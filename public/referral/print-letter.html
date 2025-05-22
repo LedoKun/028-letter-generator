@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Referral Letter</title>
+    <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@400;700&family=Noto+Sans:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Noto Sans', sans-serif;
+            color: #000;
+            background-color: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.25;
+        }
+
+        .thai-font {
+            font-family: 'Noto Sans Thai Looped', 'Noto Sans', sans-serif;
+        }
+
+        @page {
+            size: A4;
+            /* Margins: top right bottom left. Increased top slightly more, and bottom significantly. */
+            margin: 22mm 15mm 30mm 15mm;
+            /* Increased bottom margin to prevent cutoff */
+
+            @top-center {
+                content: element(pageHeaderRunning);
+                vertical-align: top;
+            }
+
+            @bottom-left {
+                content: element(pageFooterRunning);
+                vertical-align: bottom;
+                text-align: left;
+            }
+        }
+
+        .page-header-running-container {
+            position: running(pageHeaderRunning);
+            display: flex;
+            /* align-items: flex-start; /* Default, top-aligns items in the cross axis */
+            /* To align top of logo with top of first line of clinic name, ensure no top padding in columns */
+            align-items: baseline;
+            /* Tries to align based on text baseline, might work well here */
+            width: 100%;
+            padding-bottom: 4mm;
+            border-bottom: 0.5px solid #ccc;
+            font-size: 8pt;
+        }
+
+        .header-logo-column {
+            width: auto;
+            /* Let the image dictate width up to max-width */
+            max-width: 350px;
+            flex-shrink: 0;
+            margin-right: 5mm;
+            /* Space between logo and text */
+            /* padding-top: 1mm; /* Small adjustment if needed to visually align top edges */
+        }
+
+        .header-logo {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .header-text-column {
+            flex-grow: 1;
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        .clinic-name-main {
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .clinic-name-sub {
+            font-size: 9pt;
+            margin-top: 0.5mm;
+        }
+
+        .page-footer-running-container {
+            position: running(pageFooterRunning);
+            font-size: 8pt;
+            line-height: 1.25;
+            text-align: left;
+            width: 100%;
+            border-top: 0.5px solid #666;
+            padding-top: 1mm;
+            padding-bottom: 15mm;
+            /* Minimal padding */
+        }
+
+        .footer-address-english {
+            white-space: nowrap;
+        }
+
+        .footer-page-number-container .page-info-label {
+            font-weight: bold;
+            /* Label "Page:" bold */
+        }
+
+        .footer-page-number-container .page-number-display::after {
+            content: counter(page) " / " counter(pages);
+            font-weight: bold;
+            /* Numbers "X/Y" bold */
+        }
+
+        .letter-body {
+            font-size: 10pt;
+            line-height: 1.3;
+            padding-top: 5mm;
+            /* Added padding to push main content below header space */
+        }
+
+
+        .letter-body p,
+        .details-list>li,
+        .details-list p,
+        .details-list div {
+            margin-bottom: 0.25em;
+        }
+
+        h3.letter-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14pt;
+            margin-bottom: 0.4em;
+            margin-top: 0.4;
+            /* Already pushed down by .letter-body padding-top */
+            line-height: 1.2;
+            list-style-type: none !important;
+            /* Attempt to remove stray bullet */
+        }
+
+        h3.letter-title::before {
+            /* Attempt to remove stray bullet */
+            content: "" !important;
+            display: none !important;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 1em;
+            margin-bottom: 0.4em;
+            font-size: 10.5pt;
+            padding-bottom: 0.2em;
+            line-height: 1.2;
+        }
+
+        .details-list {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 0.3em;
+        }
+
+        .details-list>li {
+            margin-bottom: 0.5em;
+            padding-left: 1.5em;
+            position: relative;
+        }
+
+        .details-list>li::before {
+            content: "•";
+            position: absolute;
+            left: 0.5em;
+            top: 0.05em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .details-list ul {
+            list-style-type: circle;
+            margin-top: 0.2em;
+            margin-left: 1.2em;
+            padding-left: 0.8em;
+            line-height: 1.25;
+        }
+
+        .details-list ul li {
+            margin-bottom: 0.15em;
+        }
+
+        .details-list .label {
+            font-weight: bold;
+        }
+
+        .indent {
+            text-indent: 2.5em;
+        }
+
+        .signature-section {
+            margin-top: 2em;
+            line-height: 1.2;
+        }
+
+        .signature-section p {
+            margin-bottom: 0.15em;
+        }
+
+        .pagedjs_pages {
+            background: #ffffff;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pagedjs_page {
+            /* box-shadow: 0 0 8px rgba(0, 0, 0, 0.15); */
+            margin-bottom: 20px !important;
+            background: white;
+        }
+
+        .page-header-running-container {
+            columns: 2;
+            column-gap: 1px;
+        }
+
+        .page-header-running-container,
+        .page-footer-running-container {
+            display: none;
+        }
+
+        .developer-error-message {
+            color: red;
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid red;
+            margin: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-header-running-container">
+        <div class="header-logo-column">
+            <img src="/media/logo/logo.png" alt="Logo" class="header-logo">
+        </div>
+        <div class="header-text-column thai-font">
+            <div class="clinic-name-main">
+                ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี<br>
+                PUBLIC HEALTH CENTER 28 KRUNG THON BURI
+            </div>
+            <div class="clinic-name-sub">
+                สำนักอนามัย / HEALTH DEPARTMENT<br>
+                กรุงเทพมหานคร / Bangkok Metropolitan Administration
+            </div>
+        </div>
+    </div>
+
+    <div class="page-footer-running-container thai-font">
+        <div>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี 124/16 ถนนกรุงธนบุรี แขวงบางลำภูล่าง เขตคลองสาน กรุงเทพฯ 10600</div>
+        <div class="footer-address-english">Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road,
+            Khlong
+            San, Bangkok 10600, Thailand</div>
+        <div>โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com</div>
+        <div class="footer-page-number-container">พิมพ์เมื่อ / Printed on: <span class="printed-on-date"></span>
+            &middot; <span class="page-info-label">หน้า / Page: </span><span class="page-number-display"></span></div>
+    </div>
+
+    <div id="letterContainer" class="letter-body">
+    </div>
+
+    <script>
+        function convertBEtoCE(beDate) {
+            if (!beDate || typeof beDate !== 'string' || !beDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) return '';
+            const parts = beDate.split('/');
+            const day = parts[0], month = parts[1], beYear = parseInt(parts[2], 10);
+            if (isNaN(beYear)) return beDate;
+            return `${day}/${month}/${beYear - 543}`;
+        }
+        function formatDate(dateObj, format = "BE") {
+            if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const yCE = dateObj.getFullYear(), yBE = yCE + 543;
+            return format === "BE" ? `${d}/${m}/${yBE}` : `${d}/${m}/${yCE}`;
+        }
+
+        function renderLetterContent() {
+            const letterContainer = document.getElementById('letterContainer');
+            if (!letterContainer) {
+                document.body.innerHTML = "<h1 class='developer-error-message'>DEVELOPER ERROR: Target 'letterContainer' is missing.</h1>";
+                return;
+            }
+            let letterData = null; // Initialize
+            try {
+                const storedData = localStorage.getItem('referralDataForPrint');
+                if (storedData) letterData = JSON.parse(storedData);
+            } catch (e) { console.error("Error parsing letter data:", e); }
+
+            if (!letterData || Object.keys(letterData).length === 0) {
+                letterContainer.innerHTML = '<p style="text-align:center; padding-top:50px; color:red;" class="thai-font"><strong>ข้อผิดพลาด:</strong> ไม่พบข้อมูลสำหรับสร้างเนื้อหา.</p>';
+            } else {
+                let contentHtml = '';
+                const christianLetterDate = convertBEtoCE(letterData.letterDate);
+                const christianDob = letterData.dob ? convertBEtoCE(letterData.dob) : '';
+
+                // Ensure no list context before this H3
+                contentHtml += `<h3 class="letter-title thai-font">หนังสือส่งตัวผู้ป่วย / Referral Letter</h3><br>`;
+                contentHtml += `<p class="thai-font"><strong>วันที่ / Date:</strong> ${letterData.letterDate} (${christianLetterDate})</p>`;
+                contentHtml += `<p class="thai-font"><strong>เรียน</strong> เจ้าหน้าที่ผู้เกี่ยวข้อง / To Whom It May Concern</p>`;
+                contentHtml += `<p class="thai-font"><strong>เรื่อง</strong> ขอส่งตัวผู้ป่วยเพื่อรับการรักษาต่อเนื่อง / Re: Patient Referral for Continued Care</p>`;
+                contentHtml += `<p class="thai-font indent">ทางศูนย์บริการสาธารณสุข 28 กรุงธนบุรี มีความประสงค์ส่งตัวผู้ป่วยเพื่อเข้ารับการรักษาต่อเนื่อง / Public Health Center 28 Krung Thon Buri would like to refer the following patient for continued care:</p>`;
+                contentHtml += `<div class="details">`;
+                contentHtml += `<p class="thai-font"><span class="label">ชื่อผู้ป่วย / Patient Name:</span> ${letterData.patientName}</p>`;
+                if (letterData.dob) contentHtml += `<p class="thai-font"><span class="label">Date of Birth:</span> ${letterData.dob} (${christianDob})</p>`;
+                if (letterData.nationalId) contentHtml += `<p class="thai-font"><span class="label">เลขประจําตัวประชาชน / National ID:</span> ${letterData.nationalId}</p>`;
+                if (letterData.passportNumber) contentHtml += `<p class="thai-font"><span class="label">เลขที่หนังสือเดินทาง / Passport Number:</span> ${letterData.passportNumber}</p>`;
+                contentHtml += `</div>`;
+
+                contentHtml += `<div class="section-title thai-font">ประวัติการรักษาโดยสรุป / Summary of Medical History</div>`;
+                contentHtml += `<ul class="details-list thai-font">`;
+
+                if (letterData.includeRetroviral) {
+                    let retroViralContent = `<li><strong>Retroviral Infection</strong>`;
+                    let subBulletsHTML = "";
+                    if (letterData.napId) subBulletsHTML += `<li>NAP-ID: D4-${letterData.napId}</li>`;
+                    if (letterData.firstDiagnosisDateRetro) subBulletsHTML += `<li>วินิจฉัยเมื่อ / First diagnosis date: ${letterData.firstDiagnosisDateRetro} (${convertBEtoCE(letterData.firstDiagnosisDateRetro)})</li>`;
+                    let cd4Text = '';
+                    if (letterData.initialCD4) cd4Text = `${letterData.initialCD4} cell/mm3`;
+                    if (cd4Text) subBulletsHTML += `<li>CD4 แรกรับ / Initial CD4: ${cd4Text} ${letterData.initialCD4Date ? `(${letterData.initialCD4Date} - ${convertBEtoCE(letterData.initialCD4Date)})` : ''}</li>`;
+                    if (letterData.initialCD4Percent) subBulletsHTML += `<li>%CD4 แรกรับ / Initial %CD4: ${letterData.initialCD4Percent}% ${letterData.initialCD4Date ? `(${letterData.initialCD4Date} - ${convertBEtoCE(letterData.initialCD4Date)})` : ''}</li>`;
+                    if (letterData.adherence) subBulletsHTML += `<li>Adherence: ${letterData.adherence}</li>`;
+                    if (letterData.latestVL) subBulletsHTML += `<li>Latest VL: ${letterData.latestVL.replace('<', '&lt;')} copies/mL ${letterData.latestVLDate ? `(${letterData.latestVLDate} - ${convertBEtoCE(letterData.latestVLDate)})` : ''}</li>`;
+
+                    if (letterData.artMedications && letterData.artMedications.length > 0) {
+                        let artList = "<li>ART Medications:<ul>";
+                        letterData.artMedications.forEach(art => {
+                            artList += `<li>${art.medication} ${art.tablets} tablet(s) ${art.time ? 'at ' + art.time : 'every 24-hour'}</li>`;
+                        });
+                        artList += `</ul></li>`;
+                        subBulletsHTML += artList;
+                    }
+                    if (letterData.includeTmxSmp && letterData.tmxSmpTablets) {
+                        subBulletsHTML += `<li>Prophylaxis:<ul><li>TMX/SMP (80mg/400mg) ${letterData.tmxSmpTablets} tablet(s) OD</li></ul></li>`;
+                    }
+                    if (subBulletsHTML) retroViralContent += `<ul>${subBulletsHTML}</ul>`;
+                    retroViralContent += `</li>`;
+                    contentHtml += retroViralContent;
+                }
+
+                if (letterData.includeSyphilisActive && letterData.syphilisStartDate) {
+                    contentHtml += `<li><strong>Syphilis (Active)</strong><ul>`;
+                    contentHtml += `<li>วันที่เริ่มการรักษา / Treatment Start Date: ${letterData.syphilisStartDate} (${convertBEtoCE(letterData.syphilisStartDate)})</li>`;
+                    contentHtml += `<li>ยาที่ใช้รักษา / Medication: Benzathine Penicillin G 2.4 million units IM</li>`;
+                    contentHtml += `<li>หมายกำหนดการ / Schedule:<ul>`;
+                    contentHtml += `<li>ครั้งที่ 1 / Dose 1: ${letterData.syphilisDose1Date} (${convertBEtoCE(letterData.syphilisDose1Date)})</li>`;
+                    contentHtml += `<li>ครั้งที่ 2 / Dose 2: ${letterData.syphilisDose2Date} (${convertBEtoCE(letterData.syphilisDose2Date)})</li>`;
+                    contentHtml += `<li>ครั้งที่ 3 / Dose 3: ${letterData.syphilisDose3Date} (${convertBEtoCE(letterData.syphilisDose3Date)})</li>`;
+                    contentHtml += `</ul></li></ul></li>`;
+                }
+
+                if (letterData.includeHBV) contentHtml += `<li><strong>HBV Co-infection</strong></li>`;
+                if (letterData.includeHCVActive) contentHtml += `<li><strong>HCV Co-infection (Active)</strong></li>`;
+                if (letterData.includeTreatedSyphilis) contentHtml += `<li><strong>Treated Syphilis</strong></li>`;
+
+                if (letterData.includeTreatedHCV) {
+                    let hcvSub = "";
+                    if (letterData.treatedHCVMedication) hcvSub += `<li>ยาที่ใช้รักษา / Medication: ${letterData.treatedHCVMedication}</li>`;
+                    if (letterData.treatedHCVCompletionDate) hcvSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${letterData.treatedHCVCompletionDate} (${convertBEtoCE(letterData.treatedHCVCompletionDate)})</li>`;
+                    contentHtml += `<li><strong>Treated HCV</strong>${hcvSub ? `<ul>${hcvSub}</ul>` : ''}</li>`;
+                }
+
+                if (letterData.includeTreatedTB) {
+                    let tbSub = "";
+                    if (letterData.treatedTBSites) tbSub += `<li>ตำแหน่ง / Sites: ${letterData.treatedTBSites}</li>`;
+                    if (letterData.treatedTBMedication) tbSub += `<li>Medication: ${letterData.treatedTBMedication}</li>`;
+                    if (letterData.treatedTBCompletionDate) tbSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${letterData.treatedTBCompletionDate} (${convertBEtoCE(letterData.treatedTBCompletionDate)})</li>`;
+                    contentHtml += `<li><strong>Treated TB</strong>${tbSub ? `<ul>${tbSub}</ul>` : ''}</li>`;
+                }
+
+                if (letterData.includeCompletedTPT) {
+                    let tptSub = "";
+                    let tptMedDisplay = letterData.completedTPTMedicationText;
+                    if (letterData.completedTPTMedicationText && letterData.completedTPTMedicationText.toLowerCase() === "other" && letterData.completedTPTMedicationOther) {
+                        tptMedDisplay = `Other(s): ${letterData.completedTPTMedicationOther}`;
+                    }
+                    if (tptMedDisplay && tptMedDisplay.toLowerCase() !== "select medication" && !(tptMedDisplay.toLowerCase() === "other" && !letterData.completedTPTMedicationOther)) {
+                        tptSub += `<li>ยาที่ใช้รักษา / Medication: ${tptMedDisplay}</li>`;
+                    }
+                    if (letterData.completedTPTCompletionDate) tptSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${letterData.completedTPTCompletionDate} (${convertBEtoCE(letterData.completedTPTCompletionDate)})</li>`;
+                    contentHtml += `<li><strong>Completed TPT</strong>${tptSub ? `<ul>${tptSub}</ul>` : ''}</li>`;
+                }
+
+                if (letterData.includeOtherHistory && letterData.otherMedicalHistory) {
+                    contentHtml += `<li><strong>ประวัติการรักษาอื่นๆ / Other(s) Medical History:</strong><div style="padding-left:1em; white-space: pre-wrap;">${letterData.otherMedicalHistory}</div></li>`;
+                }
+                contentHtml += `</ul>`; // End details-list
+
+                // MODIFIED: Logic for "Last medicine pick up" and "Attachments"
+                if (letterData.includeLastMedicinePickup && letterData.lastMedicinePickupDate) {
+                    contentHtml += `<p style="margin-top: 1.0em;" class="thai-font">ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ / Last medicine pick up on: ${letterData.lastMedicinePickupDate} (${convertBEtoCE(letterData.lastMedicinePickupDate)})`;
+                    if (letterData.medicineDuration) contentHtml += ` สำหรับ / for ${letterData.medicineDuration} วัน / days`;
+                    contentHtml += `</p>`;
+                } else if (letterData.includeLastMedicinePickup && letterData.medicineDuration) { // Case where date might be missing but duration is there (though UI tries to prevent this)
+                    contentHtml += `<p style="margin-top: 1.0em;" class="thai-font">ผู้ป่วยรับยาสำหรับ / Patient received medicine for ${letterData.medicineDuration} วัน / days</p>`;
+                }
+
+
+                let attachmentItems = [];
+                if (letterData.attachmentLabResults) attachmentItems.push("ผลตรวจทางห้องปฏิบัติการล่าสุด / Latest laboratory results");
+                if (letterData.attachmentOther && letterData.attachmentOtherText) attachmentItems.push(`เอกสารอื่นๆ / Other(s): ${letterData.attachmentOtherText}`);
+                else if (letterData.attachmentOther) attachmentItems.push("เอกสารอื่นๆ / Other(s)");
+
+                if (attachmentItems.length > 0) {
+                    contentHtml += `<div class="section-title thai-font" style="border:none; margin-top: 1.0em;">เอกสารแนบ / Attachments:</div>`;
+                    contentHtml += `<ul class="details-list thai-font" style="margin-left:1em;">`;
+                    attachmentItems.forEach(item => contentHtml += `<li>${item}</li>`);
+                    contentHtml += `</ul>`;
+                }
+                // END MODIFICATION for "Last medicine pick up" and "Attachments"
+
+
+                contentHtml += `<p style="margin-top: 1.5em;" class="thai-font">กรุณาติดต่อกลับหากต้องการข้อมูลเพิ่มเติม / Please contact us if you require any additional information</p>`;
+                contentHtml += `<div class="signature-section">`;
+                contentHtml += `<p class="thai-font">ขอแสดงความนับถือ / Sincerely,</p><br><br>`;
+                contentHtml += `<p class="thai-font">(${letterData.doctorNameThai} / ${letterData.doctorNameEnglish})<br>เลขที่ใบประกอบวิชาชีพ / Medical License No.: ${letterData.medicalLicense}<br>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri</p>`;
+                contentHtml += `</div>`;
+                letterContainer.innerHTML = contentHtml;
+            }
+
+            try {
+                const printedDateSpans = document.querySelectorAll('.printed-on-date');
+                if (printedDateSpans.length > 0) {
+                    const today = new Date();
+                    printedDateSpans.forEach(span => { span.textContent = `${formatDate(today, "BE")} (${formatDate(today, "CE")})`; });
+                } else { console.warn(".printed-on-date span not found."); }
+            } catch (e) { console.error("Error setting printed-on date:", e); }
+
+            if (!window.pagedJsHandlerRegistered) {
+                class PrintHandler extends Paged.Handler {
+                    constructor(c, p, ca) { super(c, p, ca); }
+                    afterPreview(pages) {
+                        if (!window.pagedJsPrintTriggered) {
+                            window.pagedJsPrintTriggered = true;
+                            setTimeout(() => { window.print(); }, 1200);
+                        }
+                    }
+                }
+                Paged.registerHandlers(PrintHandler);
+                window.pagedJsHandlerRegistered = true;
+            }
+        }
+        renderLetterContent();
+    </script>
+</body>
+
+</html>

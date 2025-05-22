@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Ensure form inputs are somewhat visible in print preview if not hidden by .no-print */
+@media screen {
+
+    /* Styles from original file for dark mode form inputs */
+    .form-input {
+        @apply mt-1 block w-full px-3 py-2 border border-slate-600 bg-slate-700 text-slate-200 rounded-md shadow-sm focus:outline-none focus:ring-indigo-400 focus:border-indigo-400 sm:text-sm;
+    }
+
+    .form-label {
+        @apply block text-sm font-medium text-slate-400;
+    }
+
+    .fieldset-legend {
+        @apply text-xl font-semibold text-slate-300 px-2;
+    }
+
+    .form-checkbox {
+        @apply h-4 w-4 text-indigo-400 border-slate-600 rounded focus:ring-indigo-400;
+    }
+}

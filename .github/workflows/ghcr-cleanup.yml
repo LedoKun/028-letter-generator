@@ -1,0 +1,40 @@
+name: GHCR Cleanup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 0'  # every Sunday at 03:00 UTC
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      # 1. Extract and lowercase both owner & repo
+      - name: Extract and lowercase owner and repo
+        env:
+          FULL_REPO: ${{ github.repository }}
+          OWNER:     ${{ github.repository_owner }}
+        run: |
+          # strip off "owner/"
+          REPO_NAME=${FULL_REPO#*/}
+          # lowercase both
+          echo "OWNER_LC=${OWNER,,}"     >> $GITHUB_ENV
+          echo "REPO_NAME_LC=${REPO_NAME,,}" >> $GITHUB_ENV
+
+      # 2. When the dry‑run looks right, uncomment this to actually delete:
+      - name: Cleanup old images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          token:            ${{ secrets.GITHUB_TOKEN }}
+          owner:            ${{ env.OWNER_LC }}
+          repository:       ${{ env.REPO_NAME_LC }}
+          package:          ${{ env.REPO_NAME_LC }}
+          delete-untagged:  true
+          delete-ghost-images: true
+          delete-partial-images: true
+          delete-orphaned-images: true
+          keep-n-tagged:    1
