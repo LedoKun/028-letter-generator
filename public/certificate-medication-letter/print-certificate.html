@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Medication Certificate</title>
+    <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@400;700&family=Noto+Sans:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Noto Sans', sans-serif;
+            color: #000;
+            background-color: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.35;
+        }
+
+        .thai-font {
+            font-family: 'Noto Sans Thai Looped', 'Noto Sans', sans-serif;
+        }
+
+        @page {
+            size: A4;
+            margin: 22mm 15mm 30mm 15mm;
+
+            @top-center {
+                content: element(pageHeaderRunning);
+                vertical-align: top;
+            }
+
+            @bottom-left {
+                content: element(pageFooterRunning);
+                vertical-align: bottom;
+                text-align: left;
+            }
+        }
+
+        .page-header-running-container {
+            position: running(pageHeaderRunning);
+            display: flex;
+            align-items: baseline;
+            width: 100%;
+            padding-bottom: 4mm;
+            border-bottom: 0.5px solid #ccc;
+            font-size: 8pt;
+            columns: 2;
+            /* As per your version */
+            column-gap: 1px;
+            /* As per your version */
+        }
+
+        .header-logo-column {
+            width: auto;
+            max-width: 350px;
+            flex-shrink: 0;
+            margin-right: 5mm;
+        }
+
+        .header-logo {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .header-text-column {
+            flex-grow: 1;
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        .clinic-name-main {
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .clinic-name-sub {
+            font-size: 9pt;
+            margin-top: 0.5mm;
+        }
+
+        .page-footer-running-container {
+            position: running(pageFooterRunning);
+            font-size: 8pt;
+            line-height: 1.25;
+            text-align: left;
+            width: 100%;
+            border-top: 0.5px solid #666;
+            padding-top: 1mm;
+            padding-bottom: 15mm;
+        }
+
+        .footer-address-english {
+            white-space: nowrap;
+        }
+
+        .footer-page-number-container .page-info-label {
+            font-weight: bold;
+        }
+
+        .footer-page-number-container .page-number-display::after {
+            content: counter(page) " / " counter(pages);
+            font-weight: bold;
+        }
+
+        .letter-body {
+            font-size: 11pt;
+            line-height: 1.6;
+            padding-top: 10mm;
+        }
+
+        .letter-body p {
+            margin-bottom: 0.85em;
+        }
+
+        .letter-body h3.letter-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16pt;
+            margin-bottom: 1.2em;
+            margin-top: 0;
+            line-height: 1.2;
+        }
+
+        .medication-list {
+            list-style-type: none;
+            padding-left: 1.5em;
+            margin-top: 0.5em;
+            margin-bottom: 1em;
+        }
+
+        .medication-list li {
+            margin-bottom: 0.4em;
+            position: relative;
+            text-transform: uppercase;
+        }
+
+        .medication-list li::before {
+            content: "-";
+            position: absolute;
+            left: -1em;
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin-top: 3em;
+            line-height: 1.3;
+        }
+
+        .signature-section p {
+            margin-bottom: 0.2em;
+        }
+
+        .pagedjs_pages {
+            background: #ffffff;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pagedjs_page {
+            margin-bottom: 20px !important;
+            background: white;
+        }
+
+        .developer-error-message {
+            color: red;
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid red;
+            margin: 20px;
+        }
+
+        .bold-inline {
+            font-weight: bold;
+        }
+
+        .uppercase-bold {
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .uppercase-bold-inline {
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-header-running-container">
+        <div class="header-logo-column"><img src="/media/logo/logo.png" alt="Logo" class="header-logo"></div>
+        <div class="header-text-column thai-font">
+            <div class="clinic-name-main">ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี<br>PUBLIC HEALTH CENTER 28 KRUNG THON BURI
+            </div>
+            <div class="clinic-name-sub">สำนักอนามัย / HEALTH DEPARTMENT<br>กรุงเทพมหานคร / Bangkok Metropolitan
+                Administration</div>
+        </div>
+    </div>
+
+    <div class="page-footer-running-container thai-font">
+        <div>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี 124/16 ถนนกรุงธนบุรี แขวงบางลำภูล่าง เขตคลองสาน กรุงเทพฯ 10600</div>
+        <div class="footer-address-english">Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong
+            San, Bangkok 10600, Thailand</div>
+        <div>โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com</div>
+        <div class="footer-page-number-container">พิมพ์เมื่อ / Printed on: <span class="printed-on-date"></span>
+            &middot; <span class="page-info-label">หน้า / Page: </span><span class="page-number-display"></span></div>
+    </div>
+    <div id="certificateContainer" class="letter-body"></div>
+    <script>
+        // formatDate is kept for the "Printed on" date in the footer.
+        function formatDate(dateObj, formatType = "BE") { // formatType can be "BE" or "CE"
+            if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const yCE = dateObj.getFullYear();
+            const yBE = yCE + 543;
+            return formatType === "BE" ? `${d}/${m}/${yBE}` : `${d}/${m}/${yCE}`;
+        }
+
+        function renderCertificateContent() {
+            const certContainer = document.getElementById('certificateContainer');
+            if (!certContainer) {
+                document.body.innerHTML = "<h1 class='developer-error-message'>DEVELOPER ERROR: Target 'certificateContainer' is missing.</h1>";
+                return;
+            }
+            let certData = null;
+            try {
+                const storedData = localStorage.getItem('certificateDataForPrint');
+                if (storedData) certData = JSON.parse(storedData);
+            } catch (e) { console.error("Error parsing certificate data:", e); }
+
+            if (!certData || Object.keys(certData).length === 0) {
+                certContainer.innerHTML = '<p style="text-align:center; padding-top:50px; color:red;"><strong>Error:</strong> Data for certificate not found.</p>';
+            } else {
+                let contentHtml = '';
+                // certData.letterDate and certData.dob are now expected to be CE (DD/MM/YYYY) from the form
+                const letterDateCE = certData.letterDate || 'N/A';
+                const dobCE = certData.dob || 'N/A';
+
+                let patientFullNameDisplay = '';
+                if (certData.salutation && certData.salutation !== 'NONE' && certData.salutation.trim() !== '') {
+                    patientFullNameDisplay += `${certData.salutation.toUpperCase()} `;
+                }
+                patientFullNameDisplay += (certData.patientName || 'PATIENT NAME N/A').toUpperCase();
+
+                const passportNumberDisplay = (certData.passportNumber || 'N/A').toUpperCase();
+                const nationalityDisplay = (certData.nationality || 'NATIONALITY N/A').toUpperCase();
+
+                // Using your preferred order: Title first, then Date.
+                contentHtml += `<h3 class="letter-title">Certificate For Carrying Medications</h3>`;
+                contentHtml += `<p style="text-align:right;"><strong>Date:</strong> ${letterDateCE}</p><br>`;
+
+                contentHtml += `<p>To whom it may concern,</p>`;
+                contentHtml += `<p><span class="uppercase-bold">${patientFullNameDisplay}</span>, a <span class="uppercase-bold-inline">${nationalityDisplay}</span> national, passport number <span class="uppercase-bold-inline">${passportNumberDisplay}</span>, date of birth <span class="bold-inline">${dobCE}</span>, is a patient of Public Health Center 28 Krung Thon Buri and currently receiving on-going treatment. Continuous medication(s) will be necessary for successful therapy and the patient's well being.</p>`;
+                contentHtml += `<p>This certificate indicates the necessity of carrying the following medication(s).</p>`;
+
+                if (certData.includeMedications && certData.artMedications && certData.artMedications.length > 0) {
+                    contentHtml += `<p><strong>Current Medication(s):</strong></p>`;
+                    contentHtml += `<ul class="medication-list">`;
+                    certData.artMedications.forEach(art => {
+                        contentHtml += `<li>${art.medication.toUpperCase()}</li>`;
+                    });
+                    contentHtml += `</ul>`;
+                } else {
+                    contentHtml += `<p><strong>Current Medication(s):</strong> None specified.</p>`;
+                }
+
+                contentHtml += `<div class="signature-section">`;
+                contentHtml += `<p>Sincerely,</p><br><br><br>`;
+                contentHtml += `<p><span class="uppercase-bold">${(certData.doctorNameEnglish || 'DOCTOR NAME N/A').toUpperCase()}</span><br>Thai Medical License Number: ${certData.medicalLicense || 'N/A'}<br>Public Health Center 28 Krung Thon Buri</p>`;
+                contentHtml += `</div>`;
+                certContainer.innerHTML = contentHtml;
+            }
+
+            try {
+                const printedDateSpans = document.querySelectorAll('.printed-on-date');
+                if (printedDateSpans.length > 0) {
+                    const today = new Date();
+                    printedDateSpans.forEach(span => { span.textContent = `${formatDate(today, "BE")} (${formatDate(today, "CE")})`; });
+                } else { console.warn(".printed-on-date span not found."); }
+            } catch (e) { console.error("Error setting printed-on date:", e); }
+
+            if (!window.pagedJsHandlerRegistered) {
+                class PrintHandler extends Paged.Handler {
+                    constructor(c, p, ca) { super(c, p, ca); }
+                    afterPreview(pages) {
+                        if (!window.pagedJsPrintTriggered) {
+                            window.pagedJsPrintTriggered = true;
+                            setTimeout(() => { window.print(); }, 1200);
+                        }
+                    }
+                }
+                Paged.registerHandlers(PrintHandler);
+                window.pagedJsHandlerRegistered = true;
+            }
+        }
+        renderCertificateContent();
+    </script>
+</body>
+
+</html>

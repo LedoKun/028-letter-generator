@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สร้างใบรับรองการพกยา</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@400;700&family=Noto+Sans:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+        .thai-font {
+            font-family: 'Noto Sans Thai Looped', 'Noto Sans', sans-serif;
+        }
+
+        .dark body {
+            background-color: #111827;
+            color: #d1d5db;
+        }
+
+        .dark fieldset {
+            border-color: #4b5563;
+        }
+
+        .dark fieldset:disabled {
+            opacity: 0.5;
+        }
+
+        .dark input,
+        .dark select,
+        .dark textarea {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #d1d5db;
+        }
+
+        .dark input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        .dark input:disabled,
+        .dark select:disabled,
+        .dark textarea:disabled {
+            background-color: #4b5563;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .dark input::placeholder,
+        .dark textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .dark input:focus,
+        .dark select:focus,
+        .dark textarea:focus {
+            --tw-ring-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .dark .required-asterisk {
+            color: #ef4444;
+        }
+
+        .input-prefix {
+            padding-right: 0.5rem;
+            color: #9ca3af;
+        }
+
+        .medication-item {
+            padding: 0.75rem;
+            border: 1px solid #4b5563;
+            border-radius: 0.375rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .medication-item label {
+            font-weight: 500;
+        }
+
+        .hidden-field {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="p-6 sm:p-8">
+
+    <div class="container mx-auto max-w-3xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold thai-font text-white">สร้างใบรับรองเพื่อการพกยา</h1>
+            <p class="text-xl text-gray-400">Certificate for Carrying Medications Generator</p>
+        </header>
+
+        <form id="certificateForm" class="space-y-6">
+
+            <fieldset class="border p-4 rounded-md shadow-sm">
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลทั่วไป / General Information
+                </legend>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <label for="letterDate" class="block text-sm font-medium">Certificate Date (CE) <span
+                                class="required-asterisk">*</span></label>
+                        <input type="text" id="letterDate" name="letterDate" placeholder="DD/MM/YYYY" required
+                            class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="salutation" class="block text-sm font-medium thai-font">คำนำหน้าชื่อ / Salutation
+                            <span class="required-asterisk">*</span></label>
+                        <select id="salutation" name="salutation" required
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                            <option value="">-- Select --</option>
+                            <option value="MR.">MR.</option>
+                            <option value="MS.">MS.</option>
+                            <option value="MRS.">MRS.</option>
+                            <option value="MISS">MISS</option>
+                            <option value="DR.">DR.</option>
+                            <option value="PROF.">PROF.</option>
+                            <option value="NONE">(Leave Blank)</option>
+                            <option value="OTHER">Other (Specify)</option>
+                        </select>
+                        <input type="text" id="otherSalutation" name="otherSalutation" placeholder="Specify Salutation"
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="patientName" class="block text-sm font-medium thai-font">ชื่อ-นามสกุลผู้ป่วย
+                            (ภาษาอังกฤษตัวพิมพ์ใหญ่) / Patient Full Name (English, ALL CAPS) <span
+                                class="required-asterisk">*</span></label>
+                        <input type="text" id="patientName" name="patientName" placeholder="e.g., JOHN DOE" required
+                            autofocus class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                            style="text-transform: uppercase;">
+                    </div>
+                    <div>
+                        <label for="dob" class="block text-sm font-medium">Date of Birth (CE) <span
+                                class="required-asterisk">*</span></label>
+                        <input type="text" id="dob" name="dob" placeholder="DD/MM/YYYY" required
+                            class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="nationality" class="block text-sm font-medium thai-font">สัญชาติ / Nationality <span
+                                class="required-asterisk">*</span></label>
+                        <select id="nationality" name="nationality" required
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                            <option value="">-- SELECT NATIONALITY --</option>
+                            <option value="CAMBODIAN">CAMBODIAN</option>
+                            <option value="CHINESE">CHINESE</option>
+                            <option value="FILIPINO">FILIPINO</option>
+                            <option value="LAOTIAN">LAOTIAN</option>
+                            <option value="MALAYSIAN">MALAYSIAN</option>
+                            <option value="MYANMAR">MYANMAR</option>
+                            <option value="THAI">THAI</option>
+                            <option disabled>────────────────────</option>
+                            <option value="AFGHAN">AFGHAN</option>
+                            <option value="ALBANIAN">ALBANIAN</option>
+                            <option value="ALGERIAN">ALGERIAN</option>
+                            <option value="AMERICAN">AMERICAN</option>
+                            <option value="ANDORRAN">ANDORRAN</option>
+                            <option value="ANGOLAN">ANGOLAN</option>
+                            <option value="ANTIGUANS">ANTIGUANS</option>
+                            <option value="ARGENTINEAN">ARGENTINEAN</option>
+                            <option value="ARMENIAN">ARMENIAN</option>
+                            <option value="AUSTRALIAN">AUSTRALIAN</option>
+                            <option value="AUSTRIAN">AUSTRIAN</option>
+                            <option value="AZERBAIJANI">AZERBAIJANI</option>
+                            <option value="BAHAMIAN">BAHAMIAN</option>
+                            <option value="BAHRAINI">BAHRAINI</option>
+                            <option value="BANGLADESHI">BANGLADESHI</option>
+                            <option value="BARBADIAN">BARBADIAN</option>
+                            <option value="BARBUDANS">BARBUDANS</option>
+                            <option value="BATSWANA">BATSWANA</option>
+                            <option value="BELARUSIAN">BELARUSIAN</option>
+                            <option value="BELGIAN">BELGIAN</option>
+                            <option value="BELIZEAN">BELIZEAN</option>
+                            <option value="BENINESE">BENINESE</option>
+                            <option value="BHUTANESE">BHUTANESE</option>
+                            <option value="BOLIVIAN">BOLIVIAN</option>
+                            <option value="BOSNIAN">BOSNIAN</option>
+                            <option value="BRAZILIAN">BRAZILIAN</option>
+                            <option value="BRITISH">BRITISH</option>
+                            <option value="BRUNEIAN">BRUNEIAN</option>
+                            <option value="BULGARIAN">BULGARIAN</option>
+                            <option value="BURKINABE">BURKINABE</option>
+                            <option value="BURMESE">BURMESE</option>
+                            <option value="BURUNDIAN">BURUNDIAN</option>
+                            <option value="CAMEROONIAN">CAMEROONIAN</option>
+                            <option value="CANADIAN">CANADIAN</option>
+                            <option value="CAPE VERDEAN">CAPE VERDEAN</option>
+                            <option value="CENTRAL AFRICAN">CENTRAL AFRICAN</option>
+                            <option value="CHADIAN">CHADIAN</option>
+                            <option value="CHILEAN">CHILEAN</option>
+                            <option value="COLOMBIAN">COLOMBIAN</option>
+                            <option value="COMORAN">COMORAN</option>
+                            <option value="CONGOLESE">CONGOLESE</option>
+                            <option value="COSTA RICAN">COSTA RICAN</option>
+                            <option value="CROATIAN">CROATIAN</option>
+                            <option value="CUBAN">CUBAN</option>
+                            <option value="CYPRIOT">CYPRIOT</option>
+                            <option value="CZECH">CZECH</option>
+                            <option value="DANISH">DANISH</option>
+                            <option value="DJIBOUTI">DJIBOUTI</option>
+                            <option value="DOMINICAN">DOMINICAN</option>
+                            <option value="DUTCH">DUTCH</option>
+                            <option value="EAST TIMORESE">EAST TIMORESE</option>
+                            <option value="ECUADOREAN">ECUADOREAN</option>
+                            <option value="EGYPTIAN">EGYPTIAN</option>
+                            <option value="EMIRIAN">EMIRIAN</option>
+                            <option value="EQUATORIAL GUINEAN">EQUATORIAL GUINEAN</option>
+                            <option value="ERITREAN">ERITREAN</option>
+                            <option value="ESTONIAN">ESTONIAN</option>
+                            <option value="ETHIOPIAN">ETHIOPIAN</option>
+                            <option value="FIJIAN">FIJIAN</option>
+                            <option value="FINNISH">FINNISH</option>
+                            <option value="FRENCH">FRENCH</option>
+                            <option value="GABONESE">GABONESE</option>
+                            <option value="GAMBIAN">GAMBIAN</option>
+                            <option value="GEORGIAN">GEORGIAN</option>
+                            <option value="GERMAN">GERMAN</option>
+                            <option value="GHANAIAN">GHANAIAN</option>
+                            <option value="GREEK">GREEK</option>
+                            <option value="GRENADIAN">GRENADIAN</option>
+                            <option value="GUATEMALAN">GUATEMALAN</option>
+                            <option value="GUINEA-BISSAUAN">GUINEA-BISSAUAN</option>
+                            <option value="GUINEAN">GUINEAN</option>
+                            <option value="GUYANESE">GUYANESE</option>
+                            <option value="HAITIAN">HAITIAN</option>
+                            <option value="HERZEGOVINIAN">HERZEGOVINIAN</option>
+                            <option value="HONDURAN">HONDURAN</option>
+                            <option value="HUNGARIAN">HUNGARIAN</option>
+                            <option value="ICELANDER">ICELANDER</option>
+                            <option value="INDIAN">INDIAN</option>
+                            <option value="INDONESIAN">INDONESIAN</option>
+                            <option value="IRANIAN">IRANIAN</option>
+                            <option value="IRAQI">IRAQI</option>
+                            <option value="IRISH">IRISH</option>
+                            <option value="ISRAELI">ISRAELI</option>
+                            <option value="ITALIAN">ITALIAN</option>
+                            <option value="IVORIAN">IVORIAN</option>
+                            <option value="JAMAICAN">JAMAICAN</option>
+                            <option value="JAPANESE">JAPANESE</option>
+                            <option value="JORDANIAN">JORDANIAN</option>
+                            <option value="KAZAKHSTANI">KAZAKHSTANI</option>
+                            <option value="KENYAN">KENYAN</option>
+                            <option value="KITTIAN AND NEVISIAN">KITTIAN AND NEVISIAN</option>
+                            <option value="KUWAITI">KUWAITI</option>
+                            <option value="KYRGYZ">KYRGYZ</option>
+                            <option value="LATVIAN">LATVIAN</option>
+                            <option value="LEBANESE">LEBANESE</option>
+                            <option value="LIBERIAN">LIBERIAN</option>
+                            <option value="LIBYAN">LIBYAN</option>
+                            <option value="LIECHTENSTEINER">LIECHTENSTEINER</option>
+                            <option value="LITHUANIAN">LITHUANIAN</option>
+                            <option value="LUXEMBOURGER">LUXEMBOURGER</option>
+                            <option value="MACEDONIAN">MACEDONIAN</option>
+                            <option value="MALAGASY">MALAGASY</option>
+                            <option value="MALAWIAN">MALAWIAN</option>
+                            <option value="MALDIVAN">MALDIVAN</option>
+                            <option value="MALIAN">MALIAN</option>
+                            <option value="MALTESE">MALTESE</option>
+                            <option value="MARSHALLESE">MARSHALLESE</option>
+                            <option value="MAURITANIAN">MAURITANIAN</option>
+                            <option value="MAURITIAN">MAURITIAN</option>
+                            <option value="MEXICAN">MEXICAN</option>
+                            <option value="MICRONESIAN">MICRONESIAN</option>
+                            <option value="MOLDOVAN">MOLDOVAN</option>
+                            <option value="MONACAN">MONACAN</option>
+                            <option value="MONGOLIAN">MONGOLIAN</option>
+                            <option value="MOROCCAN">MOROCCAN</option>
+                            <option value="MOSOTHO">MOSOTHO</option>
+                            <option value="MOTSWANA">MOTSWANA</option>
+                            <option value="MOZAMBICAN">MOZAMBICAN</option>
+                            <option value="NAMIBIAN">NAMIBIAN</option>
+                            <option value="NAURUAN">NAURUAN</option>
+                            <option value="NEPALESE">NEPALESE</option>
+                            <option value="NEW ZEALANDER">NEW ZEALANDER</option>
+                            <option value="NI-VANUATU">NI-VANUATU</option>
+                            <option value="NICARAGUAN">NICARAGUAN</option>
+                            <option value="NIGERIEN">NIGERIEN</option>
+                            <option value="NORTH KOREAN">NORTH KOREAN</option>
+                            <option value="NORTHERN IRISH">NORTHERN IRISH</option>
+                            <option value="NORWEGIAN">NORWEGIAN</option>
+                            <option value="OMANI">OMANI</option>
+                            <option value="PAKISTANI">PAKISTANI</option>
+                            <option value="PALAUAN">PALAUAN</option>
+                            <option value="PANAMANIAN">PANAMANIAN</option>
+                            <option value="PAPUA NEW GUINEAN">PAPUA NEW GUINEAN</option>
+                            <option value="PARAGUAYAN">PARAGUAYAN</option>
+                            <option value="PERUVIAN">PERUVIAN</option>
+                            <option value="POLISH">POLISH</option>
+                            <option value="PORTUGUESE">PORTUGUESE</option>
+                            <option value="QATARI">QATARI</option>
+                            <option value="ROMANIAN">ROMANIAN</option>
+                            <option value="RUSSIAN">RUSSIAN</option>
+                            <option value="RWANDAN">RWANDAN</option>
+                            <option value="SAINT LUCIAN">SAINT LUCIAN</option>
+                            <option value="SALVADORAN">SALVADORAN</option>
+                            <option value="SAMOAN">SAMOAN</option>
+                            <option value="SAN MARINESE">SAN MARINESE</option>
+                            <option value="SAO TOMEAN">SAO TOMEAN</option>
+                            <option value="SAUDI">SAUDI</option>
+                            <option value="SCOTTISH">SCOTTISH</option>
+                            <option value="SENEGALESE">SENEGALESE</option>
+                            <option value="SERBIAN">SERBIAN</option>
+                            <option value="SEYCHELLOIS">SEYCHELLOIS</option>
+                            <option value="SIERRA LEONEAN">SIERRA LEONEAN</option>
+                            <option value="SINGAPOREAN">SINGAPOREAN</option>
+                            <option value="SLOVAKIAN">SLOVAKIAN</option>
+                            <option value="SLOVENIAN">SLOVENIAN</option>
+                            <option value="SOLOMON ISLANDER">SOLOMON ISLANDER</option>
+                            <option value="SOMALI">SOMALI</option>
+                            <option value="SOUTH AFRICAN">SOUTH AFRICAN</option>
+                            <option value="SOUTH KOREAN">SOUTH KOREAN</option>
+                            <option value="SPANISH">SPANISH</option>
+                            <option value="SRI LANKAN">SRI LANKAN</option>
+                            <option value="SUDANESE">SUDANESE</option>
+                            <option value="SURINAMER">SURINAMER</option>
+                            <option value="SWAZI">SWAZI</option>
+                            <option value="SWEDISH">SWEDISH</option>
+                            <option value="SWISS">SWISS</option>
+                            <option value="SYRIAN">SYRIAN</option>
+                            <option value="TAIWANESE">TAIWANESE</option>
+                            <option value="TAJIK">TAJIK</option>
+                            <option value="TANZANIAN">TANZANIAN</option>
+                            <option value="TOGOLESE">TOGOLESE</option>
+                            <option value="TONGAN">TONGAN</option>
+                            <option value="TRINIDADIAN OR TOBAGONIAN">TRINIDADIAN OR TOBAGONIAN</option>
+                            <option value="TUNISIAN">TUNISIAN</option>
+                            <option value="TURKISH">TURKISH</option>
+                            <option value="TUVALUAN">TUVALUAN</option>
+                            <option value="UGANDAN">UGANDAN</option>
+                            <option value="UKRAINIAN">UKRAINIAN</option>
+                            <option value="URUGUAYAN">URUGUAYAN</option>
+                            <option value="UZBEKISTANI">UZBEKISTANI</option>
+                            <option value="VENEZUELAN">VENEZUELAN</option>
+                            <option value="VIETNAMESE">VIETNAMESE</option>
+                            <option value="WELSH">WELSH</option>
+                            <option value="YEMENITE">YEMENITE</option>
+                            <option value="ZAMBIAN">ZAMBIAN</option>
+                            <option value="ZIMBABWEAN">ZIMBABWEAN</option>
+                            <option disabled>────────────────────</option>
+                            <option value="STATELESS">STATELESS / NATIONALITY PROBLEM</option>
+                            <option value="OTHER">OTHER (SPECIFY)</option>
+                        </select>
+                        <input type="text" id="otherNationality" name="otherNationality"
+                            placeholder="Specify Nationality (ALL CAPS)"
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field"
+                            style="text-transform: uppercase;">
+                    </div>
+                    <div>
+                        <label for="passportNumber" class="block text-sm font-medium thai-font">เลขที่หนังสือเดินทาง /
+                            Passport Number <span class="required-asterisk">*</span></label>
+                        <input type="text" id="passportNumber" name="passportNumber" required
+                            placeholder="PASSPORTNUMBER123"
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                            style="text-transform: uppercase;">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="border p-4 rounded-md shadow-sm">
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รายการยาปัจจุบัน / Current
+                    Medications</legend>
+                <div class="mt-4 space-y-3 p-3 border border-gray-700 rounded-md">
+                    <div class="flex items-center">
+                        <input id="includeMedications" name="includeMedications" type="checkbox" checked
+                            class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
+                        <label for="includeMedications" class="ml-2 block text-md font-medium thai-font">ระบุรายการยา /
+                            Include Medications</label>
+                    </div>
+                    <div id="medicationsDetails" class="ml-2 space-y-3 border-l-2 border-indigo-500 pl-4">
+                        <div id="artMedicationsContainer" class="space-y-3 pt-2">
+                        </div>
+                        <button type="button" id="addArtMedication"
+                            class="text-indigo-400 hover:text-indigo-300 text-sm thai-font py-1">+ เพิ่มรายการยา / Add
+                            Medication</button>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="border p-4 rounded-md shadow-sm">
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลแพทย์ / Doctor Information
+                </legend>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <label for="doctorNameEnglish" class="block text-sm font-medium">Doctor's Name (English, ALL
+                            CAPS) <span class="required-asterisk">*</span></label>
+                        <input type="text" id="doctorNameEnglish" name="doctorNameEnglish" required
+                            placeholder="DR. JANE SMITH"
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                            style="text-transform: uppercase;">
+                    </div>
+                    <div>
+                        <label for="medicalLicense" class="block text-sm font-medium thai-font">เลขที่ใบประกอบวิชาชีพ /
+                            Medical License No. <span class="required-asterisk">*</span></label>
+                        <input type="text" id="medicalLicense" name="medicalLicense" required
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="pt-5">
+                <div class="flex justify-end">
+                    <button type="button" id="previewButton"
+                        class="ml-3 inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
+                        ดูตัวอย่างและพิมพ์ / Preview & Print
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <footer class="text-center text-gray-500 mt-12 sm:mt-16 pb-8">
+        <p>&copy; <span id="currentYear"></span> Clinical Letter Generators by Rommy~*. All rights reserved.</p>
+    </footer>
+
+    <script src="certificate-script.js"></script>
+</body>
+
+</html>
