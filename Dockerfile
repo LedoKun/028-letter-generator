@@ -1,5 +1,7 @@
 FROM caddy:2-alpine
 
+LABEL MAINTAINER LedoKun
+
 WORKDIR /app
 COPY public /app/public
 
