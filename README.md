@@ -77,7 +77,7 @@ The easiest way to run the Clinical Letter Generators is by using the provided D
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/LedoKun/028-letter-generator.git](https://github.com/LedoKun/028-letter-generator.git)
+    git clone https://github.com/LedoKun/028-letter-generator.git
     ```
 2.  **Navigate to the project directory:**
     ```bash
