@@ -234,7 +234,7 @@
             if (!beDate || typeof beDate !== 'string' || !beDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) return '';
             const parts = beDate.split('/');
             const day = parts[0], month = parts[1], beYear = parseInt(parts[2], 10);
-            if (isNaN(beYear) || beYear < 2400 || beYear > 3000) return beDate;
+            if (isNaN(beYear) || beYear < 2400 || beYear > 3000) return beDate; // Return original if year is out of expected BE range
             return `${day}/${month}/${beYear - 543}`;
         }
 
@@ -271,112 +271,222 @@
                 return;
             }
 
-            const letterDateBE = data.letterDate || '................................';
-            const letterDateCE = convertBEtoCE(data.letterDate);
+            // Initialize variables with empty strings if data is not present
+            const letterDateBE = data.letterDate || '';
+            const letterDateCE = convertBEtoCE(letterDateBE); // convertBEtoCE handles empty string input gracefully
             const patientSalutation = data.patientSalutation || '';
             const patientSalutationEng = data.patientSalutationEnglish || '';
-            const patientName = data.patientName || '........................................................';
+            const patientName = data.patientName || ''; // Assuming Patient Name is required by the form
             const genderThai = data.patientGender || '';
             const genderEng = data.patientGenderEnglish || '';
-            const age = data.patientAge || '...........';
-            // Get new fields
+            const age = data.patientAge || '';
             const passportNumberFromData = data.passportNumber || '';
             const nationalIdNumberFromData = data.nationalIdNumber || '';
 
-            const doctorNameThai = data.doctorNameThai || '..........................................';
-            const doctorNameEnglish = (data.doctorNameEnglish || '..........................................').toUpperCase();
-            const medicalLicense = data.medicalLicense || '...........';
+            // Doctor's info - assuming these are required by the form
+            const doctorNameThai = data.doctorNameThai || '';
+            const doctorNameEnglish = (data.doctorNameEnglish || '').toUpperCase();
+            const medicalLicense = data.medicalLicense || '';
 
-            function fv(value, placeholder = '...........', isLong = false) {
-                let currentPlaceholder = placeholder;
-                if (isLong && placeholder === '...........') { // Default long placeholder
-                    currentPlaceholder = '........................................................';
-                } else if (isLong) { // User-defined long placeholder
-                    currentPlaceholder = placeholder;
+            // Modified fv function: returns empty string if value is blank, otherwise styled span
+            function fv(value, isPotentiallyMultiline = false) {
+                const trimmedValue = String(value || '').trim();
+                if (trimmedValue === '') {
+                    return ''; // Return empty string, so no span is created if there's no value
                 }
 
-                if (value && String(value).trim() !== '') {
-                    if (value.length > 50 && (value === data.diagnosis || value === data.doctorComment)) {
-                        return `<span class="field-value multiline-underline">${value}</span>`;
-                    }
-                    return `<span class="field-value">${value}</span>`;
+                let className = "field-value";
+                // Apply multiline style if the content is long and it's for diagnosis or comment
+                if (isPotentiallyMultiline && trimmedValue.length > 50) {
+                    className += " multiline-underline";
                 }
-                return `<span class="field-value">${currentPlaceholder}</span>`;
+                return `<span class="${className}">${trimmedValue}</span>`;
+            }
+
+            let contentHtml = `<h3 class="letter-title thai-font">ใบรับรองแพทย์ / Medical Certificate</h3>`;
+
+            // Date of Issue
+            // Only add the date line if letterDateBE has a value
+            const formattedLetterDate = fv(letterDateBE + (letterDateCE ? ` (${letterDateCE})` : ''));
+            if (letterDateBE.trim()) {
+                contentHtml += `<p class="thai-font" style="text-align:right;"><strong>วันที่ / Date:</strong> ${formattedLetterDate}</p><br>`;
+            } else {
+                contentHtml += `<br>`; // Add a break for spacing if date is missing, or remove this for tighter layout
             }
 
 
-            let contentHtml = `<h3 class="letter-title thai-font">ใบรับรองแพทย์<br>Medical Certificate</h3>`;
-            contentHtml += `<p class="thai-font" style="text-align:right;"><strong>วันที่ / Date:</strong> ${fv(letterDateBE + (letterDateCE ? ` (${letterDateCE})` : ''), '................................')}</p><br>`;
+            contentHtml += `<p class="thai-font">ข้าพเจ้าขอรับรองว่า / This is to certify that:</p>`;
 
-            let mainPatientInfoString = `ใบรับรองนี้เพื่อยืนยันว่า / This is to certify that ${patientSalutation ? fv(patientSalutation) : ''}${patientSalutationEng ? ` / ${fv(patientSalutationEng)}` : ''} ${fv(patientName, '', true)}, `;
-            mainPatientInfoString += `เพศ / Sex: ${genderThai ? fv(genderThai) : ''}${genderEng ? ` / ${fv(genderEng)}` : ''}, อายุ / Age: ${fv(age)} ปี / Years`;
+            // Patient Details Section
+            let patientInfoLines = [];
 
-            let idNumbersDisplay = [];
-            if (passportNumberFromData) {
-                idNumbersDisplay.push(`เลขที่หนังสือเดินทาง / Passport Number: ${fv(passportNumberFromData, '', true)}`);
+            // Name (assuming patientName is effectively mandatory via form)
+            let nameLine = '<strong>ชื่อ-นามสกุล / Full Name:</strong> ';
+            let salutationDisplay = '';
+            const formattedSalutation = fv(patientSalutation);
+            const formattedSalutationEng = fv(patientSalutationEng);
+
+            if (formattedSalutation && formattedSalutationEng) {
+                salutationDisplay = `${formattedSalutation} / ${formattedSalutationEng} `;
+            } else if (formattedSalutation) {
+                salutationDisplay = `${formattedSalutation} `;
+            } else if (formattedSalutationEng) { // Only English salutation
+                salutationDisplay = `${formattedSalutationEng} `;
             }
-            if (nationalIdNumberFromData) {
-                idNumbersDisplay.push(`เลขที่บัตรประจำตัวประชาชน / National ID Number: ${fv(nationalIdNumberFromData, '', true)}`);
-            }
-            if (idNumbersDisplay.length > 0) {
-                mainPatientInfoString += `, ${idNumbersDisplay.join(', ')}`;
-            }
-
-
-            if (data.includeConsultationDiagnosis && data.consultationDate) {
-                const consultationDateBE = data.consultationDate;
-                const consultationDateCE = convertBEtoCE(data.consultationDate);
-                mainPatientInfoString += `. ผู้ป่วยเข้ารับการรักษาเมื่อวันที่ / The patient had a visit for treatment on ${fv(consultationDateBE + (consultationDateCE ? ` (${consultationDateCE})` : ''))}`;
-            }
-            mainPatientInfoString += `.`;
-
-            contentHtml += `<p class="thai-font">${mainPatientInfoString}</p>`;
-
-            if (data.includeConsultationDiagnosis && data.diagnosis) {
-                contentHtml += `<p class="thai-font">และได้รับการวินิจฉัยเป็น / and is currently sick with ${fv(data.diagnosis, '', true)}.</p>`;
+            nameLine += salutationDisplay + fv(patientName); // fv(patientName) will be empty if name is somehow blank
+            if (String(patientName || '').trim()) { // Only add name line if patientName has content
+                patientInfoLines.push(nameLine);
             }
 
+
+            // Gender and Age line
+            let genderAgeLineParts = [];
+            let genderDisplay = '';
+            const formattedGenderThai = fv(genderThai);
+            const formattedGenderEng = fv(genderEng);
+            if (formattedGenderThai && formattedGenderEng) {
+                genderDisplay = `<strong>เพศ / Sex:</strong> ${formattedGenderThai} / ${formattedGenderEng}`;
+            } else if (formattedGenderThai) {
+                genderDisplay = `<strong>เพศ / Sex:</strong> ${formattedGenderThai}`;
+            } else if (formattedGenderEng) { // Only English gender
+                genderDisplay = `<strong>เพศ / Sex:</strong> ${formattedGenderEng}`;
+            }
+            if (genderDisplay) genderAgeLineParts.push(genderDisplay);
+
+            let ageDisplay = '';
+            const formattedAge = fv(age);
+            if (formattedAge) {
+                ageDisplay = `<strong>อายุ / Age:</strong> ${formattedAge} ปี / Years`;
+            }
+            if (ageDisplay) genderAgeLineParts.push(ageDisplay);
+
+            if (genderAgeLineParts.length > 0) {
+                patientInfoLines.push(genderAgeLineParts.join(' &nbsp;&nbsp;&nbsp; '));
+            }
+
+            // National ID
+            const formattedNationalId = fv(nationalIdNumberFromData);
+            if (formattedNationalId) {
+                patientInfoLines.push(`<strong>เลขที่บัตรประจำตัวประชาชน / National ID Number:</strong> ${formattedNationalId}`);
+            }
+
+            // Passport Number
+            const formattedPassportNumber = fv(passportNumberFromData);
+            if (formattedPassportNumber) {
+                patientInfoLines.push(`<strong>เลขที่หนังสือเดินทาง / Passport Number:</strong> ${formattedPassportNumber}`);
+            }
+
+            if (patientInfoLines.length > 0) {
+                const patientDetailsHtml = patientInfoLines.map(line => `<p class="thai-font">${line}</p>`).join('');
+                contentHtml += `<div style="padding-left: 1em; margin-bottom: 0.8em;">${patientDetailsHtml}</div>`;
+            }
+
+            let subsequentSectionAdded = false;
+
+            // Consultation and Diagnosis
             if (data.includeConsultationDiagnosis) {
-                contentHtml += `<div class="section-spacing"></div>`;
-            } else if (!data.includeConsultationDiagnosis && (data.includeAdvisedRest || data.includeSyphilisTreatment || data.includeTBTreatment || data.includeDoctorComment)) {
-                contentHtml += `<br>`;
+                let consultationHtml = '';
+                const consultationDateBE_val = data.consultationDate || '';
+                const consultationDateCE_val = convertBEtoCE(consultationDateBE_val);
+                const formattedConsultationDate = fv(consultationDateBE_val + (consultationDateCE_val ? ` (${consultationDateCE_val})` : ''));
+
+                if (formattedConsultationDate) {
+                    consultationHtml += `<p class="thai-font"><strong>ได้เข้ารับการตรวจรักษาเมื่อวันที่ / Examined and treated on:</strong> ${formattedConsultationDate}</p>`;
+                }
+
+                const diagnosisText = data.diagnosis || '';
+                const formattedDiagnosis = fv(diagnosisText, true); // Pass true for isPotentiallyMultiline
+                if (formattedDiagnosis) {
+                    consultationHtml += `<p class="thai-font"><strong>การวินิจฉัยโรค / Diagnosis:</strong> ${formattedDiagnosis}</p>`;
+                }
+
+                if (consultationHtml) {
+                    if (subsequentSectionAdded) contentHtml += `<div class="section-spacing"></div>`;
+                    contentHtml += consultationHtml;
+                    subsequentSectionAdded = true;
+                }
             }
 
-            if (data.includeAdvisedRest && data.restStartDate && data.restEndDate && data.restDurationDays) {
-                const restStartBE = data.restStartDate;
-                const restStartCE = convertBEtoCE(data.restStartDate);
-                const restEndBE = data.restEndDate;
-                const restEndCE = convertBEtoCE(data.restEndDate);
-                const duration = data.restDurationDays;
-                contentHtml += `<p class="thai-font">แนะนำให้ผู้ป่วยพักรักษาตัวตั้งแต่วันที่ / advised rest from ${fv(restStartBE + (restStartCE ? ` (${restStartCE})` : ''))} ถึง / to ${fv(restEndBE + (restEndCE ? ` (${restEndCE})` : ''))} เป็นเวลา / for ${fv(duration)} วัน / day(s).</p>`;
-                contentHtml += `<div class="section-spacing"></div>`;
+            // Advised Rest
+            if (data.includeAdvisedRest) {
+                const restStartDateBE_val = data.restStartDate || '';
+                const restStartDateCE_val = convertBEtoCE(restStartDateBE_val);
+                const restEndDateBE_val = data.restEndDate || '';
+                const restEndDateCE_val = convertBEtoCE(restEndDateBE_val);
+                const duration_val = data.restDurationDays || '';
+
+                const formattedRestStart = fv(restStartDateBE_val + (restStartDateCE_val ? ` (${restStartDateCE_val})` : ''));
+                const formattedRestEnd = fv(restEndDateBE_val + (restEndDateCE_val ? ` (${restEndDateCE_val})` : ''));
+                const formattedDuration = fv(duration_val);
+
+                // Only add this section if all advised rest fields are present
+                if (formattedRestStart && formattedRestEnd && formattedDuration) {
+                    let advisedRestHtml = `<p class="thai-font"><strong>คำแนะนำ / Medical Advice:</strong></p>`;
+                    advisedRestHtml += `<div style="padding-left: 1em;">`;
+                    advisedRestHtml += `<p class="thai-font">สมควรพักรักษาตัวตั้งแต่วันที่ / Advised to rest from: ${formattedRestStart}</p>`;
+                    advisedRestHtml += `<p class="thai-font">ถึงวันที่ / To: ${formattedRestEnd}</p>`;
+                    advisedRestHtml += `<p class="thai-font">รวมเป็นเวลา / Total duration: ${formattedDuration} วัน / day(s).</p>`;
+                    advisedRestHtml += `</div>`;
+
+                    if (subsequentSectionAdded) contentHtml += `<div class="section-spacing"></div>`;
+                    contentHtml += advisedRestHtml;
+                    subsequentSectionAdded = true;
+                }
             }
 
-            if (data.includeSyphilisTreatment && data.syphilisTreatmentDate) {
-                const syphilisDateBE = data.syphilisTreatmentDate;
-                const syphilisDateCE = convertBEtoCE(data.syphilisTreatmentDate);
-                contentHtml += `<p class="thai-font">ผู้ป่วยได้รับการรักษาโรคซิฟิลิสเมื่อวันที่ / The patient has been treated for Syphilis on ${fv(syphilisDateBE + (syphilisDateCE ? ` (${syphilisDateCE})` : ''))}.</p>`;
-                contentHtml += `<div class="section-spacing"></div>`;
+            // Syphilis Treatment
+            if (data.includeSyphilisTreatment) {
+                const syphilisDateBE_val = data.syphilisTreatmentDate || '';
+                const syphilisDateCE_val = convertBEtoCE(syphilisDateBE_val);
+                const formattedSyphilisDate = fv(syphilisDateBE_val + (syphilisDateCE_val ? ` (${syphilisDateCE_val})` : ''));
+
+                if (formattedSyphilisDate) {
+                    if (subsequentSectionAdded) contentHtml += `<div class="section-spacing"></div>`;
+                    contentHtml += `<p class="thai-font">ผู้ป่วยได้รับการรักษาโรคซิฟิลิสเมื่อวันที่ / The patient has been treated for Syphilis on ${formattedSyphilisDate}.</p>`;
+                    subsequentSectionAdded = true;
+                }
             }
 
-            if (data.includeTBTreatment && data.tbTreatmentCompletionDate) {
-                const tbDateBE = data.tbTreatmentCompletionDate;
-                const tbDateCE = convertBEtoCE(data.tbTreatmentCompletionDate);
-                contentHtml += `<p class="thai-font">ผู้ป่วยได้ทำการรักษาวัณโรคเสร็จสิ้นเมื่อวันที่ / The patient has completed Tuberculosis treatment on ${fv(tbDateBE + (tbDateCE ? ` (${tbDateCE})` : ''))}.</p>`;
-                contentHtml += `<div class="section-spacing"></div>`;
+            // TB Treatment
+            if (data.includeTBTreatment) {
+                const tbDateBE_val = data.tbTreatmentCompletionDate || '';
+                const tbDateCE_val = convertBEtoCE(tbDateBE_val);
+                const formattedTbDate = fv(tbDateBE_val + (tbDateCE_val ? ` (${tbDateCE_val})` : ''));
+
+                if (formattedTbDate) {
+                    if (subsequentSectionAdded) contentHtml += `<div class="section-spacing"></div>`;
+                    contentHtml += `<p class="thai-font">ผู้ป่วยได้ทำการรักษาวัณโรคเสร็จสิ้นเมื่อวันที่ / The patient has completed Tuberculosis treatment on ${formattedTbDate}.</p>`;
+                    subsequentSectionAdded = true;
+                }
             }
 
-            if (data.includeDoctorComment && data.doctorComment) {
-                contentHtml += `<p class="thai-font">ความเห็นแพทย์ / Doctor's comment: ${fv(data.doctorComment, '', true)}</p>`;
-                contentHtml += `<div class="section-spacing"></div>`;
+            // Doctor Comment
+            if (data.includeDoctorComment) {
+                const doctorCommentText = data.doctorComment || '';
+                const formattedDoctorComment = fv(doctorCommentText, true); // Pass true for isPotentiallyMultiline
+
+                if (formattedDoctorComment) {
+                    if (subsequentSectionAdded) contentHtml += `<div class="section-spacing"></div>`;
+                    contentHtml += `<p class="thai-font"><strong>หมายเหตุเพิ่มเติม / Additional Notes:</strong> ${formattedDoctorComment}</p>`;
+                    subsequentSectionAdded = true;
+                }
             }
 
+            if (subsequentSectionAdded && patientInfoLines.length > 0) { // Ensure spacing if optional sections followed patient info
+                contentHtml += `<div class="section-spacing"></div>`;
+            } else if (patientInfoLines.length > 0 && !subsequentSectionAdded) { // Patient info was there, but no optional sections
+                contentHtml += `<br>`; // Add some basic spacing
+            }
+
+
+            // Signature section - Assuming doctor's details are mandatory from the form
+            // If they were optional and empty, fv() would return '', leading to "( / )" or "Medical License No.:"
             contentHtml += `<div class="signature-section thai-font">`;
-            contentHtml += `<p>ลงชื่อ / Signature <span class="signature-line"></span></p><br><br>`;
+            contentHtml += `<p style="margin-top: 1em;">ลงชื่อ / Signature <span class="signature-line"></span></p><br><br><br>`;
             contentHtml += `<p>`;
-            contentHtml += `(<span class="doctor-signature-name doctor-signature-name-bold">${doctorNameThai} / ${doctorNameEnglish}</span>)<br>`;
+            contentHtml += `(<span class="doctor-signature-name doctor-signature-name-bold">${fv(doctorNameThai)} / ${fv(doctorNameEnglish)}</span>)<br>`;
             contentHtml += `แพทย์ / Medical Officer<br>`;
-            contentHtml += `เลขที่ใบประกอบวิชาชีพ / Medical License No.: <span class="medical-license-bold">${medicalLicense}</span><br>`;
+            contentHtml += `เลขที่ใบประกอบวิชาชีพ / Medical License No.: <span class="medical-license-bold">${fv(medicalLicense)}</span><br>`;
             contentHtml += `ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri`;
             contentHtml += `</p>`;
             contentHtml += `</div>`;
