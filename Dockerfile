@@ -1,6 +1,6 @@
 FROM caddy:2-alpine
 
-LABEL MAINTAINER LedoKun
+LABEL org.opencontainers.image.authors="LedoKun <romamp100@gmail.com>"
 
 WORKDIR /app
 COPY public /app/public
