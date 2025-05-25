@@ -2,43 +2,56 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Clinical Letter Generators is a web-based application designed to streamline the creation of medical documents. The primary tool currently available is a Patient Referral Letter Generator.
+Clinical Letter Generators is a web-based application designed to streamline the creation of common medical documents. It currently offers tools for generating Patient Referral Letters, Certificates for Carrying Medications, and general Medical Certificates.
 
 **GitHub Repository:** [https://github.com/LedoKun/028-letter-generator](https://github.com/LedoKun/028-letter-generator)
 **Docker Image:** `ghcr.io/ledokun/028-letter-generator:latest`
 
 ## Features
 
-* **Patient Referral Letter Generation:** Create comprehensive patient referral letters.
-* **Dynamic Form Input:** User-friendly form for entering patient details, medical history, and referral information.
-* **Detailed Medical History Sections:**
+* **Multiple Document Types:**
+    * **Patient Referral Letter Generator:** Create comprehensive patient referral letters.
+    * **Certificate for Carrying Medications Generator:** Generate certificates for patients needing to carry medications, especially for travel.
+    * **Medical Certificate Generator:** Produce general medical certificates for various purposes like sick leave or fitness.
+* **Dynamic Form Input:** User-friendly forms for entering patient details, medical history, and other relevant information for each document type.
+* **Detailed Medical History Sections (Referral Letter):**
     * Retroviral Infection (including NAP-ID, diagnosis date, CD4 counts, viral load, ART medications, and TMX/SMP prophylaxis).
     * Active Syphilis (with automatic calculation of treatment dose schedule).
     * HBV Co-infection.
-    * HCV Co-infection (Active).
+    * HCV Co-infection (Active/Untreated).
     * Treated Syphilis.
     * Treated HCV (medication and completion date).
     * Treated TB (sites, medication, and completion date).
     * Completed TPT (medication and completion date).
     * Other Medical History.
-* **Medication Management:**
-    * Dynamically add multiple ART medications with dosage and timing.
-* **Additional Information:**
-    * Record the last medicine pickup date and duration of medication provided.
-    * Specify attachments to the letter (e.g., latest laboratory results, other documents).
-* **Bilingual Support:** Interface and generated letter content include both Thai and English.
-* **Date Handling:** Supports Buddhist Era (พ.ศ.) date inputs with automatic conversion to Christian Era (ค.ศ.) where appropriate.
-* **Doctor Information:** Saves doctor's name (Thai and English) and medical license number in browser localStorage for convenience on subsequent uses.
-* **Print Preview:** Generates a preview of the letter formatted for A4 paper, ready for printing.
+    * Option for referral for admission.
+* **Medical Certificate Specifics:**
+    * Patient identification including salutation, gender, age, and optional Passport/ID numbers.
+    * Optional sections for consultation details, diagnosis, advised rest period (with automatic duration calculation), history of Syphilis or TB treatment, and general doctor's comments.
+    * Date fields for optional sections default to today's date when enabled.
+    * Auto-formatting for Thai National ID input.
+* **Certificate for Carrying Medications Specifics:**
+    * Patient identification including salutation (with "Other" option), nationality (with "Other" option), and passport number.
+    * List of current medications (generic names).
+* **Medication Management (Referral & Med Carry Cert):**
+    * Dynamically add multiple medications with details like dosage and timing (for referral) or generic names (for med carry cert).
+* **Bilingual Support:** Interface elements and generated letter content often include both Thai and English.
+* **Date Handling:**
+    * Supports Buddhist Era (พ.ศ.) date inputs for referral and medical certificates, with automatic conversion to Christian Era (ค.ศ.) in the output.
+    * Supports Christian Era (ค.ศ.) date inputs for the medication carrying certificate.
+    * Automatic formatting of date inputs as users type.
+    * Printed documents include "Printed on" date and time (ISO format for time).
+* **Doctor Information:** Saves doctor's name (Thai and English) and medical license number in browser `localStorage` for convenience across all generators.
+* **Print Preview:** Generates a preview of the documents formatted for A4 paper, ready for printing.
 * **Theming:** Dark mode interface for comfortable use.
 * **Responsive Design:** Accessible on various screen sizes.
 
 ## Technologies Used
 
 * HTML5
-* CSS3 (including Tailwind CSS for styling)
-* JavaScript (for form logic, data handling, and dynamic content)
-* Paged.js (for print formatting)
+* CSS3 (including Tailwind CSS for base styling and utilities)
+* JavaScript (for form logic, data handling, dynamic content, and date/ID formatting)
+* Paged.js (for print formatting of generated documents)
 
 ## Getting Started
 
@@ -64,7 +77,7 @@ The easiest way to run the Clinical Letter Generators is by using the provided D
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/LedoKun/028-letter-generator.git
+    git clone [https://github.com/LedoKun/028-letter-generator.git](https://github.com/LedoKun/028-letter-generator.git)
     ```
 2.  **Navigate to the project directory:**
     ```bash
@@ -77,21 +90,19 @@ The easiest way to run the Clinical Letter Generators is by using the provided D
     Or use a tool like `live-server` for Visual Studio Code.
 
 4.  **Access the application:**
-    Open `index.html` in your web browser (e.g., `http://localhost:8000` if using Python's server on default port).
-    * The Patient Referral Letter Generator can be accessed via the link on the main page or directly at `referral/index.html`
+    Open `public/index.html` in your web browser (e.g., `http://localhost:8000/public/` if using Python's server and you are in the root `028-letter-generator` directory).
 
 ## Usage
 
 1.  Navigate to the application in your web browser.
-2.  Click on "Open Generator" for the "หนังสือส่งตัวผู้ป่วย" (Patient Referral Letter Generator).
-3.  Fill in the required information in the form:
-    * General Information (Date, Patient Name, DOB, National ID, Passport Number).
-    * Select and fill in details for relevant medical conditions.
-    * Provide information on ART medications and prophylaxis if applicable.
-    * Add details about the last medicine pickup and any attachments.
-    * Enter the referring doctor's information (this will be saved locally for future use).
-4.  Click the "ดูตัวอย่างและพิมพ์ / Preview & Print" button.
-5.  A new browser tab or window will open with the formatted letter. The print dialog should appear automatically.
+2.  Select the desired document generator from the main page:
+    * Patient Referral Letter (`referral/index.html`)
+    * Certificate for Carrying Medications (`certificate-medication-letter/index.html`)
+    * Medical Certificate (`medical-certificate/index.html`)
+3.  Fill in the required and relevant optional information in the form.
+4.  Doctor's information, once entered, will be saved locally in the browser for future use.
+5.  Click the "ดูตัวอย่างและพิมพ์ / Preview & Print" button.
+6.  A new browser tab or window will open with the formatted document. The print dialog should appear automatically.
 
 ## License
 
