@@ -326,7 +326,7 @@
             if (data.includeConsultationDiagnosis && data.consultationDate) {
                 const consultationDateBE = data.consultationDate;
                 const consultationDateCE = convertBEtoCE(data.consultationDate);
-                mainPatientInfoString += `. ผู้ป่วยได้มารับการปรึกษาเมื่อวันที่ / The patient had a visit for consultation on ${fv(consultationDateBE + (consultationDateCE ? ` (${consultationDateCE})` : ''))}`;
+                mainPatientInfoString += `. ผู้ป่วยเข้ารับการรักษาเมื่อวันที่ / The patient had a visit for treatment on ${fv(consultationDateBE + (consultationDateCE ? ` (${consultationDateCE})` : ''))}`;
             }
             mainPatientInfoString += `.`;
 
@@ -348,7 +348,7 @@
                 const restEndBE = data.restEndDate;
                 const restEndCE = convertBEtoCE(data.restEndDate);
                 const duration = data.restDurationDays;
-                contentHtml += `<p class="thai-font">ได้รับคำแนะนำให้พักรักษาตัวตั้งแต่วันที่ / advised rest from ${fv(restStartBE + (restStartCE ? ` (${restStartCE})` : ''))} ถึง / to ${fv(restEndBE + (restEndCE ? ` (${restEndCE})` : ''))} เป็นเวลา / for ${fv(duration)} วัน / day(s).</p>`;
+                contentHtml += `<p class="thai-font">แนะนำให้ผู้ป่วยพักรักษาตัวตั้งแต่วันที่ / advised rest from ${fv(restStartBE + (restStartCE ? ` (${restStartCE})` : ''))} ถึง / to ${fv(restEndBE + (restEndCE ? ` (${restEndCE})` : ''))} เป็นเวลา / for ${fv(duration)} วัน / day(s).</p>`;
                 contentHtml += `<div class="section-spacing"></div>`;
             }
 
