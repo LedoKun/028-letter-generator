@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Medical Certificate</title>
+    <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@400;700&family=Noto+Sans:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Noto Sans', sans-serif;
+            color: #000;
+            background-color: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.25;
+        }
+
+        .thai-font {
+            font-family: 'Noto Sans Thai Looped', 'Noto Sans', sans-serif;
+        }
+
+        @page {
+            size: A4;
+            margin: 22mm 15mm 30mm 15mm;
+
+            @top-center {
+                content: element(pageHeaderRunning);
+                vertical-align: top;
+            }
+
+            @bottom-left {
+                content: element(pageFooterRunning);
+                vertical-align: bottom;
+                text-align: left;
+            }
+        }
+
+        .page-header-running-container {
+            position: running(pageHeaderRunning);
+            display: flex;
+            align-items: baseline;
+            width: 100%;
+            padding-bottom: 4mm;
+            border-bottom: 0.5px solid #ccc;
+            font-size: 8pt;
+            columns: 2;
+            column-gap: 1px;
+        }
+
+        .header-logo-column {
+            width: auto;
+            max-width: 350px;
+            flex-shrink: 0;
+            margin-right: 5mm;
+        }
+
+        .header-logo {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .header-text-column {
+            flex-grow: 1;
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        .clinic-name-main {
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .clinic-name-sub {
+            font-size: 9pt;
+            margin-top: 0.5mm;
+        }
+
+        .page-footer-running-container {
+            position: running(pageFooterRunning);
+            font-size: 8pt;
+            line-height: 1.25;
+            text-align: left;
+            width: 100%;
+            border-top: 0.5px solid #666;
+            padding-top: 1mm;
+            padding-bottom: 15mm;
+        }
+
+        .footer-address-english {
+            white-space: nowrap;
+        }
+
+        .footer-page-number-container .page-info-label {
+            font-weight: bold;
+        }
+
+        .footer-page-number-container .page-number-display::after {
+            content: counter(page) " / " counter(pages);
+            font-weight: bold;
+        }
+
+        .letter-body {
+            font-size: 11pt;
+            line-height: 1.45;
+            padding-top: 10mm;
+        }
+
+        .letter-body p {
+            margin-bottom: 0.5em;
+        }
+
+        .letter-body .section-spacing {
+            margin-bottom: 0.8em;
+        }
+
+        .letter-body h3.letter-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16pt;
+            margin-bottom: 1.2em;
+            margin-top: 0;
+            line-height: 1.2;
+        }
+
+        .field-value {
+            font-weight: bold;
+            padding: 0 0.2em;
+            display: inline;
+            border-bottom: 1px dotted #666;
+        }
+
+        .field-value.multiline-underline {
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 2px;
+            border-bottom: none;
+        }
+
+
+        .signature-section {
+            margin-top: 3em;
+            line-height: 1.3;
+            text-align: right;
+            margin-right: 50px;
+        }
+
+        .signature-section p {
+            margin-bottom: 0.15em;
+        }
+
+        .signature-line {
+            width: 300px;
+            display: inline-block;
+            margin-left: 10px;
+            height: 1.2em;
+        }
+
+        .doctor-signature-name {
+            padding: 0 0.2em;
+            display: inline-block;
+        }
+
+        .doctor-signature-name-bold {
+            font-weight: bold;
+        }
+
+        .medical-license-bold {
+            font-weight: bold;
+        }
+
+
+        .pagedjs_pages {
+            background: #ffffff;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pagedjs_page {
+            margin-bottom: 20px !important;
+            background: white;
+        }
+
+        .developer-error-message {
+            color: red;
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid red;
+            margin: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-header-running-container">
+        <div class="header-logo-column"><img src="/media/logo/logo.png" alt="Logo" class="header-logo"></div>
+        <div class="header-text-column thai-font">
+            <div class="clinic-name-main">ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี<br>PUBLIC HEALTH CENTER 28 KRUNG THON BURI
+            </div>
+            <div class="clinic-name-sub">สำนักอนามัย / HEALTH DEPARTMENT<br>กรุงเทพมหานคร / Bangkok Metropolitan
+                Administration</div>
+        </div>
+    </div>
+
+    <div class="page-footer-running-container thai-font">
+        <div>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี 124/16 ถนนกรุงธนบุรี แขวงบางลำภูล่าง เขตคลองสาน กรุงเทพฯ 10600</div>
+        <div class="footer-address-english">Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong
+            San, Bangkok 10600, Thailand</div>
+        <div>โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com</div>
+        <div class="footer-page-number-container">พิมพ์เมื่อ / Printed on: <span class="printed-on-datetime"></span>
+            &middot; <span class="page-info-label">หน้า / Page: </span><span class="page-number-display"></span>
+        </div>
+    </div>
+
+    <div id="certificateContent" class="letter-body">
+    </div>
+
+    <script>
+        function convertBEtoCE(beDate) {
+            if (!beDate || typeof beDate !== 'string' || !beDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) return '';
+            const parts = beDate.split('/');
+            const day = parts[0], month = parts[1], beYear = parseInt(parts[2], 10);
+            if (isNaN(beYear) || beYear < 2400 || beYear > 3000) return beDate;
+            return `${day}/${month}/${beYear - 543}`;
+        }
+
+        function formatDate(dateObj, formatType = "BE") {
+            if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const yCE = dateObj.getFullYear();
+            const yBE = yCE + 543;
+            return formatType === "BE" ? `${d}/${m}/${yBE}` : `${d}/${m}/${yCE}`;
+        }
+        function formatTimeISO(dateObj) {
+            if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
+            const h = String(dateObj.getHours()).padStart(2, '0');
+            const min = String(dateObj.getMinutes()).padStart(2, '0');
+            const s = String(dateObj.getSeconds()).padStart(2, '0');
+            return `${h}:${min}:${s}`;
+        }
+
+        function renderMedicalCertificate() {
+            const container = document.getElementById('certificateContent');
+            if (!container) {
+                document.body.innerHTML = "<h1 class='developer-error-message'>DEVELOPER ERROR: Target 'certificateContent' is missing.</h1>";
+                return;
+            }
+            let data = null;
+            try {
+                const storedData = localStorage.getItem('medicalCertificateDataForPrint');
+                if (storedData) data = JSON.parse(storedData);
+            } catch (e) { console.error("Error parsing medical certificate data:", e); }
+
+            if (!data || Object.keys(data).length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding-top:50px; color:red;"><strong>ข้อผิดพลาด:</strong> ไม่พบข้อมูลสำหรับใบรับรองแพทย์</p>';
+                return;
+            }
+
+            const letterDateBE = data.letterDate || '................................';
+            const letterDateCE = convertBEtoCE(data.letterDate);
+            const patientSalutation = data.patientSalutation || '';
+            const patientSalutationEng = data.patientSalutationEnglish || '';
+            const patientName = data.patientName || '........................................................';
+            const genderThai = data.patientGender || '';
+            const genderEng = data.patientGenderEnglish || '';
+            const age = data.patientAge || '...........';
+            // Get new fields
+            const passportNumberFromData = data.passportNumber || '';
+            const nationalIdNumberFromData = data.nationalIdNumber || '';
+
+            const doctorNameThai = data.doctorNameThai || '..........................................';
+            const doctorNameEnglish = (data.doctorNameEnglish || '..........................................').toUpperCase();
+            const medicalLicense = data.medicalLicense || '...........';
+
+            function fv(value, placeholder = '...........', isLong = false) {
+                let currentPlaceholder = placeholder;
+                if (isLong && placeholder === '...........') { // Default long placeholder
+                    currentPlaceholder = '........................................................';
+                } else if (isLong) { // User-defined long placeholder
+                    currentPlaceholder = placeholder;
+                }
+
+                if (value && String(value).trim() !== '') {
+                    if (value.length > 50 && (value === data.diagnosis || value === data.doctorComment)) {
+                        return `<span class="field-value multiline-underline">${value}</span>`;
+                    }
+                    return `<span class="field-value">${value}</span>`;
+                }
+                return `<span class="field-value">${currentPlaceholder}</span>`;
+            }
+
+
+            let contentHtml = `<h3 class="letter-title thai-font">ใบรับรองแพทย์<br>Medical Certificate</h3>`;
+            contentHtml += `<p class="thai-font" style="text-align:right;"><strong>วันที่ / Date:</strong> ${fv(letterDateBE + (letterDateCE ? ` (${letterDateCE})` : ''), '................................')}</p><br>`;
+
+            let mainPatientInfoString = `ใบรับรองนี้เพื่อยืนยันว่า / This is to certify that ${patientSalutation ? fv(patientSalutation) : ''}${patientSalutationEng ? ` / ${fv(patientSalutationEng)}` : ''} ${fv(patientName, '', true)}, `;
+            mainPatientInfoString += `เพศ / Sex: ${genderThai ? fv(genderThai) : ''}${genderEng ? ` / ${fv(genderEng)}` : ''}, อายุ / Age: ${fv(age)} ปี / Years`;
+
+            let idNumbersDisplay = [];
+            if (passportNumberFromData) {
+                idNumbersDisplay.push(`เลขที่หนังสือเดินทาง / Passport Number: ${fv(passportNumberFromData, '', true)}`);
+            }
+            if (nationalIdNumberFromData) {
+                idNumbersDisplay.push(`เลขที่บัตรประจำตัวประชาชน / National ID Number: ${fv(nationalIdNumberFromData, '', true)}`);
+            }
+            if (idNumbersDisplay.length > 0) {
+                mainPatientInfoString += `, ${idNumbersDisplay.join(', ')}`;
+            }
+
+
+            if (data.includeConsultationDiagnosis && data.consultationDate) {
+                const consultationDateBE = data.consultationDate;
+                const consultationDateCE = convertBEtoCE(data.consultationDate);
+                mainPatientInfoString += `. ผู้ป่วยได้มารับการปรึกษาเมื่อวันที่ / The patient had a visit for consultation on ${fv(consultationDateBE + (consultationDateCE ? ` (${consultationDateCE})` : ''))}`;
+            }
+            mainPatientInfoString += `.`;
+
+            contentHtml += `<p class="thai-font">${mainPatientInfoString}</p>`;
+
+            if (data.includeConsultationDiagnosis && data.diagnosis) {
+                contentHtml += `<p class="thai-font">และได้รับการวินิจฉัยเป็น / and is currently sick with ${fv(data.diagnosis, '', true)}.</p>`;
+            }
+
+            if (data.includeConsultationDiagnosis) {
+                contentHtml += `<div class="section-spacing"></div>`;
+            } else if (!data.includeConsultationDiagnosis && (data.includeAdvisedRest || data.includeSyphilisTreatment || data.includeTBTreatment || data.includeDoctorComment)) {
+                contentHtml += `<br>`;
+            }
+
+            if (data.includeAdvisedRest && data.restStartDate && data.restEndDate && data.restDurationDays) {
+                const restStartBE = data.restStartDate;
+                const restStartCE = convertBEtoCE(data.restStartDate);
+                const restEndBE = data.restEndDate;
+                const restEndCE = convertBEtoCE(data.restEndDate);
+                const duration = data.restDurationDays;
+                contentHtml += `<p class="thai-font">ได้รับคำแนะนำให้พักรักษาตัวตั้งแต่วันที่ / advised rest from ${fv(restStartBE + (restStartCE ? ` (${restStartCE})` : ''))} ถึง / to ${fv(restEndBE + (restEndCE ? ` (${restEndCE})` : ''))} เป็นเวลา / for ${fv(duration)} วัน / day(s).</p>`;
+                contentHtml += `<div class="section-spacing"></div>`;
+            }
+
+            if (data.includeSyphilisTreatment && data.syphilisTreatmentDate) {
+                const syphilisDateBE = data.syphilisTreatmentDate;
+                const syphilisDateCE = convertBEtoCE(data.syphilisTreatmentDate);
+                contentHtml += `<p class="thai-font">ผู้ป่วยได้รับการรักษาโรคซิฟิลิสเมื่อวันที่ / The patient has been treated for Syphilis on ${fv(syphilisDateBE + (syphilisDateCE ? ` (${syphilisDateCE})` : ''))}.</p>`;
+                contentHtml += `<div class="section-spacing"></div>`;
+            }
+
+            if (data.includeTBTreatment && data.tbTreatmentCompletionDate) {
+                const tbDateBE = data.tbTreatmentCompletionDate;
+                const tbDateCE = convertBEtoCE(data.tbTreatmentCompletionDate);
+                contentHtml += `<p class="thai-font">ผู้ป่วยได้ทำการรักษาวัณโรคเสร็จสิ้นเมื่อวันที่ / The patient has completed Tuberculosis treatment on ${fv(tbDateBE + (tbDateCE ? ` (${tbDateCE})` : ''))}.</p>`;
+                contentHtml += `<div class="section-spacing"></div>`;
+            }
+
+            if (data.includeDoctorComment && data.doctorComment) {
+                contentHtml += `<p class="thai-font">ความเห็นแพทย์ / Doctor's comment: ${fv(data.doctorComment, '', true)}</p>`;
+                contentHtml += `<div class="section-spacing"></div>`;
+            }
+
+            contentHtml += `<div class="signature-section thai-font">`;
+            contentHtml += `<p>ลงชื่อ / Signature <span class="signature-line"></span></p><br><br>`;
+            contentHtml += `<p>`;
+            contentHtml += `(<span class="doctor-signature-name doctor-signature-name-bold">${doctorNameThai} / ${doctorNameEnglish}</span>)<br>`;
+            contentHtml += `แพทย์ / Medical Officer<br>`;
+            contentHtml += `เลขที่ใบประกอบวิชาชีพ / Medical License No.: <span class="medical-license-bold">${medicalLicense}</span><br>`;
+            contentHtml += `ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri`;
+            contentHtml += `</p>`;
+            contentHtml += `</div>`;
+
+            container.innerHTML = contentHtml;
+        }
+
+        renderMedicalCertificate();
+
+        try {
+            const printedDateTimeSpans = document.querySelectorAll('.printed-on-datetime');
+            if (printedDateTimeSpans.length > 0) {
+                const today = new Date();
+                printedDateTimeSpans.forEach(span => {
+                    span.innerHTML = `<strong style="font-weight:bold;">${formatDate(today, "BE")} (${formatDate(today, "CE")}) ${formatTimeISO(today)}</strong>`;
+                });
+            } else { console.warn(".printed-on-datetime span not found for medical certificate."); }
+        } catch (e) { console.error("Error setting printed-on date and time for medical certificate:", e); }
+
+        if (!window.pagedJsHandlerRegistered) {
+            class PrintHandler extends Paged.Handler {
+                constructor(c, p, ca) { super(c, p, ca); }
+                afterPreview(pages) {
+                    if (!window.pagedJsPrintTriggered) {
+                        window.pagedJsPrintTriggered = true;
+                        setTimeout(() => { window.print(); }, 1200);
+                    }
+                }
+            }
+            Paged.registerHandlers(PrintHandler);
+            window.pagedJsHandlerRegistered = true;
+        }
+    </script>
+</body>
+
+</html>

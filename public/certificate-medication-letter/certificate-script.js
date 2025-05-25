@@ -34,6 +34,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Ensure doctorNameEnglish input itself still uppercases live for immediate UI feedback
+    const doctorNameEnglishCertInput = document.getElementById('doctorNameEnglish');
+    if (doctorNameEnglishCertInput) {
+        doctorNameEnglishCertInput.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+        });
+    }
+
     // --- Helper Functions ---
     function autoFocusPatientName() {
         const patientNameInput = document.getElementById('patientName');
@@ -268,23 +276,47 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function saveDoctorInfo() {
-        localStorage.setItem('certificateDoctorInfo', JSON.stringify({
-            englishName: document.getElementById('doctorNameEnglish').value.toUpperCase(),
-            licenseNo: document.getElementById('medicalLicense').value
-        }));
+        let sharedInfo = {};
+        try {
+            const existingInfo = localStorage.getItem('sharedDoctorInfo');
+            if (existingInfo) {
+                sharedInfo = JSON.parse(existingInfo);
+            }
+        } catch (e) {
+            console.error("Error reading sharedDoctorInfo for update:", e);
+            sharedInfo = {}; // Reset if parsing fails
+        }
+
+        sharedInfo.sharedDoctorNameEnglish = document.getElementById('doctorNameEnglish').value.toUpperCase(); // Ensures uppercase
+        sharedInfo.sharedMedicalLicense = document.getElementById('medicalLicense').value;
+        // sharedInfo.sharedDoctorNameThai is preserved if set by the referral form
+
+        localStorage.setItem('sharedDoctorInfo', JSON.stringify(sharedInfo));
     }
 
     function loadDoctorInfo() {
-        const savedInfo = localStorage.getItem('certificateDoctorInfo');
+        const savedInfo = localStorage.getItem('sharedDoctorInfo');
         if (savedInfo) {
-            const doctorInfo = JSON.parse(savedInfo);
-            document.getElementById('doctorNameEnglish').value = doctorInfo.englishName || '';
-            document.getElementById('medicalLicense').value = doctorInfo.licenseNo || '';
+            try {
+                const doctorInfo = JSON.parse(savedInfo);
+                document.getElementById('doctorNameEnglish').value = doctorInfo.sharedDoctorNameEnglish || '';
+                document.getElementById('medicalLicense').value = doctorInfo.sharedMedicalLicense || '';
+            } catch (e) {
+                console.error("Error parsing sharedDoctorInfo:", e);
+                document.getElementById('doctorNameEnglish').value = '';
+                document.getElementById('medicalLicense').value = '';
+            }
         }
-        ['doctorNameEnglish', 'medicalLicense'].forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.addEventListener('change', saveDoctorInfo);
-        });
+        // Attach change listeners
+        const doctorNameEnglishEl = document.getElementById('doctorNameEnglish');
+        const medicalLicenseEl = document.getElementById('medicalLicense');
+
+        if (doctorNameEnglishEl) {
+            doctorNameEnglishEl.addEventListener('change', saveDoctorInfo);
+        }
+        if (medicalLicenseEl) {
+            medicalLicenseEl.addEventListener('change', saveDoctorInfo);
+        }
     }
 
     function handleFormSubmitOnEnter() {

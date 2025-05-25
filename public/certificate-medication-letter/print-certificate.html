@@ -215,12 +215,11 @@
         <div class="footer-address-english">Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong
             San, Bangkok 10600, Thailand</div>
         <div>โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com</div>
-        <div class="footer-page-number-container">พิมพ์เมื่อ / Printed on: <span class="printed-on-date"></span>
+        <div class="footer-page-number-container">พิมพ์เมื่อ / Printed on: <span class="printed-on-datetime"></span>
             &middot; <span class="page-info-label">หน้า / Page: </span><span class="page-number-display"></span></div>
     </div>
     <div id="certificateContainer" class="letter-body"></div>
     <script>
-        // formatDate is kept for the "Printed on" date in the footer.
         function formatDate(dateObj, formatType = "BE") { // formatType can be "BE" or "CE"
             if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
             const d = String(dateObj.getDate()).padStart(2, '0');
@@ -228,6 +227,14 @@
             const yCE = dateObj.getFullYear();
             const yBE = yCE + 543;
             return formatType === "BE" ? `${d}/${m}/${yBE}` : `${d}/${m}/${yCE}`;
+        }
+
+        function formatTimeISO(dateObj) {
+            if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
+            const h = String(dateObj.getHours()).padStart(2, '0');
+            const min = String(dateObj.getMinutes()).padStart(2, '0');
+            const s = String(dateObj.getSeconds()).padStart(2, '0');
+            return `${h}:${min}:${s}`;
         }
 
         function renderCertificateContent() {
@@ -246,7 +253,6 @@
                 certContainer.innerHTML = '<p style="text-align:center; padding-top:50px; color:red;"><strong>Error:</strong> Data for certificate not found.</p>';
             } else {
                 let contentHtml = '';
-                // certData.letterDate and certData.dob are now expected to be CE (DD/MM/YYYY) from the form
                 const letterDateCE = certData.letterDate || 'N/A';
                 const dobCE = certData.dob || 'N/A';
 
@@ -259,7 +265,6 @@
                 const passportNumberDisplay = (certData.passportNumber || 'N/A').toUpperCase();
                 const nationalityDisplay = (certData.nationality || 'NATIONALITY N/A').toUpperCase();
 
-                // Using your preferred order: Title first, then Date.
                 contentHtml += `<h3 class="letter-title">Certificate For Carrying Medications</h3>`;
                 contentHtml += `<p style="text-align:right;"><strong>Date:</strong> ${letterDateCE}</p><br>`;
 
@@ -286,12 +291,14 @@
             }
 
             try {
-                const printedDateSpans = document.querySelectorAll('.printed-on-date');
-                if (printedDateSpans.length > 0) {
+                const printedDateTimeSpans = document.querySelectorAll('.printed-on-datetime');
+                if (printedDateTimeSpans.length > 0) {
                     const today = new Date();
-                    printedDateSpans.forEach(span => { span.textContent = `${formatDate(today, "BE")} (${formatDate(today, "CE")})`; });
-                } else { console.warn(".printed-on-date span not found."); }
-            } catch (e) { console.error("Error setting printed-on date:", e); }
+                    printedDateTimeSpans.forEach(span => {
+                        span.innerHTML = `<strong style="font-weight:bold;"> ${formatDate(today, "BE")} (${formatDate(today, "CE")}) ${formatTimeISO(today)}</strong>`;
+                    });
+                } else { console.warn(".printed-on-datetime span not found."); }
+            } catch (e) { console.error("Error setting printed-on date and time:", e); }
 
             if (!window.pagedJsHandlerRegistered) {
                 class PrintHandler extends Paged.Handler {

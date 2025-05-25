@@ -287,7 +287,7 @@
                         <input id="includeHCVActive" name="includeHCVActive" type="checkbox"
                             class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
                         <label for="includeHCVActive" class="ml-2 block text-md font-medium thai-font">HCV Co-infection
-                            (Active)</label>
+                            (Untreated)</label>
                     </div>
                     <div
                         class="flex items-center p-2 border border-gray-700 rounded-md hover:border-indigo-500 transition-colors">
@@ -449,6 +449,15 @@
                         </div>
                     </div>
 
+                    <div class="flex items-center pt-2">
+                        <input id="includeReferralForAdmission" name="includeReferralForAdmission" type="checkbox"
+                            class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
+                        <label for="includeReferralForAdmission" class="ml-2 text-sm font-medium thai-font">
+                            ส่งตัวผู้ป่วยเพื่อรับการรักษาที่ รพ ของท่าน / Patient referral for admission to your
+                            hospital
+                        </label>
+                    </div>
+
                     <div class="md:col-span-2 mt-2">
                         <label class="block text-sm font-medium thai-font">เอกสารแนบ / Attachments:</label>
                         <div class="mt-2 space-y-2">
@@ -489,7 +498,8 @@
                         <label for="doctorNameEnglish" class="block text-sm font-medium">Doctor's Name (English) <span
                                 class="required-asterisk">*</span></label>
                         <input type="text" id="doctorNameEnglish" name="doctorNameEnglish" required
-                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                            style="text-transform: uppercase;">
                     </div>
                     <div class="md:col-span-2">
                         <label for="medicalLicense" class="block text-sm font-medium thai-font">เลขที่ใบประกอบวิชาชีพ /
@@ -501,9 +511,12 @@
             </fieldset>
 
             <div class="pt-5">
-                <div class="flex justify-end">
+                <div class="flex justify-end space-x-3"> <a href="../index.html"
+                        class="inline-flex justify-center py-2.5 px-6 border border-gray-600 hover:border-gray-500 shadow-sm text-base font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
+                        กลับ / Back
+                    </a>
                     <button type="button" id="previewButton"
-                        class="ml-3 inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
+                        class="inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
                         ดูตัวอย่างและพิมพ์ / Preview & Print
                     </button>
                 </div>
@@ -512,10 +525,13 @@
     </div>
 
     <footer class="text-center text-gray-500 mt-12 sm:mt-16 pb-8">
-        <p>&copy; <span id="currentYear"></span> Clinical Letter Generators by Rommy~*. All rights reserved.</p>
+        <p>&copy; <span id="currentYear">2024</span> Clinical Letter Generators by Rommy~*. All rights reserved.</p>
     </footer>
 
     <script src="script.js"></script>
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
 </body>
 
 </html>

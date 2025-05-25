@@ -19,8 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setupConditionalSections();
     setupTreatedTBSitesLogic();
     setupTPTMedicationLogic();
-    setupLastMedicinePickupToggle(); // MODIFIED: New function
-    // setDefaultLastPickupDate(); // REMOVED: Now handled by setupLastMedicinePickupToggle
+    setupLastMedicinePickupToggle();
     loadDoctorInfo();
     initializeArtMedications();
     initializeTmxSmpCheckbox();
@@ -29,14 +28,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     autoFocusPatientName();
 
-    // --- Helper Functions ---
+    const doctorNameEnglishInputReferral = document.getElementById('doctorNameEnglish');
+    if (doctorNameEnglishInputReferral) {
+        doctorNameEnglishInputReferral.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+        });
+    }
+
     function autoFocusPatientName() {
         const patientNameInput = document.getElementById('patientName');
         if (patientNameInput) {
             patientNameInput.focus();
-            console.log("Auto-focused on Patient Name input.");
-        } else {
-            console.warn("Patient Name input field (id='patientName') not found for auto-focus.");
         }
     }
 
@@ -71,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function autoFormatDate(event) {
         const input = event.target;
         let value = input.value.replace(/\D/g, '');
-        const originalLength = value.length;
 
         if (event.inputType === 'deleteContentBackward' && (input.value.slice(-1) === '/')) {
             input.value = input.value.slice(0, -1);
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
             input.maxLength = 10;
         });
         const letterDateInput = document.getElementById('letterDate');
-        if (!letterDateInput.value) letterDateInput.value = JSDateToBE(new Date());
+        if (letterDateInput && !letterDateInput.value) letterDateInput.value = JSDateToBE(new Date());
     }
 
     function autoFormatNationalId(event) {
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (value.length >= 11) formattedValue += '-' + value.slice(10, 12);
         if (value.length >= 13) formattedValue += '-' + value.slice(12, 13);
         input.value = formattedValue;
-        input.maxLength = 17;
+        input.maxLength = 17; // 1-2345-67890-12-3
     }
 
     function initializeNationalIdInput() {
@@ -126,12 +127,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function autoFormatNapId(event) {
         const input = event.target;
         let value = input.value.replace(/\D/g, '');
-        if (value.length > 10) value = value.slice(0, 10);
+        if (value.length > 10) value = value.slice(0, 10); // Max 10 digits for XXXX-XXXXXX
         let formattedValue = '';
         if (value.length > 0) formattedValue += value.slice(0, 4);
         if (value.length >= 5) formattedValue += '-' + value.slice(4, 10);
         input.value = formattedValue;
-        input.maxLength = 11;
+        input.maxLength = 11; // XXXX-XXXXXX
     }
 
     function initializeNapIdInput() {
@@ -154,10 +155,31 @@ document.addEventListener('DOMContentLoaded', function () {
             if (checkbox && detailsDiv) {
                 const updateVisibility = () => {
                     detailsDiv.style.display = checkbox.checked ? 'block' : 'none';
-                    if (checkbox.checked && toggle.callback) toggle.callback();
+                    const inputsToToggle = detailsDiv.querySelectorAll('input, select, textarea, button');
+                    inputsToToggle.forEach(input => input.disabled = !checkbox.checked);
+
+                    if (checkbox.checked) {
+                        // Special handling for nested conditional elements if any
+                        if (toggle.checkboxId === 'includeRetroviral') {
+                            const tmxCheckbox = document.getElementById('includeTmxSmp');
+                            if (tmxCheckbox) document.getElementById('tmxSmpTabletsDiv').style.display = tmxCheckbox.checked ? 'flex' : 'none';
+                            document.getElementById('tmxSmpTablets').disabled = !tmxCheckbox.checked;
+                        }
+                        if (toggle.checkboxId === 'includeTreatedTB') {
+                            const sitesSelect = document.getElementById('treatedTBSitesSelect');
+                            const sitesOtherInput = document.getElementById('treatedTBSitesOther');
+                            if (sitesSelect && sitesOtherInput) sitesOtherInput.style.display = Array.from(sitesSelect.selectedOptions).map(opt => opt.value).includes('Other') ? 'block' : 'none';
+                        }
+                        if (toggle.checkboxId === 'includeCompletedTPT') {
+                            const tptMedSelect = document.getElementById('completedTPTMedication');
+                            const tptMedOther = document.getElementById('completedTPTMedicationOther');
+                            if (tptMedSelect && tptMedOther) tptMedOther.style.display = tptMedSelect.value === 'Other' ? 'block' : 'none';
+                        }
+                        if (toggle.callback) toggle.callback();
+                    }
                 };
                 checkbox.addEventListener('change', updateVisibility);
-                updateVisibility(); // Initial state
+                updateVisibility();
             }
         });
         const syphilisStartDateInput = document.getElementById('syphilisStartDate');
@@ -170,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function createArtMedicationInputs(idSuffix) {
         const itemDiv = document.createElement('div');
-        itemDiv.classList.add('medication-item', 'grid', 'grid-cols-1', 'md:grid-cols-4', 'gap-2', 'items-end'); // 4 cols for remove btn
+        itemDiv.classList.add('medication-item', 'grid', 'grid-cols-1', 'md:grid-cols-4', 'gap-2', 'items-end');
         itemDiv.id = `artMedItem-${idSuffix}`;
 
         const medDiv = document.createElement('div');
@@ -212,18 +234,18 @@ document.addEventListener('DOMContentLoaded', function () {
         timeLabel.textContent = `เวลา / Time (HH:MM):`;
         timeLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
         const timeInput = document.createElement('input');
-        timeInput.type = 'time'; // Value will be in 24-hour format e.g. "14:30"
+        timeInput.type = 'time';
         timeInput.id = `artTime-${idSuffix}`;
         timeInput.name = `artTime-${idSuffix}`;
         timeInput.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm');
         timeDiv.appendChild(timeLabel);
         timeDiv.appendChild(timeInput);
 
-        const removeBtnDiv = document.createElement('div'); // Container for button for alignment
+        const removeBtnDiv = document.createElement('div');
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.textContent = 'ลบ';
-        removeBtn.classList.add('text-red-400', 'hover:text-red-300', 'text-xs', 'thai-font', 'py-1', 'px-2', 'border', 'border-red-400', 'rounded');
+        removeBtn.classList.add('text-red-400', 'hover:text-red-300', 'text-xs', 'thai-font', 'py-1', 'px-2', 'border', 'border-red-400', 'rounded', 'w-full', 'md:w-auto');
         removeBtn.onclick = function () { itemDiv.remove(); };
         removeBtnDiv.appendChild(removeBtn);
 
@@ -238,31 +260,50 @@ document.addEventListener('DOMContentLoaded', function () {
     function addArtMedicationToList() {
         artMedicationCounter++;
         const artContainer = document.getElementById('artMedicationsContainer');
-        artContainer.appendChild(createArtMedicationInputs(artMedicationCounter));
+        const newItem = createArtMedicationInputs(artMedicationCounter);
+        const retroviralCheckbox = document.getElementById('includeRetroviral');
+        if (retroviralCheckbox && !retroviralCheckbox.checked) {
+            newItem.querySelectorAll('select, input, button').forEach(el => el.disabled = true);
+        }
+        artContainer.appendChild(newItem);
     }
 
     function initializeArtMedications() {
         document.getElementById('addArtMedication').addEventListener('click', addArtMedicationToList);
         const artContainer = document.getElementById('artMedicationsContainer');
-        if (artContainer.children.length <= 1) { // Only the <p> tag initially
-            addArtMedicationToList(); // Add one by default
+        if (artContainer.children.length <= 1) {
+            addArtMedicationToList();
         }
     }
 
     function initializeTmxSmpCheckbox() {
         const checkbox = document.getElementById('includeTmxSmp');
         const tabletsDiv = document.getElementById('tmxSmpTabletsDiv');
-        if (checkbox && tabletsDiv) {
+        const tabletsInput = document.getElementById('tmxSmpTablets');
+        const retroviralCheckbox = document.getElementById('includeRetroviral');
+
+        if (checkbox && tabletsDiv && tabletsInput && retroviralCheckbox) {
             const updateVisibility = () => {
-                tabletsDiv.style.display = checkbox.checked ? 'flex' : 'none';
-                if (!checkbox.checked) {
-                    document.getElementById('tmxSmpTablets').value = ''; // Clear value if unchecked
+                const isRetroviralChecked = retroviralCheckbox.checked;
+                const isTmxSmpChecked = checkbox.checked;
+
+                checkbox.disabled = !isRetroviralChecked; // Disable TMX/SMP checkbox if Retroviral is not checked
+
+                if (isRetroviralChecked && isTmxSmpChecked) {
+                    tabletsDiv.style.display = 'flex';
+                    tabletsInput.disabled = false;
+                } else {
+                    tabletsDiv.style.display = 'none';
+                    tabletsInput.disabled = true;
+                    if (!isTmxSmpChecked) tabletsInput.value = '';
                 }
             };
             checkbox.addEventListener('change', updateVisibility);
-            updateVisibility(); // Initial state
+            retroviralCheckbox.addEventListener('change', updateVisibility); // Also listen to parent checkbox
+            updateVisibility();
         }
     }
+
 
     function calculateSyphilisSchedule() {
         const startDateInput = document.getElementById('syphilisStartDate');
@@ -271,6 +312,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const dose3DateEl = document.getElementById('syphilisDose3Date');
 
         if (!startDateInput || !dose1DateEl || !dose2DateEl || !dose3DateEl) return;
+
+        const syphilisActiveCheckbox = document.getElementById('includeSyphilisActive');
+        if (!syphilisActiveCheckbox || !syphilisActiveCheckbox.checked) {
+            dose1DateEl.textContent = 'N/A';
+            dose2DateEl.textContent = 'N/A';
+            dose3DateEl.textContent = 'N/A';
+            startDateInput.style.borderColor = '';
+            return;
+        }
+
         const startDate = BEToJSDate(startDateInput.value);
 
         if (!startDate) {
@@ -296,31 +347,47 @@ document.addEventListener('DOMContentLoaded', function () {
     function setupTreatedTBSitesLogic() {
         const sitesSelect = document.getElementById('treatedTBSitesSelect');
         const sitesOtherInput = document.getElementById('treatedTBSitesOther');
-        if (sitesSelect && sitesOtherInput) {
+        const parentCheckbox = document.getElementById('includeTreatedTB');
+        if (sitesSelect && sitesOtherInput && parentCheckbox) {
             const updateOtherVisibility = () => {
+                if (!parentCheckbox.checked) {
+                    sitesOtherInput.style.display = 'none';
+                    sitesOtherInput.value = '';
+                    return;
+                }
                 const selectedOptions = Array.from(sitesSelect.selectedOptions).map(opt => opt.value);
                 sitesOtherInput.style.display = selectedOptions.includes('Other') ? 'block' : 'none';
+                sitesOtherInput.disabled = !selectedOptions.includes('Other');
                 if (!selectedOptions.includes('Other')) sitesOtherInput.value = '';
             };
             sitesSelect.addEventListener('change', updateOtherVisibility);
-            updateOtherVisibility(); // Initial state
+            // parentCheckbox.addEventListener('change', updateOtherVisibility); // Already handled by setupConditionalSections
+            updateOtherVisibility();
         }
     }
 
     function setupTPTMedicationLogic() {
         const tptMedicationSelect = document.getElementById('completedTPTMedication');
         const tptMedicationOtherInput = document.getElementById('completedTPTMedicationOther');
-        if (tptMedicationSelect && tptMedicationOtherInput) {
+        const parentCheckbox = document.getElementById('includeCompletedTPT');
+
+        if (tptMedicationSelect && tptMedicationOtherInput && parentCheckbox) {
             const updateOtherVisibility = () => {
+                if (!parentCheckbox.checked) {
+                    tptMedicationOtherInput.style.display = 'none';
+                    tptMedicationOtherInput.value = '';
+                    return;
+                }
                 tptMedicationOtherInput.style.display = tptMedicationSelect.value === 'Other' ? 'block' : 'none';
+                tptMedicationOtherInput.disabled = tptMedicationSelect.value !== 'Other';
                 if (tptMedicationSelect.value !== 'Other') tptMedicationOtherInput.value = '';
             };
             tptMedicationSelect.addEventListener('change', updateOtherVisibility);
+            // parentCheckbox.addEventListener('change', updateOtherVisibility); // Already handled
             updateOtherVisibility();
         }
     }
 
-    // NEW function to manage the "Last Medicine Pickup" checkbox and related fields
     function setupLastMedicinePickupToggle() {
         const checkbox = document.getElementById('includeLastMedicinePickup');
         const detailsDiv = document.getElementById('lastMedicinePickupDetails');
@@ -333,41 +400,64 @@ document.addEventListener('DOMContentLoaded', function () {
                 dateInput.disabled = !isChecked;
                 durationInput.disabled = !isChecked;
                 if (isChecked) {
-                    if (!dateInput.value) { // Set default date only if checked and empty
+                    if (!dateInput.value) {
                         dateInput.value = JSDateToBE(new Date());
                     }
                 } else {
-                    // Optionally clear values when unchecked
-                    // dateInput.value = '';
+                    // dateInput.value = ''; // Keep values or clear based on preference
                     // durationInput.value = '';
+                    dateInput.style.borderColor = ''; // Clear validation error if any
                 }
             };
             checkbox.addEventListener('change', function () {
                 toggleFields(this.checked);
+                if (this.checked) dateInput.focus(); // Focus on date when enabled
             });
-            toggleFields(checkbox.checked); // Initialize based on current state
+            toggleFields(checkbox.checked);
         }
     }
 
     function saveDoctorInfo() {
-        localStorage.setItem('referralDoctorInfo', JSON.stringify({
-            thaiName: document.getElementById('doctorNameThai').value,
-            englishName: document.getElementById('doctorNameEnglish').value,
-            licenseNo: document.getElementById('medicalLicense').value
-        }));
+        let sharedInfo = {};
+        try {
+            const existingInfo = localStorage.getItem('sharedDoctorInfo');
+            if (existingInfo) {
+                sharedInfo = JSON.parse(existingInfo);
+            }
+        } catch (e) {
+            console.error("Error reading sharedDoctorInfo for update:", e);
+            sharedInfo = {};
+        }
+
+        sharedInfo.sharedDoctorNameThai = document.getElementById('doctorNameThai').value;
+        sharedInfo.sharedDoctorNameEnglish = document.getElementById('doctorNameEnglish').value.toUpperCase();
+        sharedInfo.sharedMedicalLicense = document.getElementById('medicalLicense').value;
+
+        localStorage.setItem('sharedDoctorInfo', JSON.stringify(sharedInfo));
     }
 
     function loadDoctorInfo() {
-        const savedInfo = localStorage.getItem('referralDoctorInfo');
+        const savedInfo = localStorage.getItem('sharedDoctorInfo');
         if (savedInfo) {
-            const doctorInfo = JSON.parse(savedInfo);
-            document.getElementById('doctorNameThai').value = doctorInfo.thaiName || '';
-            document.getElementById('doctorNameEnglish').value = doctorInfo.englishName || '';
-            document.getElementById('medicalLicense').value = doctorInfo.licenseNo || '';
+            try {
+                const doctorInfo = JSON.parse(savedInfo);
+                document.getElementById('doctorNameThai').value = doctorInfo.sharedDoctorNameThai || '';
+                document.getElementById('doctorNameEnglish').value = doctorInfo.sharedDoctorNameEnglish || '';
+                document.getElementById('medicalLicense').value = doctorInfo.sharedMedicalLicense || '';
+            } catch (e) {
+                console.error("Error parsing sharedDoctorInfo:", e);
+                document.getElementById('doctorNameThai').value = '';
+                document.getElementById('doctorNameEnglish').value = '';
+                document.getElementById('medicalLicense').value = '';
+            }
         }
-        ['doctorNameThai', 'doctorNameEnglish', 'medicalLicense'].forEach(id => {
-            document.getElementById(id).addEventListener('change', saveDoctorInfo);
-        });
+        const doctorNameThaiEl = document.getElementById('doctorNameThai');
+        const doctorNameEnglishEl = document.getElementById('doctorNameEnglish');
+        const medicalLicenseEl = document.getElementById('medicalLicense');
+
+        if (doctorNameThaiEl) doctorNameThaiEl.addEventListener('change', saveDoctorInfo);
+        if (doctorNameEnglishEl) doctorNameEnglishEl.addEventListener('change', saveDoctorInfo);
+        if (medicalLicenseEl) medicalLicenseEl.addEventListener('change', saveDoctorInfo);
     }
 
     function handleFormSubmitOnEnter() {
@@ -382,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else if (activeElement && (activeElement.type === 'button' || activeElement.type === 'submit')) {
                     // Allow buttons
                 } else {
-                    event.preventDefault();
+                    event.preventDefault(); // Default behavior for other cases: preview
                     previewLetter();
                 }
             }
@@ -393,6 +483,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('referralForm');
         const data = {};
         let isValid = true;
+        let missingFieldsMessages = [];
 
         const requiredStaticFields = [
             { id: 'letterDate', name: 'วันที่ / Date' },
@@ -401,7 +492,6 @@ document.addEventListener('DOMContentLoaded', function () {
             { id: 'doctorNameEnglish', name: 'Doctor\'s Name (English)' },
             { id: 'medicalLicense', name: 'เลขที่ใบประกอบวิชาชีพ' }
         ];
-        let missingFieldsMessages = [];
 
         requiredStaticFields.forEach(fieldInfo => {
             const element = document.getElementById(fieldInfo.id);
@@ -419,6 +509,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        // Validate date fields that are not always required but must be valid if filled
+        const optionalDateFields = ['dob', 'firstDiagnosisDateRetro', 'initialCD4Date', 'latestVLDate',
+            'treatedHCVCompletionDate', 'treatedTBCompletionDate', 'completedTPTCompletionDate'];
+        optionalDateFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.value.trim() && (el.value.length < 10 || !isValidBEDate(el.value))) {
+                missingFieldsMessages.push(`${el.labels[0] ? el.labels[0].textContent.split(' (พ.ศ.)')[0].split(' /')[0].trim() : id} (รูปแบบไม่ถูกต้อง / Invalid format: ${el.value})`);
+                el.style.borderColor = 'red';
+                isValid = false;
+            } else if (el) {
+                el.style.borderColor = '';
+            }
+        });
+
+
         const includeSyphilisActiveCheckbox = document.getElementById('includeSyphilisActive');
         if (includeSyphilisActiveCheckbox && includeSyphilisActiveCheckbox.checked) {
             const syphilisStartDateInput = document.getElementById('syphilisStartDate');
@@ -435,7 +540,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Validation for Last Medicine Pickup Date if checkbox is checked
         const includeLastMedicinePickupCheckbox = document.getElementById('includeLastMedicinePickup');
         const lastMedicinePickupDateInput = document.getElementById('lastMedicinePickupDate');
         if (includeLastMedicinePickupCheckbox && includeLastMedicinePickupCheckbox.checked) {
@@ -452,30 +556,32 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-
         if (!isValid) {
             alert(`กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วนและถูกต้อง:\n- ${missingFieldsMessages.join('\n- ')}`);
-            const firstInvalidFieldId = requiredStaticFields.find(f => missingFieldsMessages.some(m => m.includes(f.name)))?.id;
-            if (firstInvalidFieldId) document.getElementById(firstInvalidFieldId)?.focus();
-            else if (missingFieldsMessages.some(m => m.includes("Syphilis"))) document.getElementById('syphilisStartDate')?.focus();
-            else if (missingFieldsMessages.some(m => m.includes("Last medicine pick up on"))) document.getElementById('lastMedicinePickupDate')?.focus();
+            const firstInvalidField = Array.from(document.querySelectorAll('[style*="border-color: red"]'))[0];
+            if (firstInvalidField) firstInvalidField.focus();
             return;
         }
 
         new FormData(form).forEach((value, key) => {
             const element = form.elements[key];
-            if (element && element.type === 'checkbox') return;
+            // Skip individual medication item fields as they are handled separately
+            if (key.startsWith('artMedSelect-') || key.startsWith('artTablets-') || key.startsWith('artTime-')) return;
+
+            if (element && element.type === 'checkbox') return; // Checkboxes handled below
             if (element && typeof value === 'string') data[key] = value.trim();
             else data[key] = value;
         });
+
+        data.doctorNameEnglish = data.doctorNameEnglish.toUpperCase();
+
 
         const checkboxIds = [
             'includeRetroviral', 'includeSyphilisActive', 'includeHBV',
             'includeHCVActive', 'includeTreatedSyphilis', 'includeTreatedHCV',
             'includeTreatedTB', 'includeCompletedTPT', 'includeOtherHistory',
-            'includeLastMedicinePickup', // MODIFIED: Added new checkbox
-            'attachmentLabResults', 'attachmentOther',
-            'includeTmxSmp'
+            'includeLastMedicinePickup', 'attachmentLabResults', 'attachmentOther',
+            'includeTmxSmp', 'includeReferralForAdmission' // Added new checkbox
         ];
         checkboxIds.forEach(id => {
             const cb = document.getElementById(id);
@@ -498,9 +604,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         }
-        if (data.includeTmxSmp) {
+        if (data.includeRetroviral && data.includeTmxSmp) { // only include if parent retroviral is also checked
             data.tmxSmpTablets = document.getElementById('tmxSmpTablets').value;
+        } else {
+            delete data.tmxSmpTablets; // remove if not applicable
         }
+
 
         if (data.includeSyphilisActive) {
             data.syphilisStartDate = document.getElementById('syphilisStartDate').value;
@@ -525,11 +634,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (data.includeCompletedTPT) {
             const tptSelect = document.getElementById('completedTPTMedication');
+            const tptOtherInput = document.getElementById('completedTPTMedicationOther');
             data.completedTPTMedicationText = tptSelect.value === 'Other' ?
-                document.getElementById('completedTPTMedicationOther').value : tptSelect.value;
+                tptOtherInput.value : tptSelect.options[tptSelect.selectedIndex].text; // Use text for display
+            data.completedTPTMedicationOther = tptOtherInput.value; // Store other value if any
         }
 
-        // MODIFIED: Handle lastMedicinePickupDate and medicineDuration based on the new checkbox
+
         if (!data.includeLastMedicinePickup || !document.getElementById('lastMedicinePickupDate').value) {
             delete data.lastMedicinePickupDate;
         } else {
@@ -540,6 +651,10 @@ document.addEventListener('DOMContentLoaded', function () {
             delete data.medicineDuration;
         } else {
             data.medicineDuration = document.getElementById('medicineDuration').value;
+        }
+
+        if (!data.attachmentOther || !data.attachmentOtherText?.trim()) {
+            delete data.attachmentOtherText;
         }
 
 
