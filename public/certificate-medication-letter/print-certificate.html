@@ -54,9 +54,7 @@
             border-bottom: 0.5px solid #ccc;
             font-size: 8pt;
             columns: 2;
-            /* As per your version */
             column-gap: 1px;
-            /* As per your version */
         }
 
         .header-logo-column {
@@ -141,7 +139,7 @@
         .medication-list li {
             margin-bottom: 0.4em;
             position: relative;
-            text-transform: uppercase;
+            /* text-transform: uppercase; Removed as hi() will get pre-uppercased data */
         }
 
         .medication-list li::before {
@@ -183,6 +181,16 @@
             margin: 20px;
         }
 
+        /* New class for highlighted input data */
+        .highlighted-input {
+            font-weight: bold;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 2px;
+        }
+
+        /* Keep existing specific styling if needed for other purposes,
+           but dynamic data will now primarily use .highlighted-input */
         .bold-inline {
             font-weight: bold;
         }
@@ -220,6 +228,15 @@
     </div>
     <div id="certificateContainer" class="letter-body"></div>
     <script>
+        // Helper function to style inputted information
+        function hi(value) {
+            let displayValue = String(value || '').trim();
+            if (displayValue === '' || displayValue.toUpperCase() === 'N/A') {
+                displayValue = 'N/A';
+            }
+            return `<span class="highlighted-input">${displayValue}</span>`;
+        }
+
         function formatDate(dateObj, formatType = "BE") { // formatType can be "BE" or "CE"
             if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
             const d = String(dateObj.getDate()).padStart(2, '0');
@@ -256,36 +273,41 @@
                 const letterDateCE = certData.letterDate || 'N/A';
                 const dobCE = certData.dob || 'N/A';
 
-                let patientFullNameDisplay = '';
+                let patientFullNameRaw = '';
                 if (certData.salutation && certData.salutation !== 'NONE' && certData.salutation.trim() !== '') {
-                    patientFullNameDisplay += `${certData.salutation.toUpperCase()} `;
+                    patientFullNameRaw += `${certData.salutation} `;
                 }
-                patientFullNameDisplay += (certData.patientName || 'PATIENT NAME N/A').toUpperCase();
+                patientFullNameRaw += (certData.patientName || 'PATIENT NAME N/A');
+                const patientFullNameDisplayUpper = patientFullNameRaw.toUpperCase();
 
-                const passportNumberDisplay = (certData.passportNumber || 'N/A').toUpperCase();
-                const nationalityDisplay = (certData.nationality || 'NATIONALITY N/A').toUpperCase();
+                const passportNumberDisplayUpper = (certData.passportNumber || 'N/A').toUpperCase();
+                const nationalityDisplayUpper = (certData.nationality || 'NATIONALITY N/A').toUpperCase();
+                const doctorNameDisplayUpper = (certData.doctorNameEnglish || 'DOCTOR NAME N/A').toUpperCase();
+                const medicalLicenseDisplay = certData.medicalLicense || 'N/A';
+
 
                 contentHtml += `<h3 class="letter-title">Certificate For Carrying Medications</h3>`;
-                contentHtml += `<p style="text-align:right;"><strong>Date:</strong> ${letterDateCE}</p><br>`;
+                contentHtml += `<p style="text-align:right;"><strong>Date:</strong> ${hi(letterDateCE)}</p><br>`;
 
                 contentHtml += `<p>To whom it may concern,</p>`;
-                contentHtml += `<p><span class="uppercase-bold">${patientFullNameDisplay}</span>, a <span class="uppercase-bold-inline">${nationalityDisplay}</span> national, passport number <span class="uppercase-bold-inline">${passportNumberDisplay}</span>, date of birth <span class="bold-inline">${dobCE}</span>, is a patient of Public Health Center 28 Krung Thon Buri and currently receiving on-going treatment. Continuous medication(s) will be necessary for successful therapy and the patient's well being.</p>`;
+                contentHtml += `<p>${hi(patientFullNameDisplayUpper)}, a ${hi(nationalityDisplayUpper)} national, passport number ${hi(passportNumberDisplayUpper)}, date of birth ${hi(dobCE)}, is a patient of Public Health Center 28 Krung Thon Buri and currently receiving on-going treatment. Continuous medication(s) will be necessary for successful therapy and the patient's well being.</p>`;
                 contentHtml += `<p>This certificate indicates the necessity of carrying the following medication(s).</p>`;
 
                 if (certData.includeMedications && certData.artMedications && certData.artMedications.length > 0) {
                     contentHtml += `<p><strong>Current Medication(s):</strong></p>`;
                     contentHtml += `<ul class="medication-list">`;
                     certData.artMedications.forEach(art => {
-                        contentHtml += `<li>${art.medication.toUpperCase()}</li>`;
+                        // Assuming art.medication contains the text to be displayed
+                        contentHtml += `<li>${hi(art.medication.toUpperCase())}</li>`;
                     });
                     contentHtml += `</ul>`;
                 } else {
-                    contentHtml += `<p><strong>Current Medication(s):</strong> None specified.</p>`;
+                    contentHtml += `<p><strong>Current Medication(s):</strong> ${hi('None specified')}</p>`;
                 }
 
                 contentHtml += `<div class="signature-section">`;
                 contentHtml += `<p>Sincerely,</p><br><br><br>`;
-                contentHtml += `<p><span class="uppercase-bold">${(certData.doctorNameEnglish || 'DOCTOR NAME N/A').toUpperCase()}</span><br>Thai Medical License Number: ${certData.medicalLicense || 'N/A'}<br>Public Health Center 28 Krung Thon Buri</p>`;
+                contentHtml += `<p>${hi(doctorNameDisplayUpper)}<br>Thai Medical License Number: ${hi(medicalLicenseDisplay)}<br>Public Health Center 28 Krung Thon Buri</p>`;
                 contentHtml += `</div>`;
                 certContainer.innerHTML = contentHtml;
             }
@@ -294,8 +316,11 @@
                 const printedDateTimeSpans = document.querySelectorAll('.printed-on-datetime');
                 if (printedDateTimeSpans.length > 0) {
                     const today = new Date();
+                    const printedDateBE = formatDate(today, "BE");
+                    const printedDateCE = formatDate(today, "CE");
+                    const printedTime = formatTimeISO(today);
                     printedDateTimeSpans.forEach(span => {
-                        span.innerHTML = `<strong style="font-weight:bold;"> ${formatDate(today, "BE")} (${formatDate(today, "CE")}) ${formatTimeISO(today)}</strong>`;
+                        span.innerHTML = `${hi(printedDateBE)} (${hi(printedDateCE)}) ${hi(printedTime)}`;
                     });
                 } else { console.warn(".printed-on-datetime span not found."); }
             } catch (e) { console.error("Error setting printed-on date and time:", e); }
