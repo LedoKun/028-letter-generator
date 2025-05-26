@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeDateInputs();
     initializeNationalIdInput();
     initializeNapIdInput();
+    initializePassportInput();
     setupConditionalSections();
     setupTreatedTBSitesLogic();
     setupTPTMedicationLogic();
@@ -139,6 +140,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const napIdInput = document.getElementById('napId');
         if (napIdInput) napIdInput.addEventListener('input', autoFormatNapId);
     }
+
+    // --- Function to initialize Passport Number input to uppercase ---
+    function initializePassportInput() {
+        const passportInput = document.getElementById('passportNumber');
+        if (passportInput) {
+            passportInput.addEventListener('input', function () {
+                this.value = this.value.toUpperCase();
+            });
+        }
+    }
+    // --- End of Passport Number input function ---
 
     function setupConditionalSections() {
         const toggles = [
@@ -271,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function initializeArtMedications() {
         document.getElementById('addArtMedication').addEventListener('click', addArtMedicationToList);
         const artContainer = document.getElementById('artMedicationsContainer');
-        if (artContainer.children.length <= 1) {
+        if (artContainer.children.length <= 1) { // Ensure at least one item, assuming the container might have a placeholder <p>
             addArtMedicationToList();
         }
     }
@@ -287,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const isRetroviralChecked = retroviralCheckbox.checked;
                 const isTmxSmpChecked = checkbox.checked;
 
-                checkbox.disabled = !isRetroviralChecked; // Disable TMX/SMP checkbox if Retroviral is not checked
+                checkbox.disabled = !isRetroviralChecked;
 
                 if (isRetroviralChecked && isTmxSmpChecked) {
                     tabletsDiv.style.display = 'flex';
@@ -299,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             };
             checkbox.addEventListener('change', updateVisibility);
-            retroviralCheckbox.addEventListener('change', updateVisibility); // Also listen to parent checkbox
+            retroviralCheckbox.addEventListener('change', updateVisibility);
             updateVisibility();
         }
     }
@@ -361,7 +373,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!selectedOptions.includes('Other')) sitesOtherInput.value = '';
             };
             sitesSelect.addEventListener('change', updateOtherVisibility);
-            // parentCheckbox.addEventListener('change', updateOtherVisibility); // Already handled by setupConditionalSections
             updateOtherVisibility();
         }
     }
@@ -383,7 +394,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (tptMedicationSelect.value !== 'Other') tptMedicationOtherInput.value = '';
             };
             tptMedicationSelect.addEventListener('change', updateOtherVisibility);
-            // parentCheckbox.addEventListener('change', updateOtherVisibility); // Already handled
             updateOtherVisibility();
         }
     }
@@ -403,17 +413,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (!dateInput.value) {
                         dateInput.value = JSDateToBE(new Date());
                     }
+                    // durationInput already defaults to 60 from HTML
                 } else {
-                    // dateInput.value = ''; // Keep values or clear based on preference
-                    // durationInput.value = '';
-                    dateInput.style.borderColor = ''; // Clear validation error if any
+                    dateInput.style.borderColor = '';
                 }
             };
             checkbox.addEventListener('change', function () {
                 toggleFields(this.checked);
-                if (this.checked) dateInput.focus(); // Focus on date when enabled
+                if (this.checked) dateInput.focus();
             });
-            toggleFields(checkbox.checked);
+            toggleFields(checkbox.checked); // Initial state
         }
     }
 
@@ -464,17 +473,21 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('referralForm').addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 const activeElement = document.activeElement;
-                if (activeElement && activeElement.tagName !== 'TEXTAREA' && activeElement.type !== 'button' && activeElement.type !== 'submit') {
-                    event.preventDefault();
-                    previewLetter();
-                } else if (activeElement && activeElement.tagName === 'TEXTAREA' && !event.shiftKey) {
-                    // Allow newline
-                } else if (activeElement && (activeElement.type === 'button' || activeElement.type === 'submit')) {
-                    // Allow buttons
-                } else {
-                    event.preventDefault(); // Default behavior for other cases: preview
-                    previewLetter();
+
+                if (activeElement && activeElement.tagName === 'TEXTAREA') {
+                    // For TEXTAREA elements, allow all Enter key combinations (Enter, Ctrl+Enter, Shift+Enter)
+                    // to perform their default action (typically inserting a newline).
+                    // We stop this specific event handler from proceeding to submit the form.
+                    return;
                 }
+
+                // If the active element is NOT a TEXTAREA (where we returned above),
+                // AND it's not a button or submit type input:
+                if (activeElement && activeElement.type !== 'button' && activeElement.type !== 'submit') {
+                    event.preventDefault(); // Prevent default action (like native form submission on Enter for some inputs)
+                    previewLetter();        // Call our custom preview/submit function
+                }
+                // If it's a button or submit input, Enter will trigger its default click/submit action.
             }
         });
     }
@@ -509,8 +522,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Validate date fields that are not always required but must be valid if filled
-        const optionalDateFields = ['dob', 'firstDiagnosisDateRetro', 'initialCD4Date', 'latestVLDate',
+        const optionalDateFields = ['dob', 'firstDiagnosisDateRetro', 'initialCD4Date', 'latestVLDate', 'artStartDate',
             'treatedHCVCompletionDate', 'treatedTBCompletionDate', 'completedTPTCompletionDate'];
         optionalDateFields.forEach(id => {
             const el = document.getElementById(id);
@@ -543,11 +555,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const includeLastMedicinePickupCheckbox = document.getElementById('includeLastMedicinePickup');
         const lastMedicinePickupDateInput = document.getElementById('lastMedicinePickupDate');
         if (includeLastMedicinePickupCheckbox && includeLastMedicinePickupCheckbox.checked) {
-            if (!lastMedicinePickupDateInput.value.trim()) {
+            if (!lastMedicinePickupDateInput.value.trim()) { // Only require date if checkbox is checked AND no duration is specified as an alternative.
+                // If only duration is filled, date is not strictly required.
+                // The print template handles showing duration only if date is missing.
+                // For validation, let's require it if the checkbox is checked AND the user intends to provide a date.
+                // This logic might need refinement based on how strictly "last pickup date" is enforced.
+                // For now, if checked and empty, mark as error.
                 missingFieldsMessages.push("ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ / Last medicine pick up on");
                 lastMedicinePickupDateInput.style.borderColor = 'red';
                 isValid = false;
-            } else if (lastMedicinePickupDateInput.value.length < 10 || !isValidBEDate(lastMedicinePickupDateInput.value)) {
+            } else if (lastMedicinePickupDateInput.value.trim() && (lastMedicinePickupDateInput.value.length < 10 || !isValidBEDate(lastMedicinePickupDateInput.value))) {
                 missingFieldsMessages.push(`ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ (รูปแบบไม่ถูกต้อง / Invalid format: ${lastMedicinePickupDateInput.value})`);
                 lastMedicinePickupDateInput.style.borderColor = 'red';
                 isValid = false;
@@ -555,6 +572,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 lastMedicinePickupDateInput.style.borderColor = '';
             }
         }
+
 
         if (!isValid) {
             alert(`กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วนและถูกต้อง:\n- ${missingFieldsMessages.join('\n- ')}`);
@@ -565,15 +583,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         new FormData(form).forEach((value, key) => {
             const element = form.elements[key];
-            // Skip individual medication item fields as they are handled separately
             if (key.startsWith('artMedSelect-') || key.startsWith('artTablets-') || key.startsWith('artTime-')) return;
 
-            if (element && element.type === 'checkbox') return; // Checkboxes handled below
+            if (element && element.type === 'checkbox') return;
             if (element && typeof value === 'string') data[key] = value.trim();
             else data[key] = value;
         });
 
-        data.doctorNameEnglish = data.doctorNameEnglish.toUpperCase();
+        data.doctorNameEnglish = (data.doctorNameEnglish || '').toUpperCase();
+        data.passportNumber = (data.passportNumber || '').toUpperCase(); // Ensure passport number is collected as uppercase too
 
 
         const checkboxIds = [
@@ -581,7 +599,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'includeHCVActive', 'includeTreatedSyphilis', 'includeTreatedHCV',
             'includeTreatedTB', 'includeCompletedTPT', 'includeOtherHistory',
             'includeLastMedicinePickup', 'attachmentLabResults', 'attachmentOther',
-            'includeTmxSmp', 'includeReferralForAdmission' // Added new checkbox
+            'includeTmxSmp', 'includeReferralForAdmission'
         ];
         checkboxIds.forEach(id => {
             const cb = document.getElementById(id);
@@ -604,10 +622,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         }
-        if (data.includeRetroviral && data.includeTmxSmp) { // only include if parent retroviral is also checked
+        if (data.includeRetroviral && data.includeTmxSmp) {
             data.tmxSmpTablets = document.getElementById('tmxSmpTablets').value;
         } else {
-            delete data.tmxSmpTablets; // remove if not applicable
+            delete data.tmxSmpTablets;
         }
 
 
@@ -636,18 +654,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const tptSelect = document.getElementById('completedTPTMedication');
             const tptOtherInput = document.getElementById('completedTPTMedicationOther');
             data.completedTPTMedicationText = tptSelect.value === 'Other' ?
-                tptOtherInput.value : tptSelect.options[tptSelect.selectedIndex].text; // Use text for display
-            data.completedTPTMedicationOther = tptOtherInput.value; // Store other value if any
+                tptOtherInput.value : tptSelect.options[tptSelect.selectedIndex].text;
+            data.completedTPTMedicationOther = tptOtherInput.value;
         }
 
 
-        if (!data.includeLastMedicinePickup || !document.getElementById('lastMedicinePickupDate').value) {
+        if (!data.includeLastMedicinePickup || !document.getElementById('lastMedicinePickupDate').value.trim()) {
             delete data.lastMedicinePickupDate;
         } else {
             data.lastMedicinePickupDate = document.getElementById('lastMedicinePickupDate').value;
         }
 
-        if (!data.includeLastMedicinePickup || !document.getElementById('medicineDuration').value) {
+        if (!data.includeLastMedicinePickup || !document.getElementById('medicineDuration').value.trim()) {
             delete data.medicineDuration;
         } else {
             data.medicineDuration = document.getElementById('medicineDuration').value;

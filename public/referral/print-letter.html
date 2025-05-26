@@ -128,7 +128,7 @@
             text-align: center;
             font-weight: bold;
             font-size: 14pt;
-            /* margin-bottom: 0.4em; */
+            margin-bottom: 0.4em;
             margin-top: 0.4;
             line-height: 1.2;
             list-style-type: none !important;
@@ -230,6 +230,15 @@
             border: 2px solid red;
             margin: 20px;
         }
+
+        /* Added style for highlighting data */
+        .highlighted-data {
+            font-weight: bold;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 2px;
+            /* Adjust as needed */
+        }
     </style>
 </head>
 
@@ -264,6 +273,15 @@
     </div>
 
     <script>
+        // Helper function to wrap data in a styled span if it has a value
+        function hd(value) {
+            const trimmedValue = String(value || '').trim();
+            if (trimmedValue === '') {
+                return ''; // Return empty string for blank values
+            }
+            return `<span class="highlighted-data">${trimmedValue}</span>`;
+        }
+
         function convertBEtoCE(beDate) {
             if (!beDate || typeof beDate !== 'string' || !beDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) return '';
             const parts = beDate.split('/');
@@ -302,19 +320,29 @@
                 letterContainer.innerHTML = '<p style="text-align:center; padding-top:50px; color:red;" class="thai-font"><strong>ข้อผิดพลาด:</strong> ไม่พบข้อมูลสำหรับสร้างเนื้อหา.</p>';
             } else {
                 let contentHtml = '';
+                const letterType = letterData.letterType || 'summaryOfHistory';
+
                 const christianLetterDate = convertBEtoCE(letterData.letterDate);
                 const christianDob = letterData.dob ? convertBEtoCE(letterData.dob) : '';
 
-                contentHtml += `<h3 class="letter-title thai-font">หนังสือส่งตัวผู้ป่วย / Referral Letter</h3><br>`;
-                contentHtml += `<p class="thai-font"><strong>วันที่ / Date:</strong> ${letterData.letterDate} (${christianLetterDate})</p>`;
-                contentHtml += `<p class="thai-font"><strong>เรียน</strong> เจ้าหน้าที่ผู้เกี่ยวข้อง / To Whom It May Concern</p>`;
-                contentHtml += `<p class="thai-font"><strong>เรื่อง</strong> ขอส่งตัวผู้ป่วยเพื่อรับการรักษาต่อเนื่อง / Re: Patient Referral for Continued Care</p>`;
-                contentHtml += `<p class="thai-font indent">ทางศูนย์บริการสาธารณสุข 28 กรุงธนบุรี มีความประสงค์ส่งตัวผู้ป่วยเพื่อเข้ารับการรักษาต่อเนื่อง / Public Health Center 28 Krung Thon Buri would like to refer the following patient for continued care:</p>`;
+                if (letterType === 'referralForCare') {
+                    contentHtml += `<h3 class="letter-title thai-font">หนังสือส่งตัวผู้ป่วย / Referral Letter</h3><br>`;
+                    contentHtml += `<p class="thai-font"><strong>วันที่ / Date:</strong> ${hd(letterData.letterDate)} (${hd(christianLetterDate)})</p>`;
+                    contentHtml += `<p class="thai-font"><strong>เรียน</strong> เจ้าหน้าที่ผู้เกี่ยวข้อง / To Whom It May Concern</p>`;
+                    contentHtml += `<p class="thai-font"><strong>เรื่อง</strong> ขอส่งตัวผู้ป่วยเพื่อรับการรักษาต่อเนื่อง / Re: Patient Referral for Continued Care</p>`;
+                    contentHtml += `<p class="thai-font indent">ทางศูนย์บริการสาธารณสุข 28 กรุงธนบุรี มีความประสงค์ส่งตัวผู้ป่วยเพื่อเข้ารับการรักษาต่อเนื่อง / Public Health Center 28 Krung Thon Buri would like to refer the following patient for continued care:</p>`;
+                } else { // summaryOfHistory
+                    contentHtml += `<h3 class="letter-title thai-font">สรุปประวัติการรักษา / Summary of Medical History</h3><br>`;
+                    contentHtml += `<p class="thai-font"><strong>วันที่ / Date:</strong> ${hd(letterData.letterDate)} (${hd(christianLetterDate)})</p>`;
+                    contentHtml += `<p class="thai-font"><strong>เรียน</strong> เจ้าหน้าที่ผู้เกี่ยวข้อง / To Whom It May Concern</p>`;
+                    contentHtml += `<p class="thai-font"><strong>เรื่อง</strong> สรุปประวัติการรักษา / Re: Summary of Medical History</p>`;
+                }
+
                 contentHtml += `<div class="details">`;
-                contentHtml += `<p class="thai-font"><span class="label">ชื่อผู้ป่วย / Patient Name:</span> ${letterData.patientName}</p>`;
-                if (letterData.dob) contentHtml += `<p class="thai-font"><span class="label">Date of Birth:</span> ${letterData.dob} (${christianDob})</p>`;
-                if (letterData.nationalId) contentHtml += `<p class="thai-font"><span class="label">เลขประจําตัวประชาชน / National ID:</span> ${letterData.nationalId}</p>`;
-                if (letterData.passportNumber) contentHtml += `<p class="thai-font"><span class="label">เลขที่หนังสือเดินทาง / Passport Number:</span> ${letterData.passportNumber}</p>`;
+                contentHtml += `<p class="thai-font"><span class="label">ชื่อผู้ป่วย / Patient Name:</span> ${hd(letterData.patientName)}</p>`;
+                if (letterData.dob) contentHtml += `<p class="thai-font"><span class="label">Date of Birth:</span> ${hd(letterData.dob)} (${hd(christianDob)})</p>`;
+                if (letterData.nationalId) contentHtml += `<p class="thai-font"><span class="label">เลขประจําตัวประชาชน / National ID:</span> ${hd(letterData.nationalId)}</p>`;
+                if (letterData.passportNumber) contentHtml += `<p class="thai-font"><span class="label">เลขที่หนังสือเดินทาง / Passport Number:</span> ${hd(letterData.passportNumber)}</p>`;
                 contentHtml += `</div>`;
 
                 contentHtml += `<div class="section-title thai-font">ประวัติการรักษาโดยสรุป / Summary of Medical History</div>`;
@@ -323,25 +351,41 @@
                 if (letterData.includeRetroviral) {
                     let retroViralContent = `<li><strong>Retroviral Infection</strong>`;
                     let subBulletsHTML = "";
-                    if (letterData.napId) subBulletsHTML += `<li>NAP-ID: D4-${letterData.napId}</li>`;
-                    if (letterData.firstDiagnosisDateRetro) subBulletsHTML += `<li>วินิจฉัยเมื่อ / First diagnosis date: ${letterData.firstDiagnosisDateRetro} (${convertBEtoCE(letterData.firstDiagnosisDateRetro)})</li>`;
+                    if (letterData.napId) subBulletsHTML += `<li>NAP-ID: D4-${hd(letterData.napId)}</li>`;
+
+                    const firstDiagRetroBE = letterData.firstDiagnosisDateRetro || '';
+                    if (firstDiagRetroBE) subBulletsHTML += `<li>วินิจฉัยเมื่อ / First diagnosis date: ${hd(firstDiagRetroBE)}${hd(convertBEtoCE(firstDiagRetroBE)) ? ` (${hd(convertBEtoCE(firstDiagRetroBE))})` : ''}</li>`;
+
+                    const artStartDateBE = letterData.artStartDate || '';
+                    if (artStartDateBE) subBulletsHTML += `<li>วันที่เริ่มยา ART / ART Start Date: ${hd(artStartDateBE)}${hd(convertBEtoCE(artStartDateBE)) ? ` (${hd(convertBEtoCE(artStartDateBE))})` : ''}</li>`;
+
                     let cd4Text = '';
-                    if (letterData.initialCD4) cd4Text = `${letterData.initialCD4} cell/mm3`;
-                    if (cd4Text) subBulletsHTML += `<li>CD4 แรกรับ / Initial CD4: ${cd4Text} ${letterData.initialCD4Date ? `(${letterData.initialCD4Date} - ${convertBEtoCE(letterData.initialCD4Date)})` : ''}</li>`;
-                    if (letterData.initialCD4Percent) subBulletsHTML += `<li>%CD4 แรกรับ / Initial %CD4: ${letterData.initialCD4Percent}% ${letterData.initialCD4Date ? `(${letterData.initialCD4Date} - ${convertBEtoCE(letterData.initialCD4Date)})` : ''}</li>`;
-                    if (letterData.adherence) subBulletsHTML += `<li>Adherence: ${letterData.adherence}</li>`;
-                    if (letterData.latestVL) subBulletsHTML += `<li>Latest VL: ${letterData.latestVL.replace('<', '&lt;')} copies/mL ${letterData.latestVLDate ? `(${letterData.latestVLDate} - ${convertBEtoCE(letterData.latestVLDate)})` : ''}</li>`;
+                    const initialCD4Val = letterData.initialCD4 || '';
+                    if (initialCD4Val) cd4Text = `${hd(initialCD4Val)} cell/mm3`;
+
+                    const initialCD4DateBE = letterData.initialCD4Date || '';
+                    if (cd4Text) subBulletsHTML += `<li>CD4 แรกรับ / Initial CD4: ${cd4Text}${initialCD4DateBE ? ` - ${hd(initialCD4DateBE)} (${hd(convertBEtoCE(initialCD4DateBE))})` : ''}</li>`;
+
+                    const initialCD4PercentVal = letterData.initialCD4Percent || '';
+                    if (initialCD4PercentVal) subBulletsHTML += `<li>%CD4 แรกรับ / Initial %CD4: ${hd(initialCD4PercentVal)}%${initialCD4DateBE ? ` - ${hd(initialCD4DateBE)} (${hd(convertBEtoCE(initialCD4DateBE))})` : ''}</li>`;
+
+                    if (letterData.adherence) subBulletsHTML += `<li>Adherence: ${hd(letterData.adherence)}</li>`;
+
+                    const latestVLVal = letterData.latestVL || '';
+                    const latestVLDateBE = letterData.latestVLDate || '';
+                    if (latestVLVal) subBulletsHTML += `<li>Latest VL: ${hd(latestVLVal.replace('<', '&lt;'))} copies/mL${latestVLDateBE ? ` - ${hd(latestVLDateBE)} (${hd(convertBEtoCE(latestVLDateBE))})` : ''}</li>`;
+
 
                     if (letterData.artMedications && letterData.artMedications.length > 0) {
                         let artList = "<li>ART Medications:<ul>";
                         letterData.artMedications.forEach(art => {
-                            artList += `<li>${art.medication} ${art.tablets} tablet(s) ${art.time ? 'at ' + art.time : 'every 24-hour'}</li>`;
+                            artList += `<li>${hd(art.medication)} ${hd(art.tablets)} tablet(s) ${art.time ? 'at ' + hd(art.time) : 'every 24-hour'}</li>`;
                         });
                         artList += `</ul></li>`;
                         subBulletsHTML += artList;
                     }
                     if (letterData.includeTmxSmp && letterData.tmxSmpTablets) {
-                        subBulletsHTML += `<li>Prophylaxis:<ul><li>TMX/SMP (80mg/400mg) ${letterData.tmxSmpTablets} tablet(s) OD</li></ul></li>`;
+                        subBulletsHTML += `<li>Prophylaxis:<ul><li>TMX/SMP (80mg/400mg) ${hd(letterData.tmxSmpTablets)} tablet(s) OD</li></ul></li>`;
                     }
                     if (subBulletsHTML) retroViralContent += `<ul>${subBulletsHTML}</ul>`;
                     retroViralContent += `</li>`;
@@ -349,13 +393,14 @@
                 }
 
                 if (letterData.includeSyphilisActive && letterData.syphilisStartDate) {
+                    const syphilisStartDateBE = letterData.syphilisStartDate || '';
                     contentHtml += `<li><strong>Syphilis (Active)</strong><ul>`;
-                    contentHtml += `<li>วันที่เริ่มการรักษา / Treatment Start Date: ${letterData.syphilisStartDate} (${convertBEtoCE(letterData.syphilisStartDate)})</li>`;
+                    contentHtml += `<li>วันที่เริ่มการรักษา / Treatment Start Date: ${hd(syphilisStartDateBE)} (${hd(convertBEtoCE(syphilisStartDateBE))})</li>`;
                     contentHtml += `<li>ยาที่ใช้รักษา / Medication: Benzathine Penicillin G 2.4 million units IM</li>`;
                     contentHtml += `<li>หมายกำหนดการ / Schedule:<ul>`;
-                    contentHtml += `<li>ครั้งที่ 1 / Dose 1: ${letterData.syphilisDose1Date} (${convertBEtoCE(letterData.syphilisDose1Date)})</li>`;
-                    contentHtml += `<li>ครั้งที่ 2 / Dose 2: ${letterData.syphilisDose2Date} (${convertBEtoCE(letterData.syphilisDose2Date)})</li>`;
-                    contentHtml += `<li>ครั้งที่ 3 / Dose 3: ${letterData.syphilisDose3Date} (${convertBEtoCE(letterData.syphilisDose3Date)})</li>`;
+                    contentHtml += `<li>ครั้งที่ 1 / Dose 1: ${hd(letterData.syphilisDose1Date)} (${hd(convertBEtoCE(letterData.syphilisDose1Date))})</li>`;
+                    contentHtml += `<li>ครั้งที่ 2 / Dose 2: ${hd(letterData.syphilisDose2Date)} (${hd(convertBEtoCE(letterData.syphilisDose2Date))})</li>`;
+                    contentHtml += `<li>ครั้งที่ 3 / Dose 3: ${hd(letterData.syphilisDose3Date)} (${hd(convertBEtoCE(letterData.syphilisDose3Date))})</li>`;
                     contentHtml += `</ul></li></ul></li>`;
                 }
 
@@ -365,16 +410,18 @@
 
                 if (letterData.includeTreatedHCV) {
                     let hcvSub = "";
-                    if (letterData.treatedHCVMedication) hcvSub += `<li>ยาที่ใช้รักษา / Medication: ${letterData.treatedHCVMedication}</li>`;
-                    if (letterData.treatedHCVCompletionDate) hcvSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${letterData.treatedHCVCompletionDate} (${convertBEtoCE(letterData.treatedHCVCompletionDate)})</li>`;
+                    if (letterData.treatedHCVMedication) hcvSub += `<li>ยาที่ใช้รักษา / Medication: ${hd(letterData.treatedHCVMedication)}</li>`;
+                    const treatedHCVCompletionDateBE = letterData.treatedHCVCompletionDate || '';
+                    if (treatedHCVCompletionDateBE) hcvSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${hd(treatedHCVCompletionDateBE)} (${hd(convertBEtoCE(treatedHCVCompletionDateBE))})</li>`;
                     contentHtml += `<li><strong>Treated HCV</strong>${hcvSub ? `<ul>${hcvSub}</ul>` : ''}</li>`;
                 }
 
                 if (letterData.includeTreatedTB) {
                     let tbSub = "";
-                    if (letterData.treatedTBSites) tbSub += `<li>ตำแหน่ง / Sites: ${letterData.treatedTBSites}</li>`;
-                    if (letterData.treatedTBMedication) tbSub += `<li>Medication: ${letterData.treatedTBMedication}</li>`;
-                    if (letterData.treatedTBCompletionDate) tbSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${letterData.treatedTBCompletionDate} (${convertBEtoCE(letterData.treatedTBCompletionDate)})</li>`;
+                    if (letterData.treatedTBSites) tbSub += `<li>ตำแหน่ง / Sites: ${hd(letterData.treatedTBSites)}</li>`;
+                    if (letterData.treatedTBMedication) tbSub += `<li>Medication: ${hd(letterData.treatedTBMedication)}</li>`;
+                    const treatedTBCompletionDateBE = letterData.treatedTBCompletionDate || '';
+                    if (treatedTBCompletionDateBE) tbSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${hd(treatedTBCompletionDateBE)} (${hd(convertBEtoCE(treatedTBCompletionDateBE))})</li>`;
                     contentHtml += `<li><strong>Treated TB</strong>${tbSub ? `<ul>${tbSub}</ul>` : ''}</li>`;
                 }
 
@@ -385,35 +432,39 @@
                         tptMedDisplay = `Other(s): ${letterData.completedTPTMedicationOther}`;
                     }
                     if (tptMedDisplay && tptMedDisplay.toLowerCase() !== "select medication" && !(tptMedDisplay.toLowerCase() === "other" && !letterData.completedTPTMedicationOther)) {
-                        tptSub += `<li>ยาที่ใช้รักษา / Medication: ${tptMedDisplay}</li>`;
+                        tptSub += `<li>ยาที่ใช้รักษา / Medication: ${hd(tptMedDisplay)}</li>`;
                     }
-                    if (letterData.completedTPTCompletionDate) tptSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${letterData.completedTPTCompletionDate} (${convertBEtoCE(letterData.completedTPTCompletionDate)})</li>`;
+                    const completedTPTCompletionDateBE = letterData.completedTPTCompletionDate || '';
+                    if (completedTPTCompletionDateBE) tptSub += `<li>รักษาครบเมื่อ / Treatment finished on: ${hd(completedTPTCompletionDateBE)} (${hd(convertBEtoCE(completedTPTCompletionDateBE))})</li>`;
                     contentHtml += `<li><strong>Completed TPT</strong>${tptSub ? `<ul>${tptSub}</ul>` : ''}</li>`;
                 }
 
                 if (letterData.includeOtherHistory && letterData.otherMedicalHistory) {
-                    contentHtml += `<li><strong>ประวัติการรักษาอื่นๆ / Other(s) Medical History:</strong><div style="padding-left:1em; white-space: pre-wrap;">${letterData.otherMedicalHistory}</div></li>`;
+                    contentHtml += `<li><strong>ประวัติการรักษาอื่นๆ / Other(s) Medical History:</strong><div style="padding-left:1em; white-space: pre-wrap;">${hd(letterData.otherMedicalHistory)}</div></li>`;
                 }
                 contentHtml += `</ul>`;
 
-                if (letterData.includeLastMedicinePickup && letterData.lastMedicinePickupDate) {
-                    contentHtml += `<p style="margin-top: 1.0em;" class="thai-font">ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ / Last medicine pick up on: ${letterData.lastMedicinePickupDate} (${convertBEtoCE(letterData.lastMedicinePickupDate)})`;
-                    if (letterData.medicineDuration) contentHtml += ` สำหรับ / for ${letterData.medicineDuration} วัน / days`;
+                const lastMedicinePickupDateBE = letterData.lastMedicinePickupDate || '';
+                if (letterData.includeLastMedicinePickup && lastMedicinePickupDateBE) {
+                    contentHtml += `<p style="margin-top: 1.0em;" class="thai-font">ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ / Last medicine pick up on: ${hd(lastMedicinePickupDateBE)} (${hd(convertBEtoCE(lastMedicinePickupDateBE))})`;
+                    if (letterData.medicineDuration) contentHtml += ` สำหรับ / for ${hd(letterData.medicineDuration)} วัน / days`;
                     contentHtml += `</p>`;
                 } else if (letterData.includeLastMedicinePickup && letterData.medicineDuration) {
-                    contentHtml += `<p style="margin-top: 1.0em;" class="thai-font">ผู้ป่วยรับยาสำหรับ / Patient received medicine for ${letterData.medicineDuration} วัน / days</p>`;
+                    contentHtml += `<p style="margin-top: 1.0em;" class="thai-font">ผู้ป่วยรับยาสำหรับ / Patient received medicine for ${hd(letterData.medicineDuration)} วัน / days</p>`;
                 }
 
 
                 let attachmentItems = [];
                 if (letterData.attachmentLabResults) attachmentItems.push("ผลตรวจทางห้องปฏิบัติการล่าสุด / Latest laboratory results");
-                if (letterData.attachmentOther && letterData.attachmentOtherText) attachmentItems.push(`เอกสารอื่นๆ / Other(s): ${letterData.attachmentOtherText}`);
+
+                const attachmentOtherTextVal = letterData.attachmentOtherText || '';
+                if (letterData.attachmentOther && attachmentOtherTextVal) attachmentItems.push(`เอกสารอื่นๆ / Other(s): ${hd(attachmentOtherTextVal)}`);
                 else if (letterData.attachmentOther) attachmentItems.push("เอกสารอื่นๆ / Other(s)");
 
                 if (attachmentItems.length > 0) {
                     contentHtml += `<div class="section-title thai-font" style="border:none; margin-top: 1.0em;">เอกสารแนบ / Attachments:</div>`;
                     contentHtml += `<ul class="details-list thai-font" style="margin-left:1em;">`;
-                    attachmentItems.forEach(item => contentHtml += `<li>${item}</li>`);
+                    attachmentItems.forEach(item => contentHtml += `<li>${item}</li>`); // Item here is already formatted if it contains hd()
                     contentHtml += `</ul>`;
                 }
 
@@ -424,7 +475,7 @@
                 contentHtml += `<p style="margin-top: 1.5em;" class="thai-font">กรุณาติดต่อกลับหากต้องการข้อมูลเพิ่มเติม / Please contact us if you require any additional information</p>`;
                 contentHtml += `<div class="signature-section">`;
                 contentHtml += `<p class="thai-font">ขอแสดงความนับถือ / Sincerely,</p><br><br>`;
-                contentHtml += `<p class="thai-font">(${letterData.doctorNameThai} / ${letterData.doctorNameEnglish})<br>เลขที่ใบประกอบวิชาชีพ / Medical License No.: ${letterData.medicalLicense}<br>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri</p>`;
+                contentHtml += `<p class="thai-font">(${hd(letterData.doctorNameThai)} / ${hd(letterData.doctorNameEnglish.toUpperCase())})<br>เลขที่ใบประกอบวิชาชีพ / Medical License No.: ${hd(letterData.medicalLicense)}<br>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri</p>`;
                 contentHtml += `</div>`;
                 letterContainer.innerHTML = contentHtml;
             }
@@ -433,8 +484,12 @@
                 const printedDateTimeSpans = document.querySelectorAll('.printed-on-datetime');
                 if (printedDateTimeSpans.length > 0) {
                     const today = new Date();
+                    const printedDateBE = formatDate(today, "BE");
+                    const printedDateCE = formatDate(today, "CE");
+                    const printedTime = formatTimeISO(today);
                     printedDateTimeSpans.forEach(span => {
-                        span.innerHTML = `<strong style="font-weight:bold;">${formatDate(today, "BE")} (${formatDate(today, "CE")}) ${formatTimeISO(today)}</strong>`;
+                        // Applying hd() to parts of the printed-on date/time string
+                        span.innerHTML = `<strong style="font-weight:bold;">${hd(printedDateBE)} (${hd(printedDateCE)}) ${hd(printedTime)}</strong>`;
                     });
                 } else { console.warn(".printed-on-datetime span not found."); }
             } catch (e) { console.error("Error setting printed-on date and time:", e); }

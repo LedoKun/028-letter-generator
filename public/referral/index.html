@@ -65,6 +65,16 @@
             /* placeholder-gray-400 */
         }
 
+        .dark .placeholder-gray-500::placeholder {
+            /* Specific for dark mode if needed */
+            color: #6b7280;
+        }
+
+        .dark .dark\:placeholder-gray-400::placeholder {
+            color: #9ca3af;
+        }
+
+
         .dark input:focus,
         .dark select:focus,
         .dark textarea:focus {
@@ -151,6 +161,25 @@
             </fieldset>
 
             <fieldset class="border p-4 rounded-md shadow-sm">
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รูปแบบหนังสือ / Letter Format
+                </legend>
+                <div class="mt-2 space-y-2">
+                    <div>
+                        <input type="radio" id="letterTypeSummary" name="letterType" value="summaryOfHistory"
+                            class="h-4 w-4 text-indigo-500 focus:ring-indigo-400" checked>
+                        <label for="letterTypeSummary" class="ml-2 thai-font">สรุปประวัติการรักษา / Summary of Medical
+                            History</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="letterTypeReferral" name="letterType" value="referralForCare"
+                            class="h-4 w-4 text-indigo-500 focus:ring-indigo-400">
+                        <label for="letterTypeReferral" class="ml-2 thai-font">ขอส่งตัวผู้ป่วยเพื่อรับการรักษาต่อเนื่อง
+                            / Patient Referral for Continued Care</label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="border p-4 rounded-md shadow-sm">
                 <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">วินิจฉัย / Conditions</legend>
 
                 <div class="mt-4 space-y-3 p-3 border border-gray-700 rounded-md">
@@ -176,6 +205,12 @@
                                     (พ.ศ.):</label>
                                 <input type="text" id="firstDiagnosisDateRetro" placeholder="วว/ดด/ปปปป"
                                     name="firstDiagnosisDateRetro"
+                                    class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                            </div>
+                            <div>
+                                <label for="artStartDate" class="block text-xs font-medium thai-font">วันที่เริ่มยา ART
+                                    / ART Start Date (พ.ศ.):</label>
+                                <input type="text" id="artStartDate" name="artStartDate" placeholder="วว/ดด/ปปปป"
                                     class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                             </div>
                             <div>
@@ -414,7 +449,10 @@
                     </div>
                     <div id="otherHistoryDetails" class="ml-2 mt-2 hidden border-l-2 border-indigo-500 pl-4">
                         <textarea id="otherMedicalHistory" name="otherMedicalHistory" rows="3"
-                            class="block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"></textarea>
+                            class="block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm placeholder-gray-500 dark:placeholder-gray-400"></textarea>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 thai-font mt-1">
+                            กด Enter เพื่อขึ้นบรรทัดใหม่ / Press Enter for a new line.
+                        </p>
                     </div>
                 </div>
             </fieldset>
@@ -445,7 +483,7 @@
                                 how
                                 many days:</label>
                             <input type="number" id="medicineDuration" name="medicineDuration" placeholder="เช่น 180"
-                                min="0" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                                min="0" value="60" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                         </div>
                     </div>
 
