@@ -128,12 +128,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function autoFormatNapId(event) {
         const input = event.target;
         let value = input.value.replace(/\D/g, '');
-        if (value.length > 10) value = value.slice(0, 10); // Max 10 digits for XXXX-XXXXXX
+        if (value.length > 20) value = value.slice(0, 20); // Max 20 digits for XXXX-XXXXXX
         let formattedValue = '';
         if (value.length > 0) formattedValue += value.slice(0, 4);
-        if (value.length >= 5) formattedValue += '-' + value.slice(4, 10);
+        if (value.length >= 5) formattedValue += '-' + value.slice(4, 20);
         input.value = formattedValue;
-        input.maxLength = 11; // XXXX-XXXXXX
+        input.maxLength = 20; // XXXX-XXXXXX
     }
 
     function initializeNapIdInput() {
