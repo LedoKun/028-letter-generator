@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Global Variables & Constants ---
     const ART_MEDICATION_OPTIONS = [
         { value: "TDF/3TC/DTG", text: "TDF/3TC/DTG" },
-        { value: "TAF/3TC/DTG", text: "TAF/3TC/DTG" },
+        { value: "TAF/FTC/DTG", text: "TAF/FTC/DTG" },
         { value: "TDF/3TC/EFV600", text: "TDF/3TC/EFV600" },
         { value: "TDF/FTC", text: "TDF/FTC" },
         { value: "EFV200", text: "EFV200" },
