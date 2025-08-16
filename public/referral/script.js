@@ -1,14 +1,28 @@
 document.addEventListener('DOMContentLoaded', function () {
     // --- Global Variables & Constants ---
     const ART_MEDICATION_OPTIONS = [
-        { value: "TDF/3TC/DTG", text: "TDF/3TC/DTG" },
-        { value: "TAF/FTC/DTG", text: "TAF/FTC/DTG" },
-        { value: "TDF/3TC/EFV600", text: "TDF/3TC/EFV600" },
-        { value: "TDF/FTC", text: "TDF/FTC" },
-        { value: "EFV200", text: "EFV200" },
-        { value: "RPV", text: "RPV" },
-        { value: "LPVr", text: "LPV/r (200mg/50mg)" },
-        { value: "DTG50", text: "DTG (50mg)" }
+        // Triple-Drug Regimens
+        { value: "TDF/3TC/DTG", text: "TDF/3TC/DTG" },        // DOLUTEGRAVIR/LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE
+        { value: "TAF/3TC/DTG", text: "TAF/3TC/DTG" },        // DOLUTEGRAVIR/LAMIVUDINE/TENOFOVIR ALAFENAMIDE
+        { value: "TAF/FTC/DTG", text: "TAF/FTC/DTG" },        // DOLUTEGRAVIR/EMTRICITABINE/TENOFOVIR ALAFENAMIDE
+        { value: "TDF/3TC/EFV", text: "TDF/3TC/EFV (600mg)" },// EFAVIRENZ/LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE
+    
+        // Double-Drug NRTI Backbones
+        { value: "TDF/FTC",     text: "TDF/FTC" },            // EMTRICITABINE/TENOFOVIR DISOPROXIL FUMARATE
+        { value: "TDF/3TC",     text: "TDF/3TC" },            // LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE
+        { value: "TAF/FTC",     text: "TAF/FTC" },            // EMTRICITABINE/TENOFOVIR ALAFENAMIDE
+        { value: "TAF/3TC",     text: "TAF/3TC" },            // LAMIVUDINE/TENOFOVIR ALAFENAMIDE
+        { value: "AZT/3TC300/150",     text: "AZT/3TC (300mg/150mg)" },// ZIDOVUDINE/LAMIVUDINE
+    
+        // Individual Components
+        { value: "EFV200",      text: "EFV (200mg)" },        // EFAVIRENZ
+        { value: "RPV",         text: "RPV" },                // RILPIVIRINE
+        { value: "LPV/r200/50", text: "LPV/r (200mg/50mg)" }, // LOPINAVIR/RITONAVIR (200mg/50mg)
+        { value: "DTG50",       text: "DTG (50mg)" },         // DOLUTEGRAVIR
+        { value: "3TC150",      text: "3TC (150mg)" },        // LAMIVUDINE (150 mg)
+        { value: "ABC300",      text: "ABC (300mg)" },        // ABACAVIR
+        { value: "DRV",         text: "DRV" },                // DARUNAVIR
+        { value: "RTV50",       text: "RTV (50mg)" }          // RITONAVIR
     ];
     let artMedicationCounter = 0;
 
