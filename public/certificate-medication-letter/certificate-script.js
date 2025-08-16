@@ -5,13 +5,20 @@ document.addEventListener('DOMContentLoaded', function () {
         { value: "DOLUTEGRAVIR/EMTRICITABINE/TENOFOVIR ALAFENAMIDE", text: "DOLUTEGRAVIR/EMTRICITABINE/TENOFOVIR ALAFENAMIDE" },
         { value: "EFAVIRENZ/LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE", text: "EFAVIRENZ/LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE" },
         { value: "EMTRICITABINE/TENOFOVIR DISOPROXIL FUMARATE", text: "EMTRICITABINE/TENOFOVIR DISOPROXIL FUMARATE" },
+        { value: "LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE", text: "LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE" }, // Added
+        { value: "LAMIVUDINE/TENOFOVIR ALAFENAMIDE", text: "LAMIVUDINE/TENOFOVIR ALAFENAMIDE" }, // Added
         { value: "EFAVIRENZ", text: "EFAVIRENZ" },
         { value: "RILPIVIRINE", text: "RILPIVIRINE" },
         { value: "LOPINAVIR/RITONAVIR", text: "LOPINAVIR/RITONAVIR" },
         { value: "DOLUTEGRAVIR", text: "DOLUTEGRAVIR" },
+        { value: "LAMIVUDINE (150 mg)", text: "LAMIVUDINE (150 mg)" }, // Added
+        { value: "LAMIVUDINE (300 mg)", text: "LAMIVUDINE (300 mg)" }, // Added
+        { value: "ABACAVIR", text: "ABACAVIR" }, // Added
+        { value: "DARUNAVIR", text: "DARUNAVIR" }, // Added
+        { value: "RITONAVIR", text: "RITONAVIR" }, // Added
         { value: "DOXYCYCLINE", text: "DOXYCYCLINE" },
         { value: "AZITHROMYCIN", text: "AZITHROMYCIN" },
-        { value: "OTHER", text: "OTHER (SPECIFY)" } // Added OTHER option
+        { value: "OTHER", text: "OTHER (SPECIFY)" }
     ];
     let artMedicationCounter = 0;
 
