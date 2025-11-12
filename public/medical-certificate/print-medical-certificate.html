@@ -295,14 +295,7 @@
 
             let contentHtml = `<h3 class="letter-title thai-font">ใบรับรองแพทย์ / Medical Certificate</h3>`;
 
-            // Date of Issue
-            // Only add the date line if letterDateBE has a value
-            const formattedLetterDate = fv(letterDateBE + (letterDateCE ? ` (${letterDateCE})` : ''));
-            if (letterDateBE.trim()) {
-                contentHtml += `<p class="thai-font" style="text-align:right;"><strong>วันที่ / Date:</strong> ${formattedLetterDate}</p><br>`;
-            } else {
-                contentHtml += `<br>`; // Add a break for spacing if date is missing, or remove this for tighter layout
-            }
+            // Document date (CE) and format note handled below after patient header
 
 
             contentHtml += `<p class="thai-font">ข้าพเจ้าขอรับรองว่า / This is to certify that:</p>`;
