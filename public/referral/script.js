@@ -111,13 +111,32 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function initializeDateInputs() {
+        const form = document.getElementById('referralForm');
+        const getEra = () => window.Common.getEraFromForm(form);
         document.querySelectorAll('.date-input').forEach(input => {
-            input.addEventListener('input', autoFormatDate);
-            input.addEventListener('blur', autoFormatDate);
-            input.maxLength = 10;
+            window.Common.attachDateAutoFormat(input, getEra);
+            input.placeholder = 'DD/MM/YYYY';
         });
         const letterDateInput = document.getElementById('letterDate');
-        if (letterDateInput && !letterDateInput.value) letterDateInput.value = JSDateToBE(new Date());
+        window.Common.setTodayIfEmpty(letterDateInput, getEra());
+        const eraSelect = document.getElementById('yearEra');
+        if (eraSelect) {
+            const onEraChange = () => {
+                const newEra = getEra();
+                window.Common.updateDateLabelsForEra(form, newEra);
+                document.querySelectorAll('.date-input').forEach(inp => {
+                    const v = inp.value;
+                    if (v && v.length === 10) {
+                        const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
+                        const converted = window.Common.convertDateString(v, fromEra, newEra);
+                        if (converted) inp.value = converted;
+                    }
+                });
+                calculateSyphilisSchedule();
+            };
+            eraSelect.addEventListener('change', onEraChange);
+            window.Common.updateDateLabelsForEra(form, getEra());
+        }
     }
 
     function autoFormatNationalId(event) {
@@ -348,26 +367,26 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const startDate = BEToJSDate(startDateInput.value);
+        const startDate = window.Common.parseDate(startDateInput.value, window.Common.getEraFromForm('referralForm'));
 
         if (!startDate) {
             dose1DateEl.textContent = 'N/A';
             dose2DateEl.textContent = 'N/A';
             dose3DateEl.textContent = 'N/A';
             if (startDateInput.value.length > 0 && startDateInput.value.length < 10) startDateInput.style.borderColor = 'red';
-            else if (startDateInput.value.length === 10 && !isValidBEDate(startDateInput.value)) startDateInput.style.borderColor = 'red';
+            else if (startDateInput.value.length === 10 && !window.Common.parseDate(startDateInput.value, window.Common.getEraFromForm('referralForm'))) startDateInput.style.borderColor = 'red';
             else startDateInput.style.borderColor = '';
             return;
         }
         startDateInput.style.borderColor = '';
 
-        dose1DateEl.textContent = JSDateToBE(new Date(startDate));
+        dose1DateEl.textContent = window.Common.formatDate(new Date(startDate), window.Common.getEraFromForm('referralForm'));
         const dose2Date = new Date(startDate);
         dose2Date.setDate(startDate.getDate() + 7);
-        dose2DateEl.textContent = JSDateToBE(dose2Date);
+        dose2DateEl.textContent = window.Common.formatDate(dose2Date, window.Common.getEraFromForm('referralForm'));
         const dose3Date = new Date(startDate);
         dose3Date.setDate(startDate.getDate() + 14);
-        dose3DateEl.textContent = JSDateToBE(dose3Date);
+        dose3DateEl.textContent = window.Common.formatDate(dose3Date, window.Common.getEraFromForm('referralForm'));
     }
 
     function setupTreatedTBSitesLogic() {
@@ -515,7 +534,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const requiredStaticFields = [
             { id: 'letterDate', name: 'วันที่ / Date' },
             { id: 'patientName', name: 'ชื่อผู้ป่วย / Patient Name' },
-            { id: 'doctorNameThai', name: 'ชื่อแพทย์ (ภาษาไทย)' },
             { id: 'doctorNameEnglish', name: 'Doctor\'s Name (English)' },
             { id: 'medicalLicense', name: 'เลขที่ใบประกอบวิชาชีพ' }
         ];
@@ -528,10 +546,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 isValid = false;
             } else if (element) {
                 element.style.borderColor = '';
-                if (element.classList.contains('date-input') && element.value.length > 0 && (element.value.length < 10 || !isValidBEDate(element.value))) {
-                    missingFieldsMessages.push(`${fieldInfo.name} (รูปแบบไม่ถูกต้อง / Invalid format: ${element.value})`);
-                    element.style.borderColor = 'red';
-                    isValid = false;
+                if (element.classList.contains('date-input') && element.value.length > 0) {
+                    const era = window.Common.getEraFromForm('referralForm');
+                    const ok = !!window.Common.parseDate(element.value, era);
+                    if (!ok) {
+                        missingFieldsMessages.push(`${fieldInfo.name} (รูปแบบไม่ถูกต้อง / Invalid format: ${element.value})`);
+                        element.style.borderColor = 'red';
+                        isValid = false;
+                    }
                 }
             }
         });
@@ -540,10 +562,16 @@ document.addEventListener('DOMContentLoaded', function () {
             'treatedHCVCompletionDate', 'treatedTBCompletionDate', 'completedTPTCompletionDate'];
         optionalDateFields.forEach(id => {
             const el = document.getElementById(id);
-            if (el && el.value.trim() && (el.value.length < 10 || !isValidBEDate(el.value))) {
-                missingFieldsMessages.push(`${el.labels[0] ? el.labels[0].textContent.split(' (พ.ศ.)')[0].split(' /')[0].trim() : id} (รูปแบบไม่ถูกต้อง / Invalid format: ${el.value})`);
-                el.style.borderColor = 'red';
-                isValid = false;
+            if (el && el.value.trim()) {
+                const era = window.Common.getEraFromForm('referralForm');
+                const ok = !!window.Common.parseDate(el.value, era);
+                if (!ok) {
+                    missingFieldsMessages.push(`${el.labels[0] ? el.labels[0].textContent.split(' (')[0].split(' /')[0].trim() : id} (รูปแบบไม่ถูกต้อง / Invalid format: ${el.value})`);
+                    el.style.borderColor = 'red';
+                    isValid = false;
+                } else {
+                    el.style.borderColor = '';
+                }
             } else if (el) {
                 el.style.borderColor = '';
             }
@@ -557,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 missingFieldsMessages.push("วันที่เริ่มการรักษาโรคซิฟิลิส / Syphilis Treatment Start Date");
                 syphilisStartDateInput.style.borderColor = 'red';
                 isValid = false;
-            } else if (syphilisStartDateInput.value.length < 10 || !isValidBEDate(syphilisStartDateInput.value)) {
+            } else if (syphilisStartDateInput.value.length < 10 || !window.Common.parseDate(syphilisStartDateInput.value, window.Common.getEraFromForm('referralForm'))) {
                 missingFieldsMessages.push(`วันที่เริ่มการรักษาโรคซิฟิลิส (รูปแบบไม่ถูกต้อง / Invalid format: ${syphilisStartDateInput.value})`);
                 syphilisStartDateInput.style.borderColor = 'red';
                 isValid = false;
@@ -578,10 +606,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 missingFieldsMessages.push("ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ / Last medicine pick up on");
                 lastMedicinePickupDateInput.style.borderColor = 'red';
                 isValid = false;
-            } else if (lastMedicinePickupDateInput.value.trim() && (lastMedicinePickupDateInput.value.length < 10 || !isValidBEDate(lastMedicinePickupDateInput.value))) {
-                missingFieldsMessages.push(`ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ (รูปแบบไม่ถูกต้อง / Invalid format: ${lastMedicinePickupDateInput.value})`);
-                lastMedicinePickupDateInput.style.borderColor = 'red';
-                isValid = false;
+            } else if (lastMedicinePickupDateInput.value.trim()) {
+                const era = window.Common.getEraFromForm('referralForm');
+                const ok = !!window.Common.parseDate(lastMedicinePickupDateInput.value, era);
+                if (!ok) {
+                    missingFieldsMessages.push(`ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ (รูปแบบไม่ถูกต้อง / Invalid format: ${lastMedicinePickupDateInput.value})`);
+                    lastMedicinePickupDateInput.style.borderColor = 'red';
+                    isValid = false;
+                } else {
+                    lastMedicinePickupDateInput.style.borderColor = '';
+                }
             } else {
                 lastMedicinePickupDateInput.style.borderColor = '';
             }
@@ -690,6 +724,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
 
+        // Normalize all date fields to BE (letter displays BE (CE))
+        const era = window.Common.getEraFromForm('referralForm');
+        const toBE = (v) => v ? window.Common.convertDateString(v, era, window.Common.ERA_BE) : '';
+        const dateKeys = ['letterDate', 'dob', 'firstDiagnosisDateRetro', 'artStartDate', 'initialCD4Date', 'latestVLDate',
+            'treatedHCVCompletionDate', 'treatedTBCompletionDate', 'completedTPTCompletionDate', 'lastMedicinePickupDate'];
+        dateKeys.forEach(k => { if (data[k]) data[k] = toBE(data[k]); });
+        if (data.includeSyphilisActive && data.syphilisStartDate) data.syphilisStartDate = toBE(data.syphilisStartDate);
+        data._yearEra = era;
+
+        data.additionalNotes = (document.getElementById('additionalNotes')?.value || '').trim();
         localStorage.setItem('referralDataForPrint', JSON.stringify(data));
         window.open('print-letter.html', '_blank');
     }

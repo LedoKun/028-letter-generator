@@ -98,17 +98,24 @@
             <fieldset class="border p-4 rounded-md shadow-sm">
                 <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลทั่วไป / General Information
                 </legend>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                     <div>
-                        <label for="letterDate" class="block text-sm font-medium thai-font">วันที่ / Date (พ.ศ.) <span
+                        <label for="letterDate" class="block text-sm font-medium thai-font">วันที่ / Date <span
                                 class="required-asterisk">*</span></label>
-                        <input type="text" id="letterDate" name="letterDate" placeholder="วว/ดด/ปปปป" required
+                        <input type="text" id="letterDate" name="letterDate" placeholder="DD/MM/YYYY" required
                             class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
                     <div>
+                        <label for="yearEra" class="block text-sm font-medium thai-font">รูปแบบปี / Year format</label>
+                        <select id="yearEra" name="yearEra" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                            <option value="BE" selected>พ.ศ. (BE)</option>
+                            <option value="CE">ค.ศ. (CE)</option>
+                        </select>
+                    </div>
+                    <div>
                         <label for="patientSalutation" class="block text-sm font-medium thai-font">คำนำหน้าชื่อ /
-                            Salutation <span class="required-asterisk">*</span></label>
-                        <select id="patientSalutation" name="patientSalutation" required
+                            Salutation</label>
+                        <select id="patientSalutation" name="patientSalutation"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                             <option value="">-- Select --</option>
                             <option value="นาย" data-english="Mr.">นาย / Mr.</option>
@@ -132,9 +139,8 @@
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
                     <div>
-                        <label for="patientGender" class="block text-sm font-medium thai-font">เพศ / Sex <span
-                                class="required-asterisk">*</span></label>
-                        <select id="patientGender" name="patientGender" required
+                        <label for="patientGender" class="block text-sm font-medium thai-font">เพศ / Sex</label>
+                        <select id="patientGender" name="patientGender"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                             <option value="">-- Select --</option>
                             <option value="ชาย" data-english="Male">ชาย / Male</option>
@@ -181,8 +187,8 @@
                         <div>
                             <label for="consultationDate"
                                 class="block text-xs font-medium thai-font">ผู้ป่วยได้มารับการปรึกษาเมื่อวันที่ /
-                                Patient had consultation on (พ.ศ.):</label>
-                            <input type="text" id="consultationDate" name="consultationDate" placeholder="วว/ดด/ปปปป"
+                                Patient had consultation on</label>
+                            <input type="text" id="consultationDate" name="consultationDate" placeholder="DD/MM/YYYY"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                         </div>
                         <div>
@@ -206,14 +212,13 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                             <div>
                                 <label for="restStartDate" class="block text-xs font-medium thai-font">พักตั้งแต่วันที่
-                                    / Rest from (พ.ศ.):</label>
-                                <input type="text" id="restStartDate" name="restStartDate" placeholder="วว/ดด/ปปปป"
+                                    / Rest from</label>
+                                <input type="text" id="restStartDate" name="restStartDate" placeholder="DD/MM/YYYY"
                                     class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                             </div>
                             <div>
-                                <label for="restEndDate" class="block text-xs font-medium thai-font">ถึงวันที่ / To
-                                    (พ.ศ.):</label>
-                                <input type="text" id="restEndDate" name="restEndDate" placeholder="วว/ดด/ปปปป"
+                                <label for="restEndDate" class="block text-xs font-medium thai-font">ถึงวันที่ / To</label>
+                                <input type="text" id="restEndDate" name="restEndDate" placeholder="DD/MM/YYYY"
                                     class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                             </div>
                             <div>
@@ -243,10 +248,16 @@
                         <div>
                             <label for="syphilisTreatmentDate"
                                 class="block text-xs font-medium thai-font">ผู้ป่วยได้รับการรักษาโรคซิฟิลิสเมื่อวันที่ /
-                                Patient treated for Syphilis on (พ.ศ.):</label>
+                                Patient treated for Syphilis on</label>
                             <input type="text" id="syphilisTreatmentDate" name="syphilisTreatmentDate"
-                                placeholder="วว/ดด/ปปปป"
+                                placeholder="DD/MM/YYYY"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                        </div>
+                        <div>
+                            <label for="syphilisNotes" class="block text-xs font-medium thai-font">บันทึกแพทย์ (ถ้ามี) /
+                                Doctor's Notes (optional):</label>
+                            <textarea id="syphilisNotes" name="syphilisNotes" rows="2"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
                     </div>
                 </div>
@@ -263,10 +274,16 @@
                         <div>
                             <label for="tbTreatmentCompletionDate"
                                 class="block text-xs font-medium thai-font">ผู้ป่วยได้ทำการรักษาวัณโรคเสร็จสิ้นเมื่อวันที่
-                                / Patient completed TB treatment on (พ.ศ.):</label>
+                                / Patient completed TB treatment on</label>
                             <input type="text" id="tbTreatmentCompletionDate" name="tbTreatmentCompletionDate"
-                                placeholder="วว/ดด/ปปปป"
+                                placeholder="DD/MM/YYYY"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                        </div>
+                        <div>
+                            <label for="tbNotes" class="block text-xs font-medium thai-font">บันทึกแพทย์ (ถ้ามี) /
+                                Doctor's Notes (optional):</label>
+                            <textarea id="tbNotes" name="tbNotes" rows="2"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
                     </div>
                 </div>
@@ -300,8 +317,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     <div>
                         <label for="doctorNameThai" class="block text-sm font-medium thai-font">ชื่อแพทย์ (ภาษาไทย) /
-                            Doctor's Name (Thai) <span class="required-asterisk">*</span></label>
-                        <input type="text" id="doctorNameThai" name="doctorNameThai" required
+                            Doctor's Name (Thai)</label>
+                        <input type="text" id="doctorNameThai" name="doctorNameThai"
                             placeholder="เช่น นพ.กรุง ธนบุรี"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
@@ -341,6 +358,7 @@
         <p>&copy; <span id="currentYear"></span> Clinical Letter Generators by Rommy~*. All rights reserved.</p>
     </footer>
 
+    <script src="/js/common.js"></script>
     <script src="medical-certificate-script.js"></script>
     <script>
         document.getElementById('currentYear').textContent = new Date().getFullYear();

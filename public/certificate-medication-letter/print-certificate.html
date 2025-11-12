@@ -287,11 +287,12 @@
 
 
                 contentHtml += `<h3 class="letter-title">Certificate For Carrying Medications</h3>`;
-                contentHtml += `<p style="text-align:right;"><strong>Date:</strong> ${hi(letterDateCE)}</p><br>`;
+                contentHtml += `<p style="text-align:right;"><strong>Date:</strong> ${hi(letterDateCE)}</p>`;
+                contentHtml += `<p style="text-align:right; color:#333; font-size:9pt;">Date format: DD/MM/YYYY</p><br>`;
 
                 contentHtml += `<p>To whom it may concern,</p>`;
-                contentHtml += `<p>${hi(patientFullNameDisplayUpper)}, a ${hi(nationalityDisplayUpper)} national, passport number ${hi(passportNumberDisplayUpper)}, date of birth ${hi(dobCE)}, is a patient of Public Health Center 28 Krung Thon Buri and currently receiving on-going treatment. Continuous medication(s) will be necessary for successful therapy and the patient's well being.</p>`;
-                contentHtml += `<p>This certificate indicates the necessity of carrying the following medication(s).</p>`;
+                contentHtml += `<p>${hi(patientFullNameDisplayUpper)}, a ${hi(nationalityDisplayUpper)} national holding passport number ${hi(passportNumberDisplayUpper)}, born on ${hi(dobCE)}, is under our care at Public Health Center 28 Krung Thon Buri. Ongoing medications are required for treatment and wellbeing.</p>`;
+                contentHtml += `<p>This certifies the need to carry the following medications for personal use.</p>`;
 
                 if (certData.includeMedications && certData.artMedications && certData.artMedications.length > 0) {
                     contentHtml += `<p><strong>Current Medication(s):</strong></p>`;
@@ -309,6 +310,9 @@
                 contentHtml += `<p>Sincerely,</p><br><br><br>`;
                 contentHtml += `<p>${hi(doctorNameDisplayUpper)}<br>Thai Medical License Number: ${hi(medicalLicenseDisplay)}<br>Public Health Center 28 Krung Thon Buri</p>`;
                 contentHtml += `</div>`;
+                if (certData.additionalNotes && String(certData.additionalNotes).trim()) {
+                    contentHtml += `<p style="margin-top:1em;"><strong>Additional Notes:</strong> ${hi(certData.additionalNotes)}</p>`;
+                }
                 certContainer.innerHTML = contentHtml;
             }
 
@@ -316,11 +320,10 @@
                 const printedDateTimeSpans = document.querySelectorAll('.printed-on-datetime');
                 if (printedDateTimeSpans.length > 0) {
                     const today = new Date();
-                    const printedDateBE = formatDate(today, "BE");
                     const printedDateCE = formatDate(today, "CE");
                     const printedTime = formatTimeISO(today);
                     printedDateTimeSpans.forEach(span => {
-                        span.innerHTML = `${hi(printedDateBE)} (${hi(printedDateCE)}) ${hi(printedTime)}`;
+                        span.innerHTML = `${hi(printedDateCE)} ${hi(printedTime)}`;
                     });
                 } else { console.warn(".printed-on-datetime span not found."); }
             } catch (e) { console.error("Error setting printed-on date and time:", e); }

@@ -477,6 +477,9 @@
                 contentHtml += `<p class="thai-font">ขอแสดงความนับถือ / Sincerely,</p><br><br>`;
                 contentHtml += `<p class="thai-font">(${hd(letterData.doctorNameThai)} / ${hd(letterData.doctorNameEnglish.toUpperCase())})<br>เลขที่ใบประกอบวิชาชีพ / Medical License No.: ${hd(letterData.medicalLicense)}<br>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri</p>`;
                 contentHtml += `</div>`;
+                if (letterData.additionalNotes && String(letterData.additionalNotes).trim()) {
+                    contentHtml += `<p class="thai-font" style="margin-top: 1em;"><strong>หมายเหตุเพิ่มเติม / Additional Notes:</strong> ${hd(letterData.additionalNotes)}</p>`;
+                }
                 letterContainer.innerHTML = contentHtml;
             }
 

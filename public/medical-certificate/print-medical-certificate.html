@@ -226,19 +226,10 @@
         </div>
     </div>
 
-    <div id="certificateContent" class="letter-body">
-    </div>
+    <div id="certificateContent" class="letter-body"></div>
 
     <script>
-        function convertBEtoCE(beDate) {
-            if (!beDate || typeof beDate !== 'string' || !beDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) return '';
-            const parts = beDate.split('/');
-            const day = parts[0], month = parts[1], beYear = parseInt(parts[2], 10);
-            if (isNaN(beYear) || beYear < 2400 || beYear > 3000) return beDate; // Return original if year is out of expected BE range
-            return `${day}/${month}/${beYear - 543}`;
-        }
-
-        function formatDate(dateObj, formatType = "BE") {
+        function formatDate(dateObj, formatType = "CE") {
             if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
             const d = String(dateObj.getDate()).padStart(2, '0');
             const m = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -272,8 +263,7 @@
             }
 
             // Initialize variables with empty strings if data is not present
-            const letterDateBE = data.letterDate || '';
-            const letterDateCE = convertBEtoCE(letterDateBE); // convertBEtoCE handles empty string input gracefully
+            const letterDateCE = data.letterDate || '';
             const patientSalutation = data.patientSalutation || '';
             const patientSalutationEng = data.patientSalutationEnglish || '';
             const patientName = data.patientName || ''; // Assuming Patient Name is required by the form
@@ -383,12 +373,18 @@
 
             let subsequentSectionAdded = false;
 
+            // Document date line (CE) and date format note
+            if (letterDateCE) {
+                contentHtml += `<p style="text-align:right;"><strong>วันที่ / Date:</strong> ${fv(letterDateCE)}</p>`;
+            }
+            // Note on date format (shown once)
+            contentHtml += `<p style="text-align:right; color:#333; font-size:9pt;">Date format: DD/MM/YYYY</p>`;
+
             // Consultation and Diagnosis
             if (data.includeConsultationDiagnosis) {
                 let consultationHtml = '';
-                const consultationDateBE_val = data.consultationDate || '';
-                const consultationDateCE_val = convertBEtoCE(consultationDateBE_val);
-                const formattedConsultationDate = fv(consultationDateBE_val + (consultationDateCE_val ? ` (${consultationDateCE_val})` : ''));
+                const consultationDateCE_val = data.consultationDate || '';
+                const formattedConsultationDate = fv(consultationDateCE_val);
 
                 if (formattedConsultationDate) {
                     consultationHtml += `<p class="thai-font"><strong>ได้เข้ารับการตรวจรักษาเมื่อวันที่ / Examined and treated on:</strong> ${formattedConsultationDate}</p>`;
@@ -409,14 +405,12 @@
 
             // Advised Rest
             if (data.includeAdvisedRest) {
-                const restStartDateBE_val = data.restStartDate || '';
-                const restStartDateCE_val = convertBEtoCE(restStartDateBE_val);
-                const restEndDateBE_val = data.restEndDate || '';
-                const restEndDateCE_val = convertBEtoCE(restEndDateBE_val);
+                const restStartDateCE_val = data.restStartDate || '';
+                const restEndDateCE_val = data.restEndDate || '';
                 const duration_val = data.restDurationDays || '';
 
-                const formattedRestStart = fv(restStartDateBE_val + (restStartDateCE_val ? ` (${restStartDateCE_val})` : ''));
-                const formattedRestEnd = fv(restEndDateBE_val + (restEndDateCE_val ? ` (${restEndDateCE_val})` : ''));
+                const formattedRestStart = fv(restStartDateCE_val);
+                const formattedRestEnd = fv(restEndDateCE_val);
                 const formattedDuration = fv(duration_val);
 
                 // Only add this section if all advised rest fields are present
@@ -436,26 +430,28 @@
 
             // Syphilis Treatment
             if (data.includeSyphilisTreatment) {
-                const syphilisDateBE_val = data.syphilisTreatmentDate || '';
-                const syphilisDateCE_val = convertBEtoCE(syphilisDateBE_val);
-                const formattedSyphilisDate = fv(syphilisDateBE_val + (syphilisDateCE_val ? ` (${syphilisDateCE_val})` : ''));
+                const syphilisDateCE_val = data.syphilisTreatmentDate || '';
+                const formattedSyphilisDate = fv(syphilisDateCE_val);
 
                 if (formattedSyphilisDate) {
                     if (subsequentSectionAdded) contentHtml += `<div class="section-spacing"></div>`;
                     contentHtml += `<p class="thai-font">ผู้ป่วยได้รับการรักษาโรคซิฟิลิสเมื่อวันที่ / The patient has been treated for Syphilis on ${formattedSyphilisDate}.</p>`;
+                    const docNote = fv(data.syphilisNotes || '', true);
+                    if (docNote) contentHtml += `<div style="padding-left:1em;" class="thai-font">${docNote}</div>`;
                     subsequentSectionAdded = true;
                 }
             }
 
             // TB Treatment
             if (data.includeTBTreatment) {
-                const tbDateBE_val = data.tbTreatmentCompletionDate || '';
-                const tbDateCE_val = convertBEtoCE(tbDateBE_val);
-                const formattedTbDate = fv(tbDateBE_val + (tbDateCE_val ? ` (${tbDateCE_val})` : ''));
+                const tbDateCE_val = data.tbTreatmentCompletionDate || '';
+                const formattedTbDate = fv(tbDateCE_val);
 
                 if (formattedTbDate) {
                     if (subsequentSectionAdded) contentHtml += `<div class="section-spacing"></div>`;
                     contentHtml += `<p class="thai-font">ผู้ป่วยได้ทำการรักษาวัณโรคเสร็จสิ้นเมื่อวันที่ / The patient has completed Tuberculosis treatment on ${formattedTbDate}.</p>`;
+                    const tbNote = fv(data.tbNotes || '', true);
+                    if (tbNote) contentHtml += `<div style="padding-left:1em;" class="thai-font">${tbNote}</div>`;
                     subsequentSectionAdded = true;
                 }
             }
@@ -496,15 +492,15 @@
 
         renderMedicalCertificate();
 
-        try {
-            const printedDateTimeSpans = document.querySelectorAll('.printed-on-datetime');
-            if (printedDateTimeSpans.length > 0) {
-                const today = new Date();
-                printedDateTimeSpans.forEach(span => {
-                    span.innerHTML = `<strong style="font-weight:bold;">${formatDate(today, "BE")} (${formatDate(today, "CE")}) ${formatTimeISO(today)}</strong>`;
-                });
-            } else { console.warn(".printed-on-datetime span not found for medical certificate."); }
-        } catch (e) { console.error("Error setting printed-on date and time for medical certificate:", e); }
+            try {
+                const printedDateTimeSpans = document.querySelectorAll('.printed-on-datetime');
+                if (printedDateTimeSpans.length > 0) {
+                    const today = new Date();
+                    printedDateTimeSpans.forEach(span => {
+                        span.innerHTML = `<strong style="font-weight:bold;">${formatDate(today, "CE")} ${formatTimeISO(today)}</strong>`;
+                    });
+                } else { console.warn(".printed-on-datetime span not found for medical certificate."); }
+            } catch (e) { console.error("Error setting printed-on date and time for medical certificate:", e); }
 
         if (!window.pagedJsHandlerRegistered) {
             class PrintHandler extends Paged.Handler {

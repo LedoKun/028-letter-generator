@@ -59,66 +59,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function JSDateToCE(jsDate) {
-        if (!jsDate || !(jsDate instanceof Date) || isNaN(jsDate)) return '';
-        const day = String(jsDate.getDate()).padStart(2, '0');
-        const month = String(jsDate.getMonth() + 1).padStart(2, '0');
-        const ceYear = jsDate.getFullYear();
-        return `${day}/${month}/${ceYear}`;
-    }
-
-    function CEToJSDate(ceDateString) {
-        if (!ceDateString || !ceDateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) return null;
-        const parts = ceDateString.split('/');
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const ceYear = parseInt(parts[2], 10);
-        if (isNaN(day) || isNaN(month) || isNaN(ceYear) || month < 0 || month > 11 || day < 1 || day > 31) return null;
-        const currentYear = new Date().getFullYear();
-        if (ceYear < 1900 || ceYear > currentYear + 20) return null;
-        const date = new Date(ceYear, month, day);
-        if (date.getFullYear() !== ceYear || date.getMonth() !== month || date.getDate() !== day) {
-            return null;
-        }
-        return date;
-    }
-
-    function isValidCEDate(ceDateString) {
-        return CEToJSDate(ceDateString) instanceof Date;
-    }
-
-    function autoFormatDate(event) {
-        const input = event.target;
-        let value = input.value.replace(/\D/g, '');
-        if (event.inputType === 'deleteContentBackward' && (input.value.slice(-1) === '/')) {
-            input.value = input.value.slice(0, -1);
-            return;
-        }
-        if (value.length > 8) value = value.slice(0, 8);
-        let formattedValue = '';
-        if (value.length > 0) formattedValue += value.slice(0, 2);
-        if (value.length >= 3) formattedValue += '/' + value.slice(2, 4);
-        if (value.length >= 5) formattedValue += '/' + value.slice(4, 8);
-        input.value = formattedValue;
-        if (event.type === 'blur') {
-            if (input.value.length > 0 && (input.value.length < 10 || !isValidCEDate(input.value))) {
-                input.style.borderColor = 'red';
-            } else {
-                input.style.borderColor = '';
-            }
-        }
-    }
-
     function initializeDateInputs() {
+        const form = document.getElementById('certificateForm');
+        const getEra = () => window.Common.getEraFromForm(form);
         document.querySelectorAll('.date-input').forEach(input => {
-            input.addEventListener('input', autoFormatDate);
-            input.addEventListener('blur', autoFormatDate);
-            input.maxLength = 10;
-            input.placeholder = "DD/MM/YYYY";
+            window.Common.attachDateAutoFormat(input, getEra);
+            input.placeholder = 'DD/MM/YYYY';
         });
         const letterDateInput = document.getElementById('letterDate');
-        if (letterDateInput && !letterDateInput.value) {
-            letterDateInput.value = JSDateToCE(new Date());
+        window.Common.setTodayIfEmpty(letterDateInput, getEra());
+        const eraSelect = document.getElementById('yearEra');
+        if (eraSelect) {
+            const onEraChange = () => {
+                const newEra = getEra();
+                window.Common.updateDateLabelsForEra(form, newEra);
+                document.querySelectorAll('.date-input').forEach(inp => {
+                    const v = inp.value;
+                    if (v && v.length === 10) {
+                        const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
+                        const converted = window.Common.convertDateString(v, fromEra, newEra);
+                        if (converted) inp.value = converted;
+                    }
+                });
+            };
+            eraSelect.addEventListener('change', onEraChange);
+            window.Common.updateDateLabelsForEra(form, getEra());
         }
     }
 
@@ -334,12 +299,12 @@ document.addEventListener('DOMContentLoaded', function () {
             form.addEventListener('keydown', function (event) {
                 if (event.key === 'Enter') {
                     const activeElement = document.activeElement;
-                    if (activeElement && activeElement.tagName !== 'TEXTAREA' && activeElement.type !== 'button' && activeElement.type !== 'submit') {
-                        event.preventDefault();
-                        previewCertificate();
-                    } else if (activeElement && activeElement.tagName === 'TEXTAREA' && !event.shiftKey) {
-                    } else if (activeElement && (activeElement.type === 'button' || activeElement.type === 'submit')) {
-                    } else {
+                    // Allow Enter (and Shift+Enter) inside textareas for new lines
+                    if (activeElement && activeElement.tagName === 'TEXTAREA') {
+                        return; // don't intercept
+                    }
+                    // For non-button inputs, Enter triggers preview
+                    if (activeElement && activeElement.type !== 'button' && activeElement.type !== 'submit') {
                         event.preventDefault();
                         previewCertificate();
                     }
@@ -356,7 +321,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const requiredFields = [
             { id: 'letterDate', name: 'Certificate Date' },
-            { id: 'salutation', name: 'Salutation' },
             { id: 'patientName', name: 'Patient Full Name' },
             { id: 'dob', name: 'Date of Birth' },
             { id: 'nationality', name: 'Nationality' },
@@ -373,10 +337,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 isValid = false;
             } else if (element) {
                 element.style.borderColor = '';
-                if (element.classList.contains('date-input') && element.value.length > 0 && (element.value.length < 10 || !isValidCEDate(element.value))) {
-                    missingFieldsMessages.push(`${fieldInfo.name} (Invalid format: ${element.value})`);
-                    element.style.borderColor = 'red';
-                    isValid = false;
+                if (element.classList.contains('date-input') && element.value.length > 0) {
+                    const era = window.Common.getEraFromForm('certificateForm');
+                    const ok = !!window.Common.parseDate(element.value, era);
+                    if (!ok) {
+                        missingFieldsMessages.push(`${fieldInfo.name} (Invalid format: ${element.value})`);
+                        element.style.borderColor = 'red';
+                        isValid = false;
+                    }
                 }
             }
         });
@@ -495,6 +463,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         data.doctorNameEnglish = document.getElementById('doctorNameEnglish').value.toUpperCase();
         data.passportNumber = document.getElementById('passportNumber').value.toUpperCase();
+        data.additionalNotes = (document.getElementById('additionalNotes')?.value || '').trim();
+
+        // Normalize all dates to CE for certificate
+        const era = window.Common.getEraFromForm('certificateForm');
+        const toCE = (v) => v ? window.Common.convertDateString(v, era, window.Common.ERA_CE) : '';
+        data.letterDate = toCE(data.letterDate);
+        data.dob = toCE(data.dob);
+        data._yearEra = era;
 
         localStorage.setItem('certificateDataForPrint', JSON.stringify(data));
         window.open('print-certificate.html', '_blank');

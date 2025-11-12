@@ -24,68 +24,33 @@ document.addEventListener('DOMContentLoaded', function () {
         if (patientNameInput) patientNameInput.focus();
     }
 
-    function BEToJSDate(beDateString) {
-        if (!beDateString || !beDateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) return null;
-        const parts = beDateString.split('/');
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const beYear = parseInt(parts[2], 10);
-        if (isNaN(day) || isNaN(month) || isNaN(beYear) || month < 0 || month > 11 || day < 1 || day > 31) return null;
-        const ceYear = beYear - 543;
-        if (ceYear < 1900 || ceYear > new Date().getFullYear() + 100) return null;
-        const date = new Date(ceYear, month, day);
-        if (date.getFullYear() !== ceYear || date.getMonth() !== month || date.getDate() !== day) {
-            return null;
-        }
-        return date;
-    }
-
-    function JSDateToBE(jsDate) {
-        if (!jsDate || !(jsDate instanceof Date) || isNaN(jsDate)) return '';
-        const day = String(jsDate.getDate()).padStart(2, '0');
-        const month = String(jsDate.getMonth() + 1).padStart(2, '0');
-        const ceYear = jsDate.getFullYear();
-        const beYear = ceYear + 543;
-        return `${day}/${month}/${beYear}`;
-    }
-
-    function isValidBEDate(beDateString) {
-        return BEToJSDate(beDateString) instanceof Date;
-    }
-
-    function autoFormatDate(event) {
-        const input = event.target;
-        let value = input.value.replace(/\D/g, '');
-        if (event.inputType === 'deleteContentBackward' && (input.value.slice(-1) === '/')) {
-            input.value = input.value.slice(0, -1);
-            return;
-        }
-        if (value.length > 8) value = value.slice(0, 8);
-        let formattedValue = '';
-        if (value.length > 0) formattedValue += value.slice(0, 2);
-        if (value.length >= 3) formattedValue += '/' + value.slice(2, 4);
-        if (value.length >= 5) formattedValue += '/' + value.slice(4, 8);
-        input.value = formattedValue;
-
-        if (event.type === 'blur' || (event.type === 'input' && formattedValue.length === 10)) {
-            if (input.value.length > 0 && (input.value.length < 10 || !isValidBEDate(input.value))) {
-                input.style.borderColor = 'red';
-            } else {
-                input.style.borderColor = '';
-            }
-        }
-    }
-
     function initializeDateInputs() {
+        const form = document.getElementById('medicalCertificateForm');
+        const getEra = () => window.Common.getEraFromForm(form);
         document.querySelectorAll('.date-input').forEach(input => {
-            input.addEventListener('input', autoFormatDate);
-            input.addEventListener('blur', autoFormatDate);
-            input.maxLength = 10;
-            input.placeholder = "วว/ดด/ปปปป";
+            window.Common.attachDateAutoFormat(input, getEra);
+            input.placeholder = 'DD/MM/YYYY';
         });
         const letterDateInput = document.getElementById('letterDate');
-        if (letterDateInput && !letterDateInput.value) {
-            letterDateInput.value = JSDateToBE(new Date());
+        window.Common.setTodayIfEmpty(letterDateInput, getEra());
+
+        const eraSelect = document.getElementById('yearEra');
+        if (eraSelect) {
+            const onEraChange = () => {
+                const newEra = getEra();
+                window.Common.updateDateLabelsForEra(form, newEra);
+                document.querySelectorAll('.date-input').forEach(inp => {
+                    const v = inp.value;
+                    if (v && v.length === 10) {
+                        const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
+                        const converted = window.Common.convertDateString(v, fromEra, newEra);
+                        if (converted) inp.value = converted;
+                    }
+                });
+                calculateRestDays();
+            };
+            eraSelect.addEventListener('change', onEraChange);
+            window.Common.updateDateLabelsForEra(form, getEra());
         }
     }
 
@@ -161,8 +126,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (isChecked && section.dateToDefault) {
                         const dateField = document.getElementById(section.dateToDefault);
                         if (dateField && dateField.value === '') {
-                            dateField.value = JSDateToBE(new Date());
-                            // Trigger blur to format/validate if necessary, though autoFormatDate runs on input
+                            const era = window.Common.getEraFromForm('medicalCertificateForm');
+                            dateField.value = window.Common.formatDate(new Date(), era);
+                            // Trigger blur to format/validate
                             dateField.dispatchEvent(new Event('blur'));
                         }
                     }
@@ -197,8 +163,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
 
-        const startDate = BEToJSDate(startDateInput.value);
-        const endDate = BEToJSDate(endDateInput.value);
+        const eraNow = window.Common.getEraFromForm('medicalCertificateForm');
+        const startDate = window.Common.parseDate(startDateInput.value, eraNow);
+        const endDate = window.Common.parseDate(endDateInput.value, eraNow);
 
         let validStart = true;
         let validEnd = true;
@@ -284,15 +251,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleFormSubmitOnEnter(event) {
         if (event.key === 'Enter') {
             const activeElement = document.activeElement;
-            if (activeElement && activeElement.tagName !== 'TEXTAREA' && activeElement.type !== 'button' && activeElement.type !== 'submit') {
-                event.preventDefault();
-                previewMedicalCertificate();
-            } else if (activeElement && activeElement.tagName === 'TEXTAREA' && !event.shiftKey) {
-            } else if (activeElement && (activeElement.type === 'button' || activeElement.type === 'submit')) {
-            } else {
+            // Allow Enter and Shift+Enter (or any combo) inside textareas to insert newlines normally
+            if (activeElement && activeElement.tagName === 'TEXTAREA') {
+                return; // do not intercept
+            }
+            // For other inputs (not buttons), treat Enter as preview
+            if (activeElement && activeElement.type !== 'button' && activeElement.type !== 'submit') {
                 event.preventDefault();
                 previewMedicalCertificate();
             }
+            // Buttons keep default behavior
         }
     }
 
@@ -304,10 +272,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const requiredFields = [
             { id: 'letterDate', name: 'วันที่ออกเอกสาร / Certificate Date' },
-            { id: 'patientSalutation', name: 'คำนำหน้าชื่อ / Salutation' },
             { id: 'patientName', name: 'ชื่อ-นามสกุลผู้ป่วย / Patient Full Name' },
-            { id: 'patientGender', name: 'เพศ / Gender' },
-            { id: 'doctorNameThai', name: 'ชื่อแพทย์ (ไทย) / Doctor Name (Thai)' },
             { id: 'doctorNameEnglish', name: 'ชื่อแพทย์ (อังกฤษ) / Doctor Name (English)' },
             { id: 'medicalLicense', name: 'เลขที่ใบประกอบวิชาชีพ / Medical License No.' }
         ];
@@ -320,10 +285,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 isValid = false;
             } else if (element) {
                 element.style.borderColor = '';
-                if (element.classList.contains('date-input') && element.value.length > 0 && (element.value.length < 10 || !isValidBEDate(element.value))) {
-                    missingFieldsMessages.push(`${fieldInfo.name} (รูปแบบไม่ถูกต้อง / Invalid format: ${element.value})`);
-                    element.style.borderColor = 'red';
-                    isValid = false;
+                if (element.classList.contains('date-input') && element.value.length > 0) {
+                    const era = window.Common.getEraFromForm('medicalCertificateForm');
+                    const valid = !!window.Common.parseDate(element.value, era);
+                    if (!valid) {
+                        missingFieldsMessages.push(`${fieldInfo.name} (รูปแบบไม่ถูกต้อง / Invalid format: ${element.value})`);
+                        element.style.borderColor = 'red';
+                        isValid = false;
+                    }
                 }
             }
         });
@@ -353,7 +322,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const checkbox = document.getElementById(sec.checkboxId);
             const dateField = document.getElementById(sec.dateFieldId);
             if (checkbox && checkbox.checked && dateField && dateField.value.trim()) {
-                if (dateField.value.length < 10 || !isValidBEDate(dateField.value)) {
+                const era = window.Common.getEraFromForm('medicalCertificateForm');
+                const valid = !!window.Common.parseDate(dateField.value, era);
+                if (!valid) {
                     missingFieldsMessages.push(`${sec.name} (รูปแบบไม่ถูกต้อง / Invalid format: ${dateField.value})`);
                     dateField.style.borderColor = 'red';
                     isValid = false;
@@ -369,8 +340,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (includeRestCheckbox && includeRestCheckbox.checked) {
             const restStartDateInput = document.getElementById('restStartDate');
             const restEndDateInput = document.getElementById('restEndDate');
-            const restStartDate = BEToJSDate(restStartDateInput.value);
-            const restEndDate = BEToJSDate(restEndDateInput.value);
+            const era = window.Common.getEraFromForm('medicalCertificateForm');
+            const restStartDate = window.Common.parseDate(restStartDateInput.value, era);
+            const restEndDate = window.Common.parseDate(restEndDateInput.value, era);
 
             if (restStartDate && restEndDate && restEndDate < restStartDate) {
                 missingFieldsMessages.push('วันที่สิ้นสุดการพักต้องไม่มาก่อนวันที่เริ่มพัก / Rest end date cannot be before rest start date');
@@ -433,7 +405,24 @@ document.addEventListener('DOMContentLoaded', function () {
             data.patientGenderEnglish = selectedGenderOption.dataset.english || '';
         }
 
+        // Collect notes for disease sections if present
+        data.syphilisNotes = document.getElementById('syphilisNotes')?.value || '';
+        data.tbNotes = document.getElementById('tbNotes')?.value || '';
+
         data.doctorNameEnglish = data.doctorNameEnglish.toUpperCase();
+
+        // Normalize dates to CE for certificates; keep track of selected era
+        const era = window.Common.getEraFromForm('medicalCertificateForm');
+        const toCE = (v) => v ? window.Common.convertDateString(v, era, window.Common.ERA_CE) : '';
+        data.letterDate = toCE(data.letterDate);
+        if (data.includeConsultationDiagnosis) data.consultationDate = toCE(data.consultationDate);
+        if (data.includeAdvisedRest) {
+            data.restStartDate = toCE(data.restStartDate);
+            data.restEndDate = toCE(data.restEndDate);
+        }
+        if (data.includeSyphilisTreatment) data.syphilisTreatmentDate = toCE(data.syphilisTreatmentDate);
+        if (data.includeTBTreatment) data.tbTreatmentCompletionDate = toCE(data.tbTreatmentCompletionDate);
+        data._yearEra = era;
 
         localStorage.setItem('medicalCertificateDataForPrint', JSON.stringify(data));
         window.open('print-medical-certificate.html', '_blank');

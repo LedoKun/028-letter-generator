@@ -102,7 +102,7 @@
             <fieldset class="border p-4 rounded-md shadow-sm">
                 <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลทั่วไป / General Information
                 </legend>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                     <div>
                         <label for="letterDate" class="block text-sm font-medium">Certificate Date (CE) <span
                                 class="required-asterisk">*</span></label>
@@ -110,9 +110,15 @@
                             class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
                     <div>
-                        <label for="salutation" class="block text-sm font-medium thai-font">คำนำหน้าชื่อ / Salutation
-                            <span class="required-asterisk">*</span></label>
-                        <select id="salutation" name="salutation" required
+                        <label for="yearEra" class="block text-sm font-medium thai-font">รูปแบบปี / Year format</label>
+                        <select id="yearEra" name="yearEra" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                            <option value="CE" selected>ค.ศ. (CE)</option>
+                            <option value="BE">พ.ศ. (BE)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="salutation" class="block text-sm font-medium thai-font">คำนำหน้าชื่อ / Salutation</label>
+                        <select id="salutation" name="salutation"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                             <option value="">-- Select --</option>
                             <option value="MR.">MR.</option>
@@ -402,6 +408,15 @@
                 </div>
             </fieldset>
 
+            <fieldset class="border p-4 rounded-md shadow-sm">
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">หมายเหตุแพทย์ (ทางเลือก) / Additional Notes (Optional)</legend>
+                <div class="mt-2">
+                    <label for="additionalNotes" class="block text-sm font-medium thai-font">บันทึกเพิ่มเติม / Notes:</label>
+                    <textarea id="additionalNotes" name="additionalNotes" rows="3"
+                        class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"></textarea>
+                </div>
+            </fieldset>
+
             <div class="pt-5">
                 <div class="flex justify-end space-x-3"> <a href="../index.html"
                         class="inline-flex justify-center py-2.5 px-6 border border-gray-600 hover:border-gray-500 shadow-sm text-base font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
@@ -420,6 +435,7 @@
         <p>&copy; <span id="currentYear"></span> Clinical Letter Generators by Rommy~*. All rights reserved.</p>
     </footer>
 
+    <script src="/js/common.js"></script>
     <script src="certificate-script.js"></script>
 </body>
 
