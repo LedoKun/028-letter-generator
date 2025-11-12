@@ -294,9 +294,11 @@
             }
 
             let contentHtml = `<h3 class="letter-title thai-font">ใบรับรองแพทย์ / Medical Certificate</h3>`;
-
-            // Document date (CE) and format note handled below after patient header
-
+            // Place document date (CE) directly under the title and show the date format once
+            if (letterDateCE) {
+                contentHtml += `<p style="text-align:right;"><strong>วันที่ / Date:</strong> ${fv(letterDateCE)}</p>`;
+            }
+            contentHtml += `<p style="text-align:right; color:#333; font-size:9pt;">Date format: DD/MM/YYYY</p>`;
 
             contentHtml += `<p class="thai-font">ข้าพเจ้าขอรับรองว่า / This is to certify that:</p>`;
 
@@ -365,13 +367,6 @@
             }
 
             let subsequentSectionAdded = false;
-
-            // Document date line (CE) and date format note
-            if (letterDateCE) {
-                contentHtml += `<p style="text-align:right;"><strong>วันที่ / Date:</strong> ${fv(letterDateCE)}</p>`;
-            }
-            // Note on date format (shown once)
-            contentHtml += `<p style="text-align:right; color:#333; font-size:9pt;">Date format: DD/MM/YYYY</p>`;
 
             // Consultation and Diagnosis
             if (data.includeConsultationDiagnosis) {
