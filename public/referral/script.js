@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const requiredStaticFields = [
             { id: 'letterDate', name: 'วันที่ / Date' },
             { id: 'patientName', name: 'ชื่อผู้ป่วย / Patient Name' },
-            { id: 'doctorNameEnglish', name: 'Doctor\'s Name (English)' },
+            { id: 'doctorNameThai', name: 'ชื่อแพทย์ (ภาษาไทย)' },
             { id: 'medicalLicense', name: 'เลขที่ใบประกอบวิชาชีพ' }
         ];
 

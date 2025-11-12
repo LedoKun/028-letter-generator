@@ -327,13 +327,13 @@
 
                 if (letterType === 'referralForCare') {
                     contentHtml += `<h3 class="letter-title thai-font">หนังสือส่งตัวผู้ป่วย / Referral Letter</h3><br>`;
-                    contentHtml += `<p class="thai-font"><strong>วันที่ / Date:</strong> ${hd(letterData.letterDate)} (${hd(christianLetterDate)})</p>`;
+                    contentHtml += `<p class="thai-font" style="text-align:right; margin-bottom:0.2em;"><strong>วันที่ / Date:</strong> ${hd(letterData.letterDate)} (${hd(christianLetterDate)}) <span style="color:#666; font-size:9pt; margin-left:6px;">(Date format: DD/MM/YYYY)</span></p>`;
                     contentHtml += `<p class="thai-font"><strong>เรียน</strong> เจ้าหน้าที่ผู้เกี่ยวข้อง / To Whom It May Concern</p>`;
                     contentHtml += `<p class="thai-font"><strong>เรื่อง</strong> ขอส่งตัวผู้ป่วยเพื่อรับการรักษาต่อเนื่อง / Re: Patient Referral for Continued Care</p>`;
                     contentHtml += `<p class="thai-font indent">ทางศูนย์บริการสาธารณสุข 28 กรุงธนบุรี มีความประสงค์ส่งตัวผู้ป่วยเพื่อเข้ารับการรักษาต่อเนื่อง / Public Health Center 28 Krung Thon Buri would like to refer the following patient for continued care:</p>`;
                 } else { // summaryOfHistory
                     contentHtml += `<h3 class="letter-title thai-font">สรุปประวัติการรักษา / Summary of Medical History</h3><br>`;
-                    contentHtml += `<p class="thai-font"><strong>วันที่ / Date:</strong> ${hd(letterData.letterDate)} (${hd(christianLetterDate)})</p>`;
+                    contentHtml += `<p class="thai-font" style="text-align:right; margin-bottom:0.2em;"><strong>วันที่ / Date:</strong> ${hd(letterData.letterDate)} (${hd(christianLetterDate)}) <span style="color:#666; font-size:9pt; margin-left:6px;">(Date format: DD/MM/YYYY)</span></p>`;
                     contentHtml += `<p class="thai-font"><strong>เรียน</strong> เจ้าหน้าที่ผู้เกี่ยวข้อง / To Whom It May Concern</p>`;
                     contentHtml += `<p class="thai-font"><strong>เรื่อง</strong> สรุปประวัติการรักษา / Re: Summary of Medical History</p>`;
                 }
