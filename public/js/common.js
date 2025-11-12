@@ -88,7 +88,8 @@
     root.querySelectorAll('label').forEach(lab => {
       const txt = lab.textContent || '';
       const cleaned = txt.replace(/\((พ\.ศ\.|BE|CE)\)/gi, '').replace(/\s+$/,'');
-      if (/(วัน|Date)/i.test(cleaned) && lab.htmlFor) {
+      // Skip labels that are not true date fields, e.g., medicineDuration
+      if (/(วัน|Date)/i.test(cleaned) && lab.htmlFor && lab.htmlFor !== 'medicineDuration') {
         const suffix = era === ERA_BE ? ' (พ.ศ.)' : ' (CE)';
         lab.textContent = cleaned + suffix;
       }
@@ -110,4 +111,3 @@
     updateDateLabelsForEra
   };
 })();
-
