@@ -279,11 +279,36 @@ document.addEventListener('DOMContentLoaded', function () {
         timeLabel.textContent = `เวลา / Time (HH:MM, 24-hour):`;
         timeLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
         const timeInput = document.createElement('input');
-        timeInput.type = 'time';
-        timeInput.step = '60'; // minutes precision, 24-hour display in most browsers
+        timeInput.type = 'text';
+        timeInput.placeholder = 'HH:MM';
+        timeInput.inputMode = 'numeric';
+        timeInput.pattern = '^([01]\\d|2[0-3]):([0-5]\\d)$';
+        timeInput.maxLength = '5';
+        timeInput.title = '24-hour time, e.g., 09:30';
         timeInput.id = `artTime-${idSuffix}`;
         timeInput.name = `artTime-${idSuffix}`;
         timeInput.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm');
+        // Enforce 24-hour format across browsers
+        const onlyDigitsColon = (e) => {
+            const cur = e.target.value;
+            const filtered = cur.replace(/[^0-9:]/g, '');
+            if (filtered !== cur) e.target.value = filtered;
+        };
+        const autoFormatTime = (e) => {
+            let v = e.target.value.replace(/[^0-9]/g, '');
+            if (v.length === 3) v = '0' + v; // e.g., 930 -> 0930
+            if (v.length === 4) {
+                const hh = v.slice(0, 2);
+                const mm = v.slice(2, 4);
+                const h = parseInt(hh, 10);
+                const m = parseInt(mm, 10);
+                if (!isNaN(h) && !isNaN(m) && h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+                    e.target.value = `${hh}:${mm}`;
+                }
+            }
+        };
+        timeInput.addEventListener('input', onlyDigitsColon);
+        timeInput.addEventListener('blur', autoFormatTime);
         timeDiv.appendChild(timeLabel);
         timeDiv.appendChild(timeInput);
 
