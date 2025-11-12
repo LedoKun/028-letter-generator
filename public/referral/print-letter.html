@@ -379,7 +379,7 @@
                     if (letterData.artMedications && letterData.artMedications.length > 0) {
                         let artList = "<li>ART Medications:<ul>";
                         letterData.artMedications.forEach(art => {
-                            artList += `<li>${hd(art.medication)} ${hd(art.tablets)} tablet(s) ${art.time ? 'at ' + hd(art.time) : 'every 24-hour'}</li>`;
+                            artList += `<li>${hd(art.medication)} ${hd(art.tablets)} tablet(s) ${art.time ? 'at ' + hd(art.time) : 'once every 24 hours'}</li>`;
                         });
                         artList += `</ul></li>`;
                         subBulletsHTML += artList;

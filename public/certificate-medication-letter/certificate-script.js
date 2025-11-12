@@ -324,7 +324,6 @@ document.addEventListener('DOMContentLoaded', function () {
             { id: 'patientName', name: 'Patient Full Name' },
             { id: 'dob', name: 'Date of Birth' },
             { id: 'nationality', name: 'Nationality' },
-            { id: 'passportNumber', name: 'Passport Number' },
             { id: 'doctorNameEnglish', name: 'Doctor\'s Name (English)' },
             { id: 'medicalLicense', name: 'Medical License No.' }
         ];

@@ -294,11 +294,10 @@
             }
 
             let contentHtml = `<h3 class="letter-title thai-font">ใบรับรองแพทย์ / Medical Certificate</h3>`;
-            // Place document date (CE) directly under the title and show the date format once
+            // Place document date (CE) directly under the title and show the date format once (reduced spacing)
             if (letterDateCE) {
-                contentHtml += `<p style="text-align:right;"><strong>วันที่ / Date:</strong> ${fv(letterDateCE)}</p>`;
+                contentHtml += `<p style="text-align:right; margin-bottom: 0.2em;"><strong>วันที่ / Date:</strong> ${fv(letterDateCE)} <span style="color:#666; font-size:9pt; margin-left:6px;">(Date format: DD/MM/YYYY)</span></p>`;
             }
-            contentHtml += `<p style="text-align:right; color:#333; font-size:9pt;">Date format: DD/MM/YYYY</p>`;
 
             contentHtml += `<p class="thai-font">ข้าพเจ้าขอรับรองว่า / This is to certify that:</p>`;
 
