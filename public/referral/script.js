@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const timeDiv = document.createElement('div');
         const timeLabel = document.createElement('label');
         timeLabel.htmlFor = `artTime-${idSuffix}`;
-        timeLabel.textContent = `เวลา / Time (HH:MM, 24-hour):`;
+        timeLabel.textContent = `เวลา / Time (24-hour):`;
         timeLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
         const timeInput = document.createElement('input');
         timeInput.type = 'text';
