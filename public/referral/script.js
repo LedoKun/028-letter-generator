@@ -6,23 +6,23 @@ document.addEventListener('DOMContentLoaded', function () {
         { value: "TAF/3TC/DTG", text: "TAF/3TC/DTG" },        // DOLUTEGRAVIR/LAMIVUDINE/TENOFOVIR ALAFENAMIDE
         { value: "TAF/FTC/DTG", text: "TAF/FTC/DTG" },        // DOLUTEGRAVIR/EMTRICITABINE/TENOFOVIR ALAFENAMIDE
         { value: "TDF/3TC/EFV", text: "TDF/3TC/EFV (600mg)" },// EFAVIRENZ/LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE
-    
+
         // Double-Drug NRTI Backbones
-        { value: "TDF/FTC",     text: "TDF/FTC" },            // EMTRICITABINE/TENOFOVIR DISOPROXIL FUMARATE
-        { value: "TDF/3TC",     text: "TDF/3TC" },            // LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE
-        { value: "TAF/FTC",     text: "TAF/FTC" },            // EMTRICITABINE/TENOFOVIR ALAFENAMIDE
-        { value: "TAF/3TC",     text: "TAF/3TC" },            // LAMIVUDINE/TENOFOVIR ALAFENAMIDE
-        { value: "AZT/3TC300/150",     text: "AZT/3TC (300mg/150mg)" },// ZIDOVUDINE/LAMIVUDINE
-    
+        { value: "TDF/FTC", text: "TDF/FTC" },            // EMTRICITABINE/TENOFOVIR DISOPROXIL FUMARATE
+        { value: "TDF/3TC", text: "TDF/3TC" },            // LAMIVUDINE/TENOFOVIR DISOPROXIL FUMARATE
+        { value: "TAF/FTC", text: "TAF/FTC" },            // EMTRICITABINE/TENOFOVIR ALAFENAMIDE
+        { value: "TAF/3TC", text: "TAF/3TC" },            // LAMIVUDINE/TENOFOVIR ALAFENAMIDE
+        { value: "AZT/3TC300/150", text: "AZT/3TC (300mg/150mg)" },// ZIDOVUDINE/LAMIVUDINE
+
         // Individual Components
-        { value: "EFV200",      text: "EFV (200mg)" },        // EFAVIRENZ
-        { value: "RPV",         text: "RPV" },                // RILPIVIRINE
+        { value: "EFV200", text: "EFV (200mg)" },        // EFAVIRENZ
+        { value: "RPV", text: "RPV" },                // RILPIVIRINE
         { value: "LPV/r200/50", text: "LPV/r (200mg/50mg)" }, // LOPINAVIR/RITONAVIR (200mg/50mg)
-        { value: "DTG50",       text: "DTG (50mg)" },         // DOLUTEGRAVIR
-        { value: "3TC150",      text: "3TC (150mg)" },        // LAMIVUDINE (150 mg)
-        { value: "ABC300",      text: "ABC (300mg)" },        // ABACAVIR
-        { value: "DRV",         text: "DRV" },                // DARUNAVIR
-        { value: "RTV50",       text: "RTV (50mg)" }          // RITONAVIR
+        { value: "DTG50", text: "DTG (50mg)" },         // DOLUTEGRAVIR
+        { value: "3TC150", text: "3TC (150mg)" },        // LAMIVUDINE (150 mg)
+        { value: "ABC300", text: "ABC (300mg)" },        // ABACAVIR
+        { value: "DRV", text: "DRV" },                // DARUNAVIR
+        { value: "RTV50", text: "RTV (50mg)" }          // RITONAVIR
     ];
     let artMedicationCounter = 0;
 
@@ -233,6 +233,11 @@ document.addEventListener('DOMContentLoaded', function () {
             syphilisStartDateInput.addEventListener('blur', calculateSyphilisSchedule);
         }
         if (document.getElementById('includeSyphilisActive')?.checked) calculateSyphilisSchedule();
+
+        const syphilisMedicationSelect = document.getElementById('syphilisMedication');
+        if (syphilisMedicationSelect) {
+            syphilisMedicationSelect.addEventListener('change', calculateSyphilisSchedule);
+        }
     }
 
     function createArtMedicationInputs(idSuffix) {
@@ -382,6 +387,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const dose2DateEl = document.getElementById('syphilisDose2Date');
         const dose3DateEl = document.getElementById('syphilisDose3Date');
 
+        const medicationSelect = document.getElementById('syphilisMedication');
+        const benzathineSchedule = document.getElementById('syphilisBenzathineSchedule');
+        const doxycyclineDuration = document.getElementById('syphilisDoxycyclineDuration');
+        const durationText = document.getElementById('syphilisDurationText');
+
         if (!startDateInput || !dose1DateEl || !dose2DateEl || !dose3DateEl) return;
 
         const syphilisActiveCheckbox = document.getElementById('includeSyphilisActive');
@@ -391,6 +401,19 @@ document.addEventListener('DOMContentLoaded', function () {
             dose3DateEl.textContent = 'N/A';
             startDateInput.style.borderColor = '';
             return;
+        }
+
+        const medValue = medicationSelect ? medicationSelect.value : 'Benzathine';
+
+        if (medValue === 'Benzathine') {
+            if (benzathineSchedule) benzathineSchedule.style.display = 'block';
+            if (doxycyclineDuration) doxycyclineDuration.style.display = 'none';
+        } else {
+            if (benzathineSchedule) benzathineSchedule.style.display = 'none';
+            if (doxycyclineDuration) doxycyclineDuration.style.display = 'block';
+            if (durationText) {
+                durationText.textContent = medValue === 'Doxycycline2Weeks' ? '2 weeks' : '28 days';
+            }
         }
 
         const startDate = window.Common.parseDate(startDateInput.value, window.Common.getEraFromForm('referralForm'));
@@ -406,13 +429,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         startDateInput.style.borderColor = '';
 
-        dose1DateEl.textContent = window.Common.formatDate(new Date(startDate), window.Common.getEraFromForm('referralForm'));
-        const dose2Date = new Date(startDate);
-        dose2Date.setDate(startDate.getDate() + 7);
-        dose2DateEl.textContent = window.Common.formatDate(dose2Date, window.Common.getEraFromForm('referralForm'));
-        const dose3Date = new Date(startDate);
-        dose3Date.setDate(startDate.getDate() + 14);
-        dose3DateEl.textContent = window.Common.formatDate(dose3Date, window.Common.getEraFromForm('referralForm'));
+        if (medValue === 'Benzathine') {
+            dose1DateEl.textContent = window.Common.formatDate(new Date(startDate), window.Common.getEraFromForm('referralForm'));
+            const dose2Date = new Date(startDate);
+            dose2Date.setDate(startDate.getDate() + 7);
+            dose2DateEl.textContent = window.Common.formatDate(dose2Date, window.Common.getEraFromForm('referralForm'));
+            const dose3Date = new Date(startDate);
+            dose3Date.setDate(startDate.getDate() + 14);
+            dose3DateEl.textContent = window.Common.formatDate(dose3Date, window.Common.getEraFromForm('referralForm'));
+        }
     }
 
     function setupTreatedTBSitesLogic() {
@@ -705,9 +730,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (data.includeSyphilisActive) {
             data.syphilisStartDate = document.getElementById('syphilisStartDate').value;
-            data.syphilisDose1Date = document.getElementById('syphilisDose1Date').textContent;
-            data.syphilisDose2Date = document.getElementById('syphilisDose2Date').textContent;
-            data.syphilisDose3Date = document.getElementById('syphilisDose3Date').textContent;
+            const medSelect = document.getElementById('syphilisMedication');
+            data.syphilisMedication = medSelect ? medSelect.value : 'Benzathine';
+            data.syphilisMedicationText = medSelect ? medSelect.options[medSelect.selectedIndex].text : 'Benzathine Penicillin G 2.4 million units IM';
+
+            if (data.syphilisMedication === 'Benzathine') {
+                data.syphilisDose1Date = document.getElementById('syphilisDose1Date').textContent;
+                data.syphilisDose2Date = document.getElementById('syphilisDose2Date').textContent;
+                data.syphilisDose3Date = document.getElementById('syphilisDose3Date').textContent;
+            } else {
+                data.syphilisDuration = data.syphilisMedication === 'Doxycycline2Weeks' ? '2 weeks' : '28 days';
+            }
         }
 
         if (data.includeTreatedTB) {

@@ -299,16 +299,30 @@
                             <input type="text" id="syphilisStartDate" name="syphilisStartDate" placeholder="DD/MM/YYYY"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                         </div>
-                        <p class="text-sm thai-font">ยาที่ใช้รักษา / Medication: Benzathine Penicillin G 2.4 million
-                            units IM</p>
-                        <p class="text-sm thai-font">หมายกำหนดการ / Schedule: (Calculated for 3 weekly doses)</p>
-                        <div class="text-sm space-y-1">
-                            <p>ครั้งที่ 1 / Dose 1: <span id="syphilisDose1Date"
-                                    class="font-semibold text-indigo-300"></span></p>
-                            <p>ครั้งที่ 2 / Dose 2: <span id="syphilisDose2Date"
-                                    class="font-semibold text-indigo-300"></span></p>
-                            <p>ครั้งที่ 3 / Dose 3: <span id="syphilisDose3Date"
-                                    class="font-semibold text-indigo-300"></span></p>
+                        <div>
+                            <label for="syphilisMedication" class="block text-xs font-medium thai-font">ยาที่ใช้รักษา / Medication:</label>
+                            <select id="syphilisMedication" name="syphilisMedication"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                                <option value="Benzathine">Benzathine Penicillin G 2.4 million units IM</option>
+                                <option value="Doxycycline2Weeks">Doxycycline (200) 1 tab oral bid for 2 weeks</option>
+                                <option value="Doxycycline28Days">Doxycycline (200) 1 tab oral bid for 28 days</option>
+                            </select>
+                        </div>
+                        
+                        <div id="syphilisBenzathineSchedule">
+                            <p class="text-sm thai-font">หมายกำหนดการ / Schedule: (Calculated for 3 weekly doses)</p>
+                            <div class="text-sm space-y-1">
+                                <p>ครั้งที่ 1 / Dose 1: <span id="syphilisDose1Date"
+                                        class="font-semibold text-indigo-300"></span></p>
+                                <p>ครั้งที่ 2 / Dose 2: <span id="syphilisDose2Date"
+                                        class="font-semibold text-indigo-300"></span></p>
+                                <p>ครั้งที่ 3 / Dose 3: <span id="syphilisDose3Date"
+                                        class="font-semibold text-indigo-300"></span></p>
+                            </div>
+                        </div>
+
+                        <div id="syphilisDoxycyclineDuration" class="hidden">
+                            <p class="text-sm thai-font">ระยะเวลา / Duration: <span id="syphilisDurationText" class="font-semibold text-indigo-300"></span></p>
                         </div>
                     </div>
                 </div>

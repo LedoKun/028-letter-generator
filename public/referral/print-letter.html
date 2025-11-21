@@ -398,12 +398,20 @@
                     const syphilisStartDateBE = letterData.syphilisStartDate || '';
                     contentHtml += `<li><strong>Syphilis (Active)</strong><ul>`;
                     contentHtml += `<li>วันที่เริ่มการรักษา / Treatment Start Date: ${hd(syphilisStartDateBE)} (${hd(convertBEtoCE(syphilisStartDateBE))})</li>`;
-                    contentHtml += `<li>ยาที่ใช้รักษา / Medication: Benzathine Penicillin G 2.4 million units IM</li>`;
-                    contentHtml += `<li>หมายกำหนดการ / Schedule:<ul>`;
-                    contentHtml += `<li>ครั้งที่ 1 / Dose 1: ${hd(letterData.syphilisDose1Date)} (${hd(convertBEtoCE(letterData.syphilisDose1Date))})</li>`;
-                    contentHtml += `<li>ครั้งที่ 2 / Dose 2: ${hd(letterData.syphilisDose2Date)} (${hd(convertBEtoCE(letterData.syphilisDose2Date))})</li>`;
-                    contentHtml += `<li>ครั้งที่ 3 / Dose 3: ${hd(letterData.syphilisDose3Date)} (${hd(convertBEtoCE(letterData.syphilisDose3Date))})</li>`;
-                    contentHtml += `</ul></li></ul></li>`;
+
+                    const medText = letterData.syphilisMedicationText || 'Benzathine Penicillin G 2.4 million units IM';
+                    contentHtml += `<li>ยาที่ใช้รักษา / Medication: ${hd(medText)}</li>`;
+
+                    if (!letterData.syphilisMedication || letterData.syphilisMedication === 'Benzathine') {
+                        contentHtml += `<li>หมายกำหนดการ / Schedule:<ul>`;
+                        contentHtml += `<li>ครั้งที่ 1 / Dose 1: ${hd(letterData.syphilisDose1Date)} (${hd(convertBEtoCE(letterData.syphilisDose1Date))})</li>`;
+                        contentHtml += `<li>ครั้งที่ 2 / Dose 2: ${hd(letterData.syphilisDose2Date)} (${hd(convertBEtoCE(letterData.syphilisDose2Date))})</li>`;
+                        contentHtml += `<li>ครั้งที่ 3 / Dose 3: ${hd(letterData.syphilisDose3Date)} (${hd(convertBEtoCE(letterData.syphilisDose3Date))})</li>`;
+                        contentHtml += `</ul></li>`;
+                    } else {
+                        contentHtml += `<li>ระยะเวลา / Duration: ${hd(letterData.syphilisDuration)}</li>`;
+                    }
+                    contentHtml += `</ul></li>`;
                 }
 
                 if (letterData.includeHBV) contentHtml += `<li><strong>HBV Co-infection</strong></li>`;
