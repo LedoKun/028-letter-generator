@@ -28,13 +28,13 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeDateInputs();
     initializeSalutationField();
     initializeNationalityField();
-    loadDoctorInfo();
+    window.Common.loadDoctorInfo(null, 'doctorNameEnglish', 'medicalLicense');
     initializeArtMedications();
     setupConditionalMedicationSection();
-    handleFormSubmitOnEnter();
+    window.Common.handleFormSubmitOnEnter('certificateForm', previewCertificate);
     document.getElementById('previewButton').addEventListener('click', previewCertificate);
     document.getElementById('currentYear').textContent = new Date().getFullYear();
-    autoFocusPatientName();
+    window.Common.autoFocusPatientName();
 
     ['patientName', 'doctorNameEnglish', 'otherNationality', 'otherSalutation', 'passportNumber'].forEach(id => {
         const el = document.getElementById(id);
@@ -52,12 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- Helper Functions ---
-    function autoFocusPatientName() {
-        const patientNameInput = document.getElementById('patientName');
-        if (patientNameInput) {
-            patientNameInput.focus();
-        }
-    }
+
 
     function initializeDateInputs() {
         const form = document.getElementById('certificateForm');
@@ -249,69 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function saveDoctorInfo() {
-        let sharedInfo = {};
-        try {
-            const existingInfo = localStorage.getItem('sharedDoctorInfo');
-            if (existingInfo) {
-                sharedInfo = JSON.parse(existingInfo);
-            }
-        } catch (e) {
-            console.error("Error reading sharedDoctorInfo for update:", e);
-            sharedInfo = {}; // Reset if parsing fails
-        }
 
-        sharedInfo.sharedDoctorNameEnglish = document.getElementById('doctorNameEnglish').value.toUpperCase(); // Ensures uppercase
-        sharedInfo.sharedMedicalLicense = document.getElementById('medicalLicense').value;
-        // sharedInfo.sharedDoctorNameThai is preserved if set by the referral form
-
-        localStorage.setItem('sharedDoctorInfo', JSON.stringify(sharedInfo));
-    }
-
-    function loadDoctorInfo() {
-        const savedInfo = localStorage.getItem('sharedDoctorInfo');
-        if (savedInfo) {
-            try {
-                const doctorInfo = JSON.parse(savedInfo);
-                document.getElementById('doctorNameEnglish').value = doctorInfo.sharedDoctorNameEnglish || '';
-                document.getElementById('medicalLicense').value = doctorInfo.sharedMedicalLicense || '';
-            } catch (e) {
-                console.error("Error parsing sharedDoctorInfo:", e);
-                document.getElementById('doctorNameEnglish').value = '';
-                document.getElementById('medicalLicense').value = '';
-            }
-        }
-        // Attach change listeners
-        const doctorNameEnglishEl = document.getElementById('doctorNameEnglish');
-        const medicalLicenseEl = document.getElementById('medicalLicense');
-
-        if (doctorNameEnglishEl) {
-            doctorNameEnglishEl.addEventListener('change', saveDoctorInfo);
-        }
-        if (medicalLicenseEl) {
-            medicalLicenseEl.addEventListener('change', saveDoctorInfo);
-        }
-    }
-
-    function handleFormSubmitOnEnter() {
-        const form = document.getElementById('certificateForm');
-        if (form) {
-            form.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter') {
-                    const activeElement = document.activeElement;
-                    // Allow Enter (and Shift+Enter) inside textareas for new lines
-                    if (activeElement && activeElement.tagName === 'TEXTAREA') {
-                        return; // don't intercept
-                    }
-                    // For non-button inputs, Enter triggers preview
-                    if (activeElement && activeElement.type !== 'button' && activeElement.type !== 'submit') {
-                        event.preventDefault();
-                        previewCertificate();
-                    }
-                }
-            });
-        }
-    }
 
     function previewCertificate() {
         const form = document.getElementById('certificateForm');

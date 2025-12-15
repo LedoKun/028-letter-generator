@@ -99,6 +99,99 @@
     });
   }
 
+  // --- New Shared Functions ---
+
+  function autoFocusPatientName(id = 'patientName') {
+    const el = document.getElementById(id);
+    if (el) el.focus();
+  }
+
+  function saveDoctorInfo(thaiId, engId, licenseId) {
+    let sharedInfo = {};
+    try {
+      const existingInfo = localStorage.getItem('sharedDoctorInfo');
+      if (existingInfo) sharedInfo = JSON.parse(existingInfo);
+    } catch (e) { console.error("Error reading sharedDoctorInfo:", e); sharedInfo = {}; }
+
+    if (thaiId) {
+        const el = document.getElementById(thaiId);
+        if (el) sharedInfo.sharedDoctorNameThai = el.value;
+    }
+    if (engId) {
+        const el = document.getElementById(engId);
+        if (el) sharedInfo.sharedDoctorNameEnglish = el.value.toUpperCase();
+    }
+    if (licenseId) {
+        const el = document.getElementById(licenseId);
+        if (el) sharedInfo.sharedMedicalLicense = el.value;
+    }
+    localStorage.setItem('sharedDoctorInfo', JSON.stringify(sharedInfo));
+  }
+
+  function loadDoctorInfo(thaiId, engId, licenseId) {
+    const savedInfo = localStorage.getItem('sharedDoctorInfo');
+    if (savedInfo) {
+      try {
+        const doctorInfo = JSON.parse(savedInfo);
+        if (thaiId) {
+            const el = document.getElementById(thaiId);
+            if (el) el.value = doctorInfo.sharedDoctorNameThai || '';
+        }
+        if (engId) {
+            const el = document.getElementById(engId);
+            if (el) el.value = doctorInfo.sharedDoctorNameEnglish || '';
+        }
+        if (licenseId) {
+            const el = document.getElementById(licenseId);
+            if (el) el.value = doctorInfo.sharedMedicalLicense || '';
+        }
+      } catch (e) {
+        console.error("Error parsing sharedDoctorInfo:", e);
+      }
+    }
+
+    [thaiId, engId, licenseId].forEach(id => {
+      if (id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', () => saveDoctorInfo(thaiId, engId, licenseId));
+      }
+    });
+  }
+
+  function autoFormatNationalId(event) {
+    const input = event.target;
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 13) value = value.slice(0, 13);
+
+    let formattedValue = '';
+    if (value.length > 0) formattedValue += value.slice(0, 1);
+    if (value.length >= 2) formattedValue += '-' + value.slice(1, 5);
+    if (value.length >= 6) formattedValue += '-' + value.slice(5, 10);
+    if (value.length >= 11) formattedValue += '-' + value.slice(10, 12);
+    if (value.length >= 13) formattedValue += '-' + value.slice(12, 13);
+
+    input.value = formattedValue;
+    input.maxLength = 17;
+  }
+
+  function handleFormSubmitOnEnter(formId, previewFunction) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    form.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.tagName === 'TEXTAREA') {
+          return;
+        }
+        if (activeElement && activeElement.type !== 'button' && activeElement.type !== 'submit') {
+          event.preventDefault();
+          if (typeof previewFunction === 'function') previewFunction();
+        }
+      }
+    });
+  }
+
   window.Common = {
     ERA_BE,
     ERA_CE,
@@ -108,6 +201,11 @@
     attachDateAutoFormat,
     setTodayIfEmpty,
     getEraFromForm,
-    updateDateLabelsForEra
+    updateDateLabelsForEra,
+    autoFocusPatientName,
+    saveDoctorInfo,
+    loadDoctorInfo,
+    autoFormatNationalId,
+    handleFormSubmitOnEnter
   };
 })();

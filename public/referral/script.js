@@ -35,13 +35,13 @@ document.addEventListener('DOMContentLoaded', function () {
     setupTreatedTBSitesLogic();
     setupTPTMedicationLogic();
     setupLastMedicinePickupToggle();
-    loadDoctorInfo();
+    window.Common.loadDoctorInfo('doctorNameThai', 'doctorNameEnglish', 'medicalLicense');
     initializeArtMedications();
     initializeTmxSmpCheckbox();
-    handleFormSubmitOnEnter();
+    window.Common.handleFormSubmitOnEnter('referralForm', previewLetter);
     document.getElementById('previewButton').addEventListener('click', previewLetter);
 
-    autoFocusPatientName();
+    window.Common.autoFocusPatientName();
 
     const doctorNameEnglishInputReferral = document.getElementById('doctorNameEnglish');
     if (doctorNameEnglishInputReferral) {
@@ -50,65 +50,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function autoFocusPatientName() {
-        const patientNameInput = document.getElementById('patientName');
-        if (patientNameInput) {
-            patientNameInput.focus();
-        }
-    }
 
-    function BEToJSDate(beDateString) {
-        if (!beDateString || !beDateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) return null;
-        const parts = beDateString.split('/');
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const beYear = parseInt(parts[2], 10);
-        if (isNaN(day) || isNaN(month) || isNaN(beYear) || month < 0 || month > 11 || day < 1 || day > 31) return null;
-        const ceYear = beYear - 543;
-        const date = new Date(ceYear, month, day);
-        if (date.getFullYear() !== ceYear || date.getMonth() !== month || date.getDate() !== day) {
-            return null;
-        }
-        return date;
-    }
 
-    function JSDateToBE(jsDate) {
-        if (!jsDate || !(jsDate instanceof Date) || isNaN(jsDate)) return '';
-        const day = String(jsDate.getDate()).padStart(2, '0');
-        const month = String(jsDate.getMonth() + 1).padStart(2, '0');
-        const ceYear = jsDate.getFullYear();
-        const beYear = ceYear + 543;
-        return `${day}/${month}/${beYear}`;
-    }
 
-    function isValidBEDate(beDateString) {
-        return BEToJSDate(beDateString) instanceof Date;
-    }
-
-    function autoFormatDate(event) {
-        const input = event.target;
-        let value = input.value.replace(/\D/g, '');
-
-        if (event.inputType === 'deleteContentBackward' && (input.value.slice(-1) === '/')) {
-            input.value = input.value.slice(0, -1);
-            return;
-        }
-        if (value.length > 8) value = value.slice(0, 8);
-
-        let formattedValue = '';
-        if (value.length > 0) formattedValue += value.slice(0, 2);
-        if (value.length >= 3) formattedValue += '/' + value.slice(2, 4);
-        if (value.length >= 5) formattedValue += '/' + value.slice(4, 8);
-        input.value = formattedValue;
-
-        if (event.type === 'blur') {
-            if (input.value.length > 0 && (input.value.length < 10 || !isValidBEDate(input.value))) {
-                input.style.borderColor = 'red';
-            } else {
-                input.style.borderColor = '';
-            }
-        }
-    }
 
     function initializeDateInputs() {
         const form = document.getElementById('referralForm');
@@ -139,23 +83,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function autoFormatNationalId(event) {
-        const input = event.target;
-        let value = input.value.replace(/\D/g, '');
-        if (value.length > 13) value = value.slice(0, 13);
-        let formattedValue = '';
-        if (value.length > 0) formattedValue += value.slice(0, 1);
-        if (value.length >= 2) formattedValue += '-' + value.slice(1, 5);
-        if (value.length >= 6) formattedValue += '-' + value.slice(5, 10);
-        if (value.length >= 11) formattedValue += '-' + value.slice(10, 12);
-        if (value.length >= 13) formattedValue += '-' + value.slice(12, 13);
-        input.value = formattedValue;
-        input.maxLength = 17; // 1-2345-67890-12-3
-    }
+
 
     function initializeNationalIdInput() {
         const nationalIdInput = document.getElementById('nationalId');
-        if (nationalIdInput) nationalIdInput.addEventListener('input', autoFormatNationalId);
+        if (nationalIdInput) nationalIdInput.addEventListener('input', window.Common.autoFormatNationalId);
     }
 
     function autoFormatNapId(event) {
@@ -495,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 durationInput.disabled = !isChecked;
                 if (isChecked) {
                     if (!dateInput.value) {
-                        dateInput.value = JSDateToBE(new Date());
+                        dateInput.value = window.Common.formatDate(new Date(), window.Common.ERA_BE);
                     }
                     // durationInput already defaults to 60 from HTML
                 } else {
@@ -510,71 +442,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function saveDoctorInfo() {
-        let sharedInfo = {};
-        try {
-            const existingInfo = localStorage.getItem('sharedDoctorInfo');
-            if (existingInfo) {
-                sharedInfo = JSON.parse(existingInfo);
-            }
-        } catch (e) {
-            console.error("Error reading sharedDoctorInfo for update:", e);
-            sharedInfo = {};
-        }
 
-        sharedInfo.sharedDoctorNameThai = document.getElementById('doctorNameThai').value;
-        sharedInfo.sharedDoctorNameEnglish = document.getElementById('doctorNameEnglish').value.toUpperCase();
-        sharedInfo.sharedMedicalLicense = document.getElementById('medicalLicense').value;
-
-        localStorage.setItem('sharedDoctorInfo', JSON.stringify(sharedInfo));
-    }
-
-    function loadDoctorInfo() {
-        const savedInfo = localStorage.getItem('sharedDoctorInfo');
-        if (savedInfo) {
-            try {
-                const doctorInfo = JSON.parse(savedInfo);
-                document.getElementById('doctorNameThai').value = doctorInfo.sharedDoctorNameThai || '';
-                document.getElementById('doctorNameEnglish').value = doctorInfo.sharedDoctorNameEnglish || '';
-                document.getElementById('medicalLicense').value = doctorInfo.sharedMedicalLicense || '';
-            } catch (e) {
-                console.error("Error parsing sharedDoctorInfo:", e);
-                document.getElementById('doctorNameThai').value = '';
-                document.getElementById('doctorNameEnglish').value = '';
-                document.getElementById('medicalLicense').value = '';
-            }
-        }
-        const doctorNameThaiEl = document.getElementById('doctorNameThai');
-        const doctorNameEnglishEl = document.getElementById('doctorNameEnglish');
-        const medicalLicenseEl = document.getElementById('medicalLicense');
-
-        if (doctorNameThaiEl) doctorNameThaiEl.addEventListener('change', saveDoctorInfo);
-        if (doctorNameEnglishEl) doctorNameEnglishEl.addEventListener('change', saveDoctorInfo);
-        if (medicalLicenseEl) medicalLicenseEl.addEventListener('change', saveDoctorInfo);
-    }
-
-    function handleFormSubmitOnEnter() {
-        document.getElementById('referralForm').addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                const activeElement = document.activeElement;
-
-                if (activeElement && activeElement.tagName === 'TEXTAREA') {
-                    // For TEXTAREA elements, allow all Enter key combinations (Enter, Ctrl+Enter, Shift+Enter)
-                    // to perform their default action (typically inserting a newline).
-                    // We stop this specific event handler from proceeding to submit the form.
-                    return;
-                }
-
-                // If the active element is NOT a TEXTAREA (where we returned above),
-                // AND it's not a button or submit type input:
-                if (activeElement && activeElement.type !== 'button' && activeElement.type !== 'submit') {
-                    event.preventDefault(); // Prevent default action (like native form submission on Enter for some inputs)
-                    previewLetter();        // Call our custom preview/submit function
-                }
-                // If it's a button or submit input, Enter will trigger its default click/submit action.
-            }
-        });
-    }
 
     function previewLetter() {
         const form = document.getElementById('referralForm');

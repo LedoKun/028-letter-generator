@@ -3,13 +3,13 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeDateInputs();
     initializeSalutationField();
     initializeNationalIdInput();
-    loadDoctorInfo();
+    window.Common.loadDoctorInfo('doctorNameThai', 'doctorNameEnglish', 'medicalLicense');
     setupOptionalSections(); // This function will be modified
     setupAdvisedRestCalculation();
-    autoFocusPatientName();
+    window.Common.autoFocusPatientName();
 
     document.getElementById('previewButton').addEventListener('click', previewMedicalCertificate);
-    document.getElementById('medicalCertificateForm').addEventListener('keydown', handleFormSubmitOnEnter);
+    window.Common.handleFormSubmitOnEnter('medicalCertificateForm', previewMedicalCertificate);
 
     const doctorNameEnglishCertInput = document.getElementById('doctorNameEnglish');
     if (doctorNameEnglishCertInput) {
@@ -19,10 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- Helper Functions ---
-    function autoFocusPatientName() {
-        const patientNameInput = document.getElementById('patientName');
-        if (patientNameInput) patientNameInput.focus();
-    }
+
 
     function initializeDateInputs() {
         const form = document.getElementById('medicalCertificateForm');
@@ -73,26 +70,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function autoFormatNationalId(event) {
-        const input = event.target;
-        let value = input.value.replace(/\D/g, '');
-        if (value.length > 13) value = value.slice(0, 13);
 
-        let formattedValue = '';
-        if (value.length > 0) formattedValue += value.slice(0, 1);
-        if (value.length >= 2) formattedValue += '-' + value.slice(1, 5);
-        if (value.length >= 6) formattedValue += '-' + value.slice(5, 10);
-        if (value.length >= 11) formattedValue += '-' + value.slice(10, 12);
-        if (value.length >= 13) formattedValue += '-' + value.slice(12, 13);
-
-        input.value = formattedValue;
-        input.maxLength = 17;
-    }
 
     function initializeNationalIdInput() {
         const nationalIdInput = document.getElementById('nationalIdNumber');
         if (nationalIdInput) {
-            nationalIdInput.addEventListener('input', autoFormatNationalId);
+            nationalIdInput.addEventListener('input', window.Common.autoFormatNationalId);
         }
     }
 
@@ -214,55 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function saveDoctorInfo() {
-        let sharedInfo = {};
-        try {
-            const existingInfo = localStorage.getItem('sharedDoctorInfo');
-            if (existingInfo) sharedInfo = JSON.parse(existingInfo);
-        } catch (e) { console.error("Error reading sharedDoctorInfo for update:", e); sharedInfo = {}; }
 
-        sharedInfo.sharedDoctorNameThai = document.getElementById('doctorNameThai').value;
-        sharedInfo.sharedDoctorNameEnglish = document.getElementById('doctorNameEnglish').value.toUpperCase();
-        sharedInfo.sharedMedicalLicense = document.getElementById('medicalLicense').value;
-        localStorage.setItem('sharedDoctorInfo', JSON.stringify(sharedInfo));
-    }
-
-    function loadDoctorInfo() {
-        const savedInfo = localStorage.getItem('sharedDoctorInfo');
-        if (savedInfo) {
-            try {
-                const doctorInfo = JSON.parse(savedInfo);
-                document.getElementById('doctorNameThai').value = doctorInfo.sharedDoctorNameThai || '';
-                document.getElementById('doctorNameEnglish').value = doctorInfo.sharedDoctorNameEnglish || '';
-                document.getElementById('medicalLicense').value = doctorInfo.sharedMedicalLicense || '';
-            } catch (e) {
-                console.error("Error parsing sharedDoctorInfo:", e);
-                document.getElementById('doctorNameThai').value = '';
-                document.getElementById('doctorNameEnglish').value = '';
-                document.getElementById('medicalLicense').value = '';
-            }
-        }
-        ['doctorNameThai', 'doctorNameEnglish', 'medicalLicense'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener('change', saveDoctorInfo);
-        });
-    }
-
-    function handleFormSubmitOnEnter(event) {
-        if (event.key === 'Enter') {
-            const activeElement = document.activeElement;
-            // Allow Enter and Shift+Enter (or any combo) inside textareas to insert newlines normally
-            if (activeElement && activeElement.tagName === 'TEXTAREA') {
-                return; // do not intercept
-            }
-            // For other inputs (not buttons), treat Enter as preview
-            if (activeElement && activeElement.type !== 'button' && activeElement.type !== 'submit') {
-                event.preventDefault();
-                previewMedicalCertificate();
-            }
-            // Buttons keep default behavior
-        }
-    }
 
     function previewMedicalCertificate() {
         const form = document.getElementById('medicalCertificateForm');

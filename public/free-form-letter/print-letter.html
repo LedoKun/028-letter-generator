@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Free Form Letter</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@400;700&family=Noto+Sans:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans Thai Looped', 'Noto Sans', sans-serif;
+            background-color: white;
+            color: black;
+            font-size: 14px;
+            /* Base size */
+            line-height: 1.5;
+        }
+
+        .print-container {
+            max-width: 210mm;
+            /* A4 width */
+            margin: 0 auto;
+            padding: 20mm;
+            background: white;
+            min-height: 297mm;
+            /* A4 height */
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        @media print {
+            body {
+                background: none;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-container {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                padding: 0;
+                /* Let page margins handle it or set specific print margins */
+                box-shadow: none;
+                min-height: auto;
+            }
+
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        .header-logo {
+            height: 80px;
+            width: auto;
+        }
+
+        .content-line {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .content-label {
+            font-weight: bold;
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+
+        .content-value {
+            flex-grow: 1;
+        }
+
+        .letter-body {
+            white-space: pre-wrap;
+            text-align: justify;
+            margin-top: 20px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="print-container shadow-lg">
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-6 border-b pb-4">
+            <div class="flex items-center">
+                <img src="/media/logo.png" alt="Hospital Logo" class="header-logo mr-4 object-contain">
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">โรงพยาบาลสมเด็จพระยุพราชเดชอุดม</h1>
+                    <p class="text-sm text-gray-600">Detudom Crown Prince Hospital</p>
+                    <p class="text-xs text-gray-500">399 หมู่ 19 ต.เมืองเดช อ.เดชอุดม จ.อุบลราชธานี 34160</p>
+                    <p class="text-xs text-gray-500">Tel: 045-361-133 Fax: 045-361-133 ext. 103</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Title -->
+        <div class="text-center mb-8">
+            <h2 id="printDocumentTitle" class="text-2xl font-bold uppercase underline decoration-2 underline-offset-4">
+            </h2>
+        </div>
+
+        <!-- Date -->
+        <div class="flex justify-end mb-8">
+            <div class="text-right">
+                <p>Date: <span id="printDate" class="font-medium"></span></p>
+            </div>
+        </div>
+
+        <!-- Addressee -->
+        <div id="printAddresseeContainer" class="mb-6">
+            <p>To: <span id="printAddressee" class="font-medium"></span></p>
+        </div>
+
+        <!-- Body -->
+        <div id="printBody" class="letter-body text-base"></div>
+
+        <!-- Footer / Signature -->
+        <div class="mt-16 flex justify-end">
+            <div class="text-center" style="min-width: 250px;">
+                <div class="mb-8 border-b border-gray-400 w-full mx-auto"></div> <!-- Signature Line -->
+                <p class="font-bold text-lg">( <span id="printDoctorNameEnglish"></span> )</p>
+                <p class="text-md"><span id="printDoctorNameThai"></span></p>
+                <p class="text-sm text-gray-600">Medical License No. <span id="printMedicalLicense"></span></p>
+                <p class="text-sm text-gray-600">Attending Physician</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const data = JSON.parse(localStorage.getItem('freeFormLetterDataForPrint'));
+            if (!data) {
+                document.body.innerHTML = '<p class="text-center text-red-500 mt-10">No data found. Please go back and generate the letter again.</p>';
+                return;
+            }
+
+            document.getElementById('printDocumentTitle').textContent = data.documentTitle || 'LETTER';
+            document.getElementById('printDate').textContent = data.letterDate || '';
+
+            if (data.addressee) {
+                document.getElementById('printAddressee').textContent = data.addressee;
+            } else {
+                document.getElementById('printAddresseeContainer').style.display = 'none';
+            }
+
+            document.getElementById('printBody').textContent = data.letterBody || '';
+
+            document.getElementById('printDoctorNameThai').textContent = data.doctorNameThai || '';
+            document.getElementById('printDoctorNameEnglish').textContent = data.doctorNameEnglish || '';
+            document.getElementById('printMedicalLicense').textContent = data.medicalLicense || '';
+
+            // Auto print
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        });
+    </script>
+</body>
+
+</html>
