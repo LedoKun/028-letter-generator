@@ -1,170 +1,315 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Print Free Form Letter</title>
+    <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@400;700&family=Noto+Sans:wght@400;700&display=swap"
         rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: 'Noto Sans Thai Looped', 'Noto Sans', sans-serif;
-            background-color: white;
-            color: black;
-            font-size: 14px;
-            /* Base size */
-            line-height: 1.5;
-        }
-
-        .print-container {
-            max-width: 210mm;
-            /* A4 width */
-            margin: 0 auto;
-            padding: 20mm;
-            background: white;
-            min-height: 297mm;
-            /* A4 height */
-            position: relative;
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
-        @media print {
-            body {
-                background: none;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+        body {
+            margin: 0;
+            font-family: 'Noto Sans', sans-serif;
+            color: #000;
+            background-color: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.35;
+        }
+
+        .thai-font {
+            font-family: 'Noto Sans Thai Looped', 'Noto Sans', sans-serif;
+        }
+
+        @page {
+            size: A4;
+            margin: 22mm 15mm 30mm 15mm;
+
+            @top-center {
+                content: element(pageHeaderRunning);
+                vertical-align: top;
             }
 
-            .print-container {
-                width: 100%;
-                max-width: none;
-                margin: 0;
-                padding: 0;
-                /* Let page margins handle it or set specific print margins */
-                box-shadow: none;
-                min-height: auto;
+            @bottom-left {
+                content: element(pageFooterRunning);
+                vertical-align: bottom;
+                text-align: left;
             }
+        }
 
-            @page {
-                size: A4;
-                margin: 20mm;
-            }
+        .page-header-running-container {
+            position: running(pageHeaderRunning);
+            display: flex;
+            align-items: baseline;
+            width: 100%;
+            padding-bottom: 4mm;
+            border-bottom: 0.5px solid #ccc;
+            font-size: 8pt;
+            columns: 2;
+            column-gap: 1px;
+        }
 
-            .no-print {
-                display: none;
-            }
+        .header-logo-column {
+            width: auto;
+            max-width: 350px;
+            flex-shrink: 0;
+            margin-right: 5mm;
         }
 
         .header-logo {
-            height: 80px;
-            width: auto;
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
-        .content-line {
-            display: flex;
-            align-items: baseline;
-            margin-bottom: 4px;
+        .header-text-column {
+            flex-grow: 1;
+            text-align: right;
+            line-height: 1.3;
         }
 
-        .content-label {
+        .clinic-name-main {
             font-weight: bold;
-            margin-right: 8px;
+            font-size: 11pt;
+        }
+
+        .clinic-name-sub {
+            font-size: 9pt;
+            margin-top: 0.5mm;
+        }
+
+        .page-footer-running-container {
+            position: running(pageFooterRunning);
+            font-size: 8pt;
+            line-height: 1.25;
+            text-align: left;
+            width: 100%;
+            border-top: 0.5px solid #666;
+            padding-top: 1mm;
+            padding-bottom: 15mm;
+        }
+
+        .footer-address-english {
             white-space: nowrap;
         }
 
-        .content-value {
-            flex-grow: 1;
+        .footer-page-number-container .page-info-label {
+            font-weight: bold;
+        }
+
+        .footer-page-number-container .page-number-display::after {
+            content: counter(page) " / " counter(pages);
+            font-weight: bold;
         }
 
         .letter-body {
+            font-size: 11pt;
+            line-height: 1.55;
+            padding-top: 12mm;
+        }
+
+        .letter-body p {
+            margin-bottom: 0.8em;
+        }
+
+        .letter-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16pt;
+            margin-bottom: 1em;
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .meta-line {
+            text-align: right;
+            margin: 0 0 0.2em 0;
+            font-size: 10pt;
+        }
+
+        .meta-line .label {
+            font-weight: bold;
+        }
+
+        .addressee-line {
+            text-align: left;
+            margin-top: 1em;
+            font-size: 11pt;
+        }
+
+        .letter-text {
             white-space: pre-wrap;
             text-align: justify;
-            margin-top: 20px;
-            margin-bottom: 40px;
-            line-height: 1.8;
+            margin-top: 1em;
+            margin-bottom: 2em;
+        }
+
+        .signature-section {
+            margin-top: 3em;
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        .signature-section p {
+            margin-bottom: 0.2em;
+        }
+
+        .signature-line {
+            display: inline-block;
+            width: 260px;
+            border-bottom: 1px solid #666;
+            height: 0.2em;
+            margin-left: 6px;
+        }
+
+        .signature-name {
+            margin-top: 1.2em;
+            margin-bottom: 0.2em;
+            font-weight: bold;
+        }
+
+        .signature-name-thai {
+            margin: 0.1em 0;
+        }
+
+        .signature-meta {
+            margin: 0;
+            font-size: 10pt;
+            color: #444;
+        }
+
+        .developer-error-message {
+            color: red;
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid red;
+            margin: 20px;
         }
     </style>
 </head>
 
-<body class="bg-gray-100">
-
-    <div class="print-container shadow-lg">
-        <!-- Header -->
-        <div class="flex justify-between items-start mb-6 border-b pb-4">
-            <div class="flex items-center">
-                <img src="/media/logo.png" alt="Hospital Logo" class="header-logo mr-4 object-contain">
-                <div>
-                    <h1 class="text-xl font-bold text-gray-800">โรงพยาบาลสมเด็จพระยุพราชเดชอุดม</h1>
-                    <p class="text-sm text-gray-600">Detudom Crown Prince Hospital</p>
-                    <p class="text-xs text-gray-500">399 หมู่ 19 ต.เมืองเดช อ.เดชอุดม จ.อุบลราชธานี 34160</p>
-                    <p class="text-xs text-gray-500">Tel: 045-361-133 Fax: 045-361-133 ext. 103</p>
-                </div>
+<body>
+    <div class="page-header-running-container">
+        <div class="header-logo-column"><img src="/media/logo/logo.png" alt="Logo" class="header-logo"></div>
+        <div class="header-text-column thai-font">
+            <div class="clinic-name-main">ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี<br>PUBLIC HEALTH CENTER 28 KRUNG THON BURI
             </div>
+            <div class="clinic-name-sub">สำนักอนามัย / Health Department<br>กรุงเทพมหานคร / Bangkok Metropolitan
+                Administration</div>
         </div>
+    </div>
 
-        <!-- Document Title -->
-        <div class="text-center mb-8">
-            <h2 id="printDocumentTitle" class="text-2xl font-bold uppercase underline decoration-2 underline-offset-4">
-            </h2>
-        </div>
+    <div class="page-footer-running-container thai-font">
+        <div>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี 124/16 ถนนกรุงธนบุรี แขวงบางลำภูล่าง เขตคลองสาน กรุงเทพฯ 10600</div>
+        <div class="footer-address-english">Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong
+            San, Bangkok 10600, Thailand</div>
+        <div>โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com</div>
+        <div class="footer-page-number-container">พิมพ์เมื่อ / Printed on: <span class="printed-on-datetime"></span>
+            &middot; <span class="page-info-label">หน้า / Page: </span><span class="page-number-display"></span></div>
+    </div>
 
-        <!-- Date -->
-        <div class="flex justify-end mb-8">
-            <div class="text-right">
-                <p>Date: <span id="printDate" class="font-medium"></span></p>
-            </div>
-        </div>
-
-        <!-- Addressee -->
-        <div id="printAddresseeContainer" class="mb-6">
-            <p>To: <span id="printAddressee" class="font-medium"></span></p>
-        </div>
-
-        <!-- Body -->
-        <div id="printBody" class="letter-body text-base"></div>
-
-        <!-- Footer / Signature -->
-        <div class="mt-16 flex justify-end">
-            <div class="text-center" style="min-width: 250px;">
-                <div class="mb-8 border-b border-gray-400 w-full mx-auto"></div> <!-- Signature Line -->
-                <p class="font-bold text-lg">( <span id="printDoctorNameEnglish"></span> )</p>
-                <p class="text-md"><span id="printDoctorNameThai"></span></p>
-                <p class="text-sm text-gray-600">Medical License No. <span id="printMedicalLicense"></span></p>
-                <p class="text-sm text-gray-600">Attending Physician</p>
-            </div>
+    <div id="letterContent" class="letter-body">
+        <h3 id="printDocumentTitle" class="letter-title thai-font"></h3>
+        <p class="meta-line"><span class="label">วันที่ / Date:</span> <span id="printDate"></span></p>
+        <p id="addresseeLine" class="addressee-line thai-font"><span class="label">ถึง / To:</span> <span
+                id="printAddressee"></span></p>
+        <div id="printBody" class="letter-text thai-font"></div>
+        <div class="signature-section thai-font">
+            <p><span class="label">ลงชื่อ / Signature</span> <span class="signature-line"></span></p><br><br>
+            <p class="signature-name">( <span id="printDoctorNameEnglish"></span> )</p>
+            <p class="signature-name-thai"><span id="printDoctorNameThai"></span></p>
+            <p class="signature-meta">เลขที่ใบประกอบวิชาชีพ / Medical License No. <span
+                    id="printMedicalLicense"></span></p>
+            <p class="signature-meta">แพทย์ / Attending Physician</p>
         </div>
     </div>
 
     <script>
+        function formatDate(dateObj, formatType = "CE") {
+            if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const yCE = dateObj.getFullYear();
+            const yBE = yCE + 543;
+            return formatType === "BE" ? `${d}/${m}/${yBE}` : `${d}/${m}/${yCE}`;
+        }
+
+        function formatTimeISO(dateObj) {
+            if (!(dateObj instanceof Date) || isNaN(dateObj)) return 'N/A';
+            const h = String(dateObj.getHours()).padStart(2, '0');
+            const min = String(dateObj.getMinutes()).padStart(2, '0');
+            const s = String(dateObj.getSeconds()).padStart(2, '0');
+            return `${h}:${min}:${s}`;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            const data = JSON.parse(localStorage.getItem('freeFormLetterDataForPrint'));
+            let data = null;
+            try {
+                const stored = localStorage.getItem('freeFormLetterDataForPrint');
+                if (stored) data = JSON.parse(stored);
+            } catch (e) {
+                console.error("Error parsing free form letter data:", e);
+            }
+
             if (!data) {
-                document.body.innerHTML = '<p class="text-center text-red-500 mt-10">No data found. Please go back and generate the letter again.</p>';
+                document.body.innerHTML = '<p class="developer-error-message">No data found. Please go back and generate the letter again.</p>';
                 return;
             }
 
-            document.getElementById('printDocumentTitle').textContent = data.documentTitle || 'LETTER';
-            document.getElementById('printDate').textContent = data.letterDate || '';
+            const getText = (val) => (typeof val === 'string') ? val.trim() : '';
 
-            if (data.addressee) {
-                document.getElementById('printAddressee').textContent = data.addressee;
+            document.getElementById('printDocumentTitle').textContent = getText(data.documentTitle) || 'LETTER';
+            document.getElementById('printDate').textContent = getText(data.letterDate);
+
+            const addressee = getText(data.addressee);
+            if (addressee) {
+                document.getElementById('printAddressee').textContent = addressee;
             } else {
-                document.getElementById('printAddresseeContainer').style.display = 'none';
+                const addresseeLine = document.getElementById('addresseeLine');
+                if (addresseeLine) addresseeLine.style.display = 'none';
             }
 
             document.getElementById('printBody').textContent = data.letterBody || '';
+            document.getElementById('printDoctorNameThai').textContent = getText(data.doctorNameThai);
+            document.getElementById('printDoctorNameEnglish').textContent = getText(data.doctorNameEnglish);
+            document.getElementById('printMedicalLicense').textContent = getText(data.medicalLicense);
 
-            document.getElementById('printDoctorNameThai').textContent = data.doctorNameThai || '';
-            document.getElementById('printDoctorNameEnglish').textContent = data.doctorNameEnglish || '';
-            document.getElementById('printMedicalLicense').textContent = data.medicalLicense || '';
+            try {
+                const printedDateTimeSpans = document.querySelectorAll('.printed-on-datetime');
+                if (printedDateTimeSpans.length > 0) {
+                    const today = new Date();
+                    const printedDateCE = formatDate(today, "CE");
+                    const printedTime = formatTimeISO(today);
+                    printedDateTimeSpans.forEach(span => {
+                        span.innerHTML = `<strong>${printedDateCE} ${printedTime}</strong>`;
+                    });
+                } else { console.warn(".printed-on-datetime span not found for free form letter."); }
+            } catch (e) { console.error("Error setting printed-on date and time for free form letter:", e); }
 
-            // Auto print
-            setTimeout(() => {
-                window.print();
-            }, 500);
+            if (!window.pagedJsHandlerRegistered) {
+                class PrintHandler extends Paged.Handler {
+                    constructor(c, p, ca) { super(c, p, ca); }
+                    afterPreview(pages) {
+                        if (!window.pagedJsPrintTriggered) {
+                            window.pagedJsPrintTriggered = true;
+                            setTimeout(() => { window.print(); }, 1200);
+                        }
+                    }
+                }
+                Paged.registerHandlers(PrintHandler);
+                window.pagedJsHandlerRegistered = true;
+            }
         });
     </script>
 </body>
