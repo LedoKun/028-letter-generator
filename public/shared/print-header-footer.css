@@ -1,0 +1,125 @@
+/* ========================================
+   SHARED PRINT HEADER/FOOTER CSS
+   ======================================== 
+   Styling classes only - no @page rules
+   (each template defines its own @page)
+   
+   Used by all four print templates:
+   - medical-certificate
+   - referral
+   - free-form-letter  
+   - certificate-medication-letter
+*/
+
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+}
+
+/* ========================================
+   HEADER STYLING
+   ======================================== */
+.page-header-running-container {
+    position: running(pageHeaderRunning);
+    display: flex;
+    align-items: baseline;
+    width: 100%;
+    padding-bottom: 4mm;
+    border-bottom: 0.5px solid #999;
+    font-size: 8pt;
+    line-height: 1.35;
+    font-family: 'Noto Sans', 'Noto Sans Thai Looped', sans-serif;
+    box-sizing: border-box;
+}
+
+.header-logo-column {
+    width: auto;
+    max-width: 350px;
+    flex-shrink: 0;
+    margin-right: 5mm;
+}
+
+.header-logo {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.header-text-column {
+    flex-grow: 1;
+    text-align: right;
+    line-height: 1.3;
+}
+
+.clinic-name-main {
+    font-weight: bold;
+    font-size: 11pt;
+    line-height: 1.35;
+}
+
+.clinic-name-sub {
+    font-size: 9pt;
+    margin-top: 0.5mm;
+    line-height: 1.35;
+}
+
+/* ========================================
+   FOOTER STYLING
+   ======================================== */
+.page-footer-running-container {
+    position: running(pageFooterRunning);
+    font-size: 8pt;
+    line-height: 1.25;
+    text-align: left;
+    width: 100%;
+    border-top: 0.5px solid #999;
+    padding-top: 4mm;
+    padding-bottom: 0;
+    font-family: 'Noto Sans', 'Noto Sans Thai Looped', sans-serif;
+    box-sizing: border-box;
+}
+
+.page-footer-running-container * {
+    font-size: 8pt;
+    line-height: 1.25;
+}
+
+.page-footer-running-container > div {
+    margin-bottom: 1mm;
+}
+
+.footer-address-english {
+    white-space: nowrap;
+}
+
+.footer-page-number-container {
+    font-size: 8pt;
+    line-height: 1.25;
+}
+
+.footer-page-number-container .page-info-label {
+    font-weight: bold;
+}
+
+.footer-page-number-container .page-number-display::after {
+    content: counter(page) " / " counter(pages);
+    font-weight: bold;
+}
+
+/* ========================================
+   UTILITY STYLES
+   ======================================== */
+.highlighted-input {
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+}
+
+.compact-text {
+    margin-bottom: 0.1em !important;
+    line-height: 1.1;
+}
