@@ -464,14 +464,25 @@
             }
 
 
-            // Signature section - Assuming doctor's details are mandatory from the form
-            // If they were optional and empty, fv() would return '', leading to "( / )" or "Medical License No.:"
+            // Signature section - conditionally render doctor details if present
             contentHtml += `<div class="signature-section thai-font">`;
             contentHtml += `<p style="margin-top: 1em;">ลงชื่อ / Signature <span class="signature-line"></span></p><br><br><br>`;
             contentHtml += `<p>`;
-            contentHtml += `(<span class="doctor-signature-name doctor-signature-name-bold">${fv(doctorNameThai)} / ${fv(doctorNameEnglish)}</span>)<br>`;
-            contentHtml += `แพทย์ / Medical Officer<br>`;
-            contentHtml += `เลขที่ใบประกอบวิชาชีพ / Medical License No.: <span class="medical-license-bold">${fv(medicalLicense)}</span><br>`;
+            
+            // Conditionally render doctor name - only if at least one name exists
+            if (doctorNameThai || doctorNameEnglish) {
+                const thaiPart = fv(doctorNameThai);
+                const englishPart = fv(doctorNameEnglish);
+                const nameSeparator = (thaiPart && englishPart) ? ' / ' : '';
+                contentHtml += `(<span class="doctor-signature-name doctor-signature-name-bold">${doctorNameThai || ''}${nameSeparator}${doctorNameEnglish || ''}</span>)<br>`;
+                contentHtml += `แพทย์ / Medical Officer<br>`;
+            }
+            
+            // Only render medical license line if it has a value
+            if (medicalLicense) {
+                contentHtml += `เลขที่ใบประกอบวิชาชีพ / Medical License No.: <span class="medical-license-bold">${fv(medicalLicense)}</span><br>`;
+            }
+            
             contentHtml += `ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri`;
             contentHtml += `</p>`;
             contentHtml += `</div>`;

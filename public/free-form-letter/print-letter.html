@@ -369,11 +369,18 @@
             contentHtml += `<div class="signature-section">`;
             contentHtml += `<p class="thai-font">ขอแสดงความนับถือ / Sincerely,</p><br><br>`;
 
-            const doctorNameDisplay = doctorNameEnglishUpper
-                ? `(${hd(doctorNameThai)} / ${hd(doctorNameEnglishUpper)})`
-                : `(${hd(doctorNameThai)})`;
+            // Conditionally render doctor details if present
+            if (doctorNameThai || doctorNameEnglishUpper) {
+                const thaiPartFree = doctorNameThai ? `${hd(doctorNameThai)}` : '';
+                const englishPartFree = doctorNameEnglishUpper ? `${hd(doctorNameEnglishUpper)}` : '';
+                const nameSepFree = (thaiPartFree && englishPartFree) ? ' / ' : '';
+                contentHtml += `<p class="thai-font">(${thaiPartFree}${nameSepFree}${englishPartFree})<br>`;
+                if (medicalLicense) {
+                    contentHtml += `เลขที่ใบประกอบวิชาชีพ / Medical License No.: ${hd(medicalLicense)}<br>`;
+                }
+                contentHtml += `ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri</p>`;
+            }
 
-            contentHtml += `<p class="thai-font">${doctorNameDisplay}<br>เลขที่ใบประกอบวิชาชีพ / Medical License No.: ${hd(medicalLicense)}<br>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri</p>`;
             contentHtml += `</div>`;
 
             letterContainer.innerHTML = contentHtml;

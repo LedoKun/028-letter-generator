@@ -486,7 +486,23 @@
                 contentHtml += `<p style="margin-top: 1.5em;" class="thai-font">กรุณาติดต่อกลับหากต้องการข้อมูลเพิ่มเติม / Please contact us if you require any additional information</p>`;
                 contentHtml += `<div class="signature-section">`;
                 contentHtml += `<p class="thai-font">ขอแสดงความนับถือ / Sincerely,</p><br><br>`;
-                contentHtml += `<p class="thai-font">(${hd(letterData.doctorNameThai)} / ${hd(letterData.doctorNameEnglish.toUpperCase())})<br>เลขที่ใบประกอบวิชาชีพ / Medical License No.: ${hd(letterData.medicalLicense)}<br>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri</p>`;
+                
+                // Conditionally render doctor details if present
+                const doctorThaiReferral = letterData.doctorNameThai || '';
+                const doctorEnglishReferral = (letterData.doctorNameEnglish || '').toUpperCase();
+                const medicalLicenseReferral = letterData.medicalLicense || '';
+                
+                if (doctorThaiReferral || doctorEnglishReferral) {
+                    const thaiPartRef = doctorThaiReferral ? `${hd(doctorThaiReferral)}` : '';
+                    const englishPartRef = doctorEnglishReferral ? `${hd(doctorEnglishReferral)}` : '';
+                    const nameSepRef = (thaiPartRef && englishPartRef) ? ' / ' : '';
+                    contentHtml += `<p class="thai-font">(${thaiPartRef}${nameSepRef}${englishPartRef})<br>`;
+                    if (medicalLicenseReferral) {
+                        contentHtml += `เลขที่ใบประกอบวิชาชีพ / Medical License No.: ${hd(medicalLicenseReferral)}<br>`;
+                    }
+                    contentHtml += `ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri</p>`;
+                }
+                
                 contentHtml += `</div>`;
                 if (letterData.additionalNotes && String(letterData.additionalNotes).trim()) {
                     contentHtml += `<p class="thai-font" style="margin-top: 1em;"><strong>หมายเหตุเพิ่มเติม / Additional Notes:</strong> ${hd(letterData.additionalNotes)}</p>`;

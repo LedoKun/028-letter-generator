@@ -292,7 +292,14 @@
                 contentHtml += `<p style="text-align:right; color:#666; font-size:9pt; margin-top: 0;">Date format: DD/MM/YYYY</p>`;
 
                 contentHtml += `<p>To whom it may concern,</p>`;
-                contentHtml += `<p>${hi(patientFullNameDisplayUpper)}, a ${hi(nationalityDisplayUpper)} national holding passport number ${hi(passportNumberDisplayUpper)}, born on ${hi(dobCE)}, is under our care at Public Health Center 28 Krung Thon Buri. Ongoing medications are required for treatment and wellbeing.</p>`;
+                
+                // Conditionally render passport number if present
+                let passportClause = '';
+                if (certData.passportNumber && String(certData.passportNumber).trim()) {
+                    passportClause = `, holding passport number ${hi(passportNumberDisplayUpper)}`;
+                }
+                
+                contentHtml += `<p>${hi(patientFullNameDisplayUpper)}, a ${hi(nationalityDisplayUpper)} national${passportClause}, born on ${hi(dobCE)}, is under our care at Public Health Center 28 Krung Thon Buri. Ongoing medications are required for treatment and wellbeing.</p>`;
                 contentHtml += `<p>This certifies the need to carry the following medications for personal use.</p>`;
 
                 if (certData.includeMedications && certData.artMedications && certData.artMedications.length > 0) {
