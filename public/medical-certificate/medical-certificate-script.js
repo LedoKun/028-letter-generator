@@ -207,9 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const requiredFields = [
             { id: 'letterDate', name: 'วันที่ออกเอกสาร / Certificate Date' },
-            { id: 'patientName', name: 'ชื่อ-นามสกุลผู้ป่วย / Patient Full Name' },
-            { id: 'doctorNameThai', name: 'ชื่อแพทย์ (ไทย) / Doctor Name (Thai)' },
-            { id: 'medicalLicense', name: 'เลขที่ใบประกอบวิชาชีพ / Medical License No.' }
+            { id: 'patientName', name: 'ชื่อ-นามสกุลผู้ป่วย / Patient Full Name' }
         ];
 
         requiredFields.forEach(fieldInfo => {
