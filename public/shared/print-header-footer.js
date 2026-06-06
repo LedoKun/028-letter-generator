@@ -7,7 +7,7 @@
    Called by all four print templates.
 */
 
-(function() {
+(function () {
     function createHeaderFooter() {
         if (document.querySelector('.page-header-running-container')) return;
 
@@ -54,7 +54,7 @@
         var el = document.querySelector('.printed-on-datetime');
         if (el) {
             var d = new Date();
-            var z = function(n) { return (n < 10 ? '0' : '') + n; };
+            var z = function (n) { return (n < 10 ? '0' : '') + n; };
             el.textContent = z(d.getDate()) + '/' + z(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + z(d.getHours()) + ':' + z(d.getMinutes());
         }
     }

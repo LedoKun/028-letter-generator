@@ -44,6 +44,8 @@
 
         .required-asterisk {
             color: #ef4444;
+            font-weight: 700;
+            margin-left: 0.125rem;
         }
     </style>
 </head>
@@ -59,7 +61,8 @@
         <form id="freeFormLetterForm" class="space-y-6">
 
             <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รายละเอียดจดหมาย / Letter Details</legend>
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รายละเอียดจดหมาย / Letter Details
+                </legend>
                 <div class="grid grid-cols-1 gap-4 mt-2">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -69,8 +72,10 @@
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                         </div>
                         <div>
-                            <label for="yearEra" class="block text-sm font-medium thai-font">รูปแบบปี / Year format</label>
-                            <select id="yearEra" name="yearEra" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                            <label for="yearEra" class="block text-sm font-medium thai-font">รูปแบบปี / Year
+                                format</label>
+                            <select id="yearEra" name="yearEra"
+                                class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                                 <option value="BE" selected>พ.ศ. (BE)</option>
                                 <option value="CE">ค.ศ. (CE)</option>
                             </select>
@@ -78,19 +83,24 @@
                     </div>
 
                     <div>
-                        <label for="documentTitle" class="block text-sm font-medium thai-font">หัวข้อเอกสาร / Document Title <span class="required-asterisk">*</span></label>
-                        <input type="text" id="documentTitle" name="documentTitle" placeholder="e.g. MEDICAL CERTIFICATE, TO WHOM IT MAY CONCERN" required
-                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm" style="text-transform: uppercase;">
+                        <label for="documentTitle" class="block text-sm font-medium thai-font">หัวข้อเอกสาร / Document
+                            Title <span class="required-asterisk">*</span></label>
+                        <input type="text" id="documentTitle" name="documentTitle"
+                            placeholder="e.g. MEDICAL CERTIFICATE, TO WHOM IT MAY CONCERN" required
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                            style="text-transform: uppercase;">
                     </div>
 
                     <div>
-                        <label for="addressee" class="block text-sm font-medium thai-font">เรียน / Addressee (To...)</label>
+                        <label for="addressee" class="block text-sm font-medium thai-font">เรียน / Addressee
+                            (To...)</label>
                         <input type="text" id="addressee" name="addressee" placeholder="e.g. The Immigration Officer"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
 
                     <div>
-                        <label for="letterBody" class="block text-sm font-medium thai-font">เนื้อหาจดหมาย / Letter Body <span class="required-asterisk">*</span></label>
+                        <label for="letterBody" class="block text-sm font-medium thai-font">เนื้อหาจดหมาย / Letter Body
+                            <span class="required-asterisk">*</span></label>
                         <textarea id="letterBody" name="letterBody" rows="10" required
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm placeholder-gray-500"
                             placeholder="Type your letter content here..."></textarea>
@@ -141,6 +151,9 @@
         <p>&copy; <span id="currentYear"></span> Clinical Letter Generators by Rommy~*. All rights reserved.</p>
     </footer>
 
+    <script src="/vendor/pdfmake/pdfmake.min.js"></script>
+    <script src="/shared/pdf-generator.js"></script>
+    <script src="/shared/pdf-templates.js"></script>
     <script src="/js/common.js"></script>
     <script src="script.js"></script>
     <script>

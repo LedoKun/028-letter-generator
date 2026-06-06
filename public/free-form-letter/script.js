@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function previewLetter() {
+    async function previewLetter() {
         const form = document.getElementById('freeFormLetterForm');
         const data = {};
         let isValid = true;
@@ -107,7 +107,15 @@ document.addEventListener('DOMContentLoaded', function () {
         data.documentTitle = data.documentTitle.toUpperCase();
         data.doctorNameEnglish = (data.doctorNameEnglish || '').toUpperCase();
 
-        localStorage.setItem('freeFormLetterDataForPrint', JSON.stringify(data));
-        window.open('print-letter.html', '_blank');
+        try {
+            await window.PdfGenerator.generateAndPrint({
+                type: 'Free-Form-Letter',
+                patientName: data.addressee || data.documentTitle || 'Patient',
+                content: window.PdfTemplates.buildFreeForm(data)
+            });
+        } catch (error) {
+            console.error('Error generating free form letter PDF:', error);
+            alert('Unable to generate PDF. Please check the console for details.');
+        }
     }
 });

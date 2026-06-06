@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
             { checkboxId: 'includeTreatedHCV', detailsId: 'treatedHCVDetails' },
             { checkboxId: 'includeTreatedTB', detailsId: 'treatedTBDetails' },
             { checkboxId: 'includeCompletedTPT', detailsId: 'completedTPTDetails' },
+            { checkboxId: 'includeOngoingTPT', detailsId: 'ongoingTPTDetails' },
             { checkboxId: 'includeOtherHistory', detailsId: 'otherHistoryDetails' }
         ];
         toggles.forEach(toggle => {
@@ -147,9 +148,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             const sitesOtherInput = document.getElementById('treatedTBSitesOther');
                             if (sitesSelect && sitesOtherInput) sitesOtherInput.style.display = Array.from(sitesSelect.selectedOptions).map(opt => opt.value).includes('Other') ? 'block' : 'none';
                         }
-                        if (toggle.checkboxId === 'includeCompletedTPT') {
-                            const tptMedSelect = document.getElementById('completedTPTMedication');
-                            const tptMedOther = document.getElementById('completedTPTMedicationOther');
+                        if (toggle.checkboxId === 'includeCompletedTPT' || toggle.checkboxId === 'includeOngoingTPT') {
+                            const tptPrefix = toggle.checkboxId === 'includeCompletedTPT' ? 'completed' : 'ongoing';
+                            const tptMedSelect = document.getElementById(`${tptPrefix}TPTMedication`);
+                            const tptMedOther = document.getElementById(`${tptPrefix}TPTMedicationOther`);
                             if (tptMedSelect && tptMedOther) tptMedOther.style.display = tptMedSelect.value === 'Other' ? 'block' : 'none';
                         }
                         if (toggle.callback) toggle.callback();
@@ -394,11 +396,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupTPTMedicationLogic() {
-        const tptMedicationSelect = document.getElementById('completedTPTMedication');
-        const tptMedicationOtherInput = document.getElementById('completedTPTMedicationOther');
-        const parentCheckbox = document.getElementById('includeCompletedTPT');
+        const setupMedicationOther = (prefix) => {
+            const tptMedicationSelect = document.getElementById(`${prefix}TPTMedication`);
+            const tptMedicationOtherInput = document.getElementById(`${prefix}TPTMedicationOther`);
+            const parentCheckbox = document.getElementById(`include${prefix[0].toUpperCase()}${prefix.slice(1)}TPT`);
+            if (!tptMedicationSelect || !tptMedicationOtherInput || !parentCheckbox) return;
 
-        if (tptMedicationSelect && tptMedicationOtherInput && parentCheckbox) {
             const updateOtherVisibility = () => {
                 if (!parentCheckbox.checked) {
                     tptMedicationOtherInput.style.display = 'none';
@@ -411,7 +414,9 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             tptMedicationSelect.addEventListener('change', updateOtherVisibility);
             updateOtherVisibility();
-        }
+        };
+        setupMedicationOther('completed');
+        setupMedicationOther('ongoing');
     }
 
     function setupLastMedicinePickupToggle() {
@@ -444,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    function previewLetter() {
+    async function previewLetter() {
         const form = document.getElementById('referralForm');
         const data = {};
         let isValid = true;
@@ -452,7 +457,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const requiredStaticFields = [
             { id: 'letterDate', name: 'วันที่ / Date' },
-            { id: 'patientName', name: 'ชื่อผู้ป่วย / Patient Name' }
+            { id: 'patientName', name: 'ชื่อผู้ป่วย / Patient Name' },
+            { id: 'doctorNameThai', name: 'ชื่อแพทย์ (ภาษาไทย) / Doctor\'s Name (Thai)' }
         ];
 
         requiredStaticFields.forEach(fieldInfo => {
@@ -476,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         const optionalDateFields = ['dob', 'firstDiagnosisDateRetro', 'initialCD4Date', 'latestVLDate', 'artStartDate',
-            'treatedHCVCompletionDate', 'treatedTBCompletionDate', 'completedTPTCompletionDate'];
+            'treatedHCVCompletionDate', 'treatedTBCompletionDate'];
         optionalDateFields.forEach(id => {
             const el = document.getElementById(id);
             if (el && el.value.trim()) {
@@ -490,6 +496,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     el.style.borderColor = '';
                 }
             } else if (el) {
+                el.style.borderColor = '';
+            }
+        });
+
+        const partialDateFields = ['completedTPTStartDate', 'ongoingTPTStartDate'];
+        partialDateFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el || !el.value.trim()) {
+                if (el) el.style.borderColor = '';
+                return;
+            }
+            const value = el.value.trim();
+            const era = window.Common.getEraFromForm('referralForm');
+            const isFullDate = /^\d{2}\/\d{2}\/\d{4}$/.test(value);
+            const isMonthYear = /^\d{2}\/\d{4}$/.test(value);
+            const month = isMonthYear ? parseInt(value.slice(0, 2), 10) : 0;
+            const okMonthYear = isMonthYear && month >= 1 && month <= 12;
+            const ok = (isFullDate && !!window.Common.parseDate(value, era)) || okMonthYear;
+            if (!ok) {
+                missingFieldsMessages.push(`${el.labels[0] ? el.labels[0].textContent.split(' /')[0].trim() : id} (รูปแบบไม่ถูกต้อง / Invalid format: ${value})`);
+                el.style.borderColor = 'red';
+                isValid = false;
+            } else {
                 el.style.borderColor = '';
             }
         });
@@ -562,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const checkboxIds = [
             'includeRetroviral', 'includeSyphilisActive', 'includeHBV',
             'includeHCVActive', 'includeTreatedSyphilis', 'includeTreatedHCV',
-            'includeTreatedTB', 'includeCompletedTPT', 'includeOtherHistory',
+            'includeTreatedTB', 'includeCompletedTPT', 'includeOngoingTPT', 'includeOtherHistory',
             'includeLastMedicinePickup', 'attachmentLabResults', 'attachmentOther',
             'includeTmxSmp', 'includeReferralForAdmission'
         ];
@@ -631,6 +660,14 @@ document.addEventListener('DOMContentLoaded', function () {
             data.completedTPTMedicationOther = tptOtherInput.value;
         }
 
+        if (data.includeOngoingTPT) {
+            const tptSelect = document.getElementById('ongoingTPTMedication');
+            const tptOtherInput = document.getElementById('ongoingTPTMedicationOther');
+            data.ongoingTPTMedicationText = tptSelect.value === 'Other' ?
+                tptOtherInput.value : tptSelect.options[tptSelect.selectedIndex].text;
+            data.ongoingTPTMedicationOther = tptOtherInput.value;
+        }
+
 
         if (!data.includeLastMedicinePickup || !document.getElementById('lastMedicinePickupDate').value.trim()) {
             delete data.lastMedicinePickupDate;
@@ -652,14 +689,32 @@ document.addEventListener('DOMContentLoaded', function () {
         // Normalize all date fields to BE (letter displays BE (CE))
         const era = window.Common.getEraFromForm('referralForm');
         const toBE = (v) => v ? window.Common.convertDateString(v, era, window.Common.ERA_BE) : '';
+        const partialToBE = (v) => {
+            if (!v) return '';
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) return toBE(v);
+            if (!/^\d{2}\/\d{4}$/.test(v)) return v;
+            const [month, yearString] = v.split('/');
+            const year = parseInt(yearString, 10);
+            if (Number.isNaN(year)) return v;
+            return era === window.Common.ERA_CE ? `${month}/${year + 543}` : v;
+        };
         const dateKeys = ['letterDate', 'dob', 'firstDiagnosisDateRetro', 'artStartDate', 'initialCD4Date', 'latestVLDate',
-            'treatedHCVCompletionDate', 'treatedTBCompletionDate', 'completedTPTCompletionDate', 'lastMedicinePickupDate'];
+            'treatedHCVCompletionDate', 'treatedTBCompletionDate', 'lastMedicinePickupDate'];
         dateKeys.forEach(k => { if (data[k]) data[k] = toBE(data[k]); });
+        ['completedTPTStartDate', 'ongoingTPTStartDate'].forEach(k => { if (data[k]) data[k] = partialToBE(data[k]); });
         if (data.includeSyphilisActive && data.syphilisStartDate) data.syphilisStartDate = toBE(data.syphilisStartDate);
         data._yearEra = era;
 
         data.additionalNotes = (document.getElementById('additionalNotes')?.value || '').trim();
-        localStorage.setItem('referralDataForPrint', JSON.stringify(data));
-        window.open('print-letter.html', '_blank');
+        try {
+            await window.PdfGenerator.generateAndPrint({
+                type: 'Referral-Letter',
+                patientName: data.patientName,
+                content: window.PdfTemplates.buildReferral(data)
+            });
+        } catch (error) {
+            console.error('Error generating referral letter PDF:', error);
+            alert('Unable to generate PDF. Please check the console for details.');
+        }
     }
 });

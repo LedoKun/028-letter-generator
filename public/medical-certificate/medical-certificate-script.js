@@ -54,13 +54,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function initializeSalutationField() {
         const salutationSelect = document.getElementById('patientSalutation');
         const otherSalutationInput = document.getElementById('otherPatientSalutation');
+        const otherSalutationLabel = document.querySelector('label[for="otherPatientSalutation"]');
         if (salutationSelect && otherSalutationInput) {
             salutationSelect.addEventListener('change', function () {
                 if (this.value === 'OTHER') {
+                    if (otherSalutationLabel) otherSalutationLabel.classList.remove('hidden-field');
                     otherSalutationInput.classList.remove('hidden-field');
                     otherSalutationInput.required = true;
                     otherSalutationInput.focus();
                 } else {
+                    if (otherSalutationLabel) otherSalutationLabel.classList.add('hidden-field');
                     otherSalutationInput.classList.add('hidden-field');
                     otherSalutationInput.required = false;
                     otherSalutationInput.value = '';
@@ -199,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    function previewMedicalCertificate() {
+    async function previewMedicalCertificate() {
         const form = document.getElementById('medicalCertificateForm');
         const data = {};
         let isValid = true;
@@ -339,6 +342,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Collect notes for disease sections if present
+        data.advisedRestNotes = document.getElementById('advisedRestNotes')?.value || '';
         data.syphilisNotes = document.getElementById('syphilisNotes')?.value || '';
         data.tbNotes = document.getElementById('tbNotes')?.value || '';
 
@@ -357,7 +361,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.includeTBTreatment) data.tbTreatmentCompletionDate = toCE(data.tbTreatmentCompletionDate);
         data._yearEra = era;
 
-        localStorage.setItem('medicalCertificateDataForPrint', JSON.stringify(data));
-        window.open('print-medical-certificate.html', '_blank');
+        try {
+            await window.PdfGenerator.generateAndPrint({
+                type: 'Medical-Certificate',
+                patientName: data.patientName,
+                content: window.PdfTemplates.buildMedicalCertificate(data)
+            });
+        } catch (error) {
+            console.error('Error generating medical certificate PDF:', error);
+            alert('Unable to generate PDF. Please check the console for details.');
+        }
     }
 });

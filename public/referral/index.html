@@ -84,8 +84,10 @@
             /* border-indigo-500 */
         }
 
-        .dark .required-asterisk {
+        .required-asterisk {
             color: #ef4444;
+            font-weight: 700;
+            margin-left: 0.125rem;
             /* text-red-500 */
         }
 
@@ -135,7 +137,8 @@
                     </div>
                     <div>
                         <label for="yearEra" class="block text-sm font-medium thai-font">รูปแบบปี / Year format</label>
-                        <select id="yearEra" name="yearEra" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                        <select id="yearEra" name="yearEra"
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                             <option value="BE" selected>พ.ศ. (BE)</option>
                             <option value="CE">ค.ศ. (CE)</option>
                         </select>
@@ -207,7 +210,8 @@
                             </div>
                             <div>
                                 <label for="firstDiagnosisDateRetro"
-                                    class="block text-xs font-medium thai-font">วินิจฉัยเมื่อ / First diagnosis date</label>
+                                    class="block text-xs font-medium thai-font">วินิจฉัยเมื่อ / First diagnosis
+                                    date</label>
                                 <input type="text" id="firstDiagnosisDateRetro" placeholder="DD/MM/YYYY"
                                     name="firstDiagnosisDateRetro"
                                     class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
@@ -281,6 +285,13 @@
                                 </div>
                             </div>
                         </div>
+                        <div>
+                            <label for="retroviralNotes" class="block text-xs font-medium thai-font">บันทึกทางการแพทย์
+                                (ถ้ามี) /
+                                Medical Notes (optional):</label>
+                            <textarea id="retroviralNotes" name="retroviralNotes" rows="2"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
+                        </div>
                     </div>
                 </div>
 
@@ -295,12 +306,14 @@
                         class="ml-2 space-y-3 hidden border-l-2 border-indigo-500 pl-4 pt-2">
                         <div>
                             <label for="syphilisStartDate"
-                                class="block text-xs font-medium thai-font">วันที่เริ่มการรักษา / Treatment Start Date</label>
+                                class="block text-xs font-medium thai-font">วันที่เริ่มการรักษา / Treatment Start
+                                Date <span class="required-asterisk">*</span></label>
                             <input type="text" id="syphilisStartDate" name="syphilisStartDate" placeholder="DD/MM/YYYY"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                         </div>
                         <div>
-                            <label for="syphilisMedication" class="block text-xs font-medium thai-font">ยาที่ใช้รักษา / Medication:</label>
+                            <label for="syphilisMedication" class="block text-xs font-medium thai-font">ยาที่ใช้รักษา /
+                                Medication:</label>
                             <select id="syphilisMedication" name="syphilisMedication"
                                 class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                                 <option value="Benzathine">Benzathine Penicillin G 2.4 million units IM</option>
@@ -308,7 +321,7 @@
                                 <option value="Doxycycline28Days">Doxycycline (200) 1 tab oral bid for 28 days</option>
                             </select>
                         </div>
-                        
+
                         <div id="syphilisBenzathineSchedule">
                             <p class="text-sm thai-font">หมายกำหนดการ / Schedule: (Calculated for 3 weekly doses)</p>
                             <div class="text-sm space-y-1">
@@ -322,7 +335,15 @@
                         </div>
 
                         <div id="syphilisDoxycyclineDuration" class="hidden">
-                            <p class="text-sm thai-font">ระยะเวลา / Duration: <span id="syphilisDurationText" class="font-semibold text-indigo-300"></span></p>
+                            <p class="text-sm thai-font">ระยะเวลา / Duration: <span id="syphilisDurationText"
+                                    class="font-semibold text-indigo-300"></span></p>
+                        </div>
+                        <div>
+                            <label for="syphilisNotes" class="block text-xs font-medium thai-font">บันทึกทางการแพทย์
+                                (ถ้ามี) /
+                                Medical Notes (optional):</label>
+                            <textarea id="syphilisNotes" name="syphilisNotes" rows="2"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
                     </div>
                 </div>
@@ -397,7 +418,7 @@
                                 <option value="Bone">Bone</option>
                                 <option value="Meningeal">Meningeal</option>
                                 <option value="Disseminated">Disseminated</option>
-                                <option value="Other">Other(s)</option>
+                                <option value="Other">Other</option>
                             </select>
                             <input type="text" id="treatedTBSitesOther" name="treatedTBSitesOther"
                                 placeholder="Specify other site(s), comma separated"
@@ -412,7 +433,8 @@
                         </div>
                         <div>
                             <label for="treatedTBCompletionDate"
-                                class="block text-xs font-medium thai-font">รักษาครบเมื่อ / Treatment finished on</label>
+                                class="block text-xs font-medium thai-font">รักษาครบเมื่อ / Treatment finished
+                                on</label>
                             <input type="text" id="treatedTBCompletionDate" placeholder="DD/MM/YYYY"
                                 name="treatedTBCompletionDate"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
@@ -439,18 +461,69 @@
                                 <option value="9H">9H</option>
                                 <option value="6H">6H</option>
                                 <option value="4R">4R</option>
-                                <option value="Other">Other(s)</option>
+                                <option value="Other">Other</option>
                             </select>
                             <input type="text" id="completedTPTMedicationOther" name="completedTPTMedicationOther"
                                 placeholder="Specify other medication"
                                 class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm hidden">
                         </div>
                         <div>
-                            <label for="completedTPTCompletionDate"
-                                class="block text-xs font-medium thai-font">รักษาครบเมื่อ / Treatment finished on</label>
-                            <input type="text" id="completedTPTCompletionDate" placeholder="DD/MM/YYYY"
-                                name="completedTPTCompletionDate"
-                                class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                            <label for="completedTPTStartDate"
+                                class="block text-xs font-medium thai-font">เริ่มการรักษาเมื่อ / Started on</label>
+                            <input type="text" id="completedTPTStartDate" placeholder="MM/YYYY or DD/MM/YYYY"
+                                name="completedTPTStartDate"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                            <p class="text-xs text-gray-400 thai-font mt-1">Supports MM/YYYY or DD/MM/YYYY format</p>
+                        </div>
+                        <div>
+                            <label for="completedTPTNotes" class="block text-xs font-medium thai-font">บันทึกทางการแพทย์
+                                (ถ้ามี) /
+                                Medical Notes (optional):</label>
+                            <textarea id="completedTPTNotes" name="completedTPTNotes" rows="2"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 border border-gray-700 rounded-md">
+                    <div class="flex items-center">
+                        <input id="includeOngoingTPT" name="includeOngoingTPT" type="checkbox"
+                            class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
+                        <label for="includeOngoingTPT" class="ml-2 block text-md font-medium thai-font">Ongoing TPT
+                            (Treatment In Progress)</label>
+                    </div>
+                    <div id="ongoingTPTDetails" class="ml-2 space-y-3 hidden border-l-2 border-indigo-500 pl-4 pt-2">
+                        <div>
+                            <label for="ongoingTPTMedication" class="block text-xs font-medium thai-font">ยาที่ใช้รักษา
+                                / Medication:</label>
+                            <select id="ongoingTPTMedication" name="ongoingTPTMedication"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                                <option value="">Select Medication</option>
+                                <option value="3HP">3HP</option>
+                                <option value="1HP">1HP</option>
+                                <option value="9H">9H</option>
+                                <option value="6H">6H</option>
+                                <option value="4R">4R</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <input type="text" id="ongoingTPTMedicationOther" name="ongoingTPTMedicationOther"
+                                placeholder="Specify other medication"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm hidden">
+                        </div>
+                        <div>
+                            <label for="ongoingTPTStartDate"
+                                class="block text-xs font-medium thai-font">เริ่มการรักษาเมื่อ / Started on</label>
+                            <input type="text" id="ongoingTPTStartDate" name="ongoingTPTStartDate"
+                                placeholder="MM/YYYY or DD/MM/YYYY"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                            <p class="text-xs text-gray-400 thai-font mt-1">Supports MM/YYYY or DD/MM/YYYY format</p>
+                        </div>
+                        <div>
+                            <label for="ongoingTPTNotes" class="block text-xs font-medium thai-font">บันทึกทางการแพทย์
+                                (ถ้ามี) /
+                                Medical Notes (optional):</label>
+                            <textarea id="ongoingTPTNotes" name="ongoingTPTNotes" rows="2"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
                     </div>
                 </div>
@@ -477,119 +550,122 @@
                 <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลเพิ่มเติม / Additional
                     Information</legend>
 
-                <div class="mt-4 space-y-4">
-                    <div class="flex items-center">
-                        <input id="includeLastMedicinePickup" name="includeLastMedicinePickup" type="checkbox" checked
-                            class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
-                        <label for="includeLastMedicinePickup" class="ml-2 text-sm font-medium thai-font">
-                            ผู้ป่วยรับยาครั้งสุดท้าย / Patient last medicine pickup
-                        </label>
-                    </div>
+        <div class="mt-4 space-y-4">
+            <div class="flex items-center">
+                <input id="includeLastMedicinePickup" name="includeLastMedicinePickup" type="checkbox" checked
+                    class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
+                <label for="includeLastMedicinePickup" class="ml-2 text-sm font-medium thai-font">
+                    ผู้ป่วยรับยาครั้งสุดท้าย / Patient last medicine pickup
+                </label>
+            </div>
 
-                    <div id="lastMedicinePickupDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-7">
-                        <div>
-                            <label for="lastMedicinePickupDate" class="block text-sm font-medium thai-font">เมื่อ / On
-                                Date</label>
-                            <input type="text" id="lastMedicinePickupDate" name="lastMedicinePickupDate"
-                                placeholder="DD/MM/YYYY"
-                                class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                        </div>
-                        <div>
-                            <label for="medicineDuration" class="block text-sm font-medium thai-font">สำหรับกี่วัน / for
-                                how
-                                many days:</label>
-                            <input type="number" id="medicineDuration" name="medicineDuration" placeholder="เช่น 180"
-                                min="0" value="60" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                        </div>
-                    </div>
-
-                    <div class="flex items-center pt-2">
-                        <input id="includeReferralForAdmission" name="includeReferralForAdmission" type="checkbox"
-                            class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
-                        <label for="includeReferralForAdmission" class="ml-2 text-sm font-medium thai-font">
-                            ส่งตัวผู้ป่วยเพื่อรับการรักษาที่ รพ ของท่าน / Patient referral for admission to your
-                            hospital
-                        </label>
-                    </div>
-
-                    <div class="md:col-span-2 mt-2">
-                        <label class="block text-sm font-medium thai-font">เอกสารแนบ / Attachments:</label>
-                        <div class="mt-2 space-y-2">
-                            <div class="flex items-center">
-                                <input id="attachmentLabResults" name="attachmentLabResults" type="checkbox" checked
-                                    class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
-                                <label for="attachmentLabResults"
-                                    class="ml-2 block text-md thai-font">ผลตรวจทางห้องปฏิบัติการล่าสุด / Latest
-                                    laboratory results</label>
-                            </div>
-                            <div class="flex items-start">
-                                <input id="attachmentOther" name="attachmentOther" type="checkbox"
-                                    class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400 mt-0.5">
-                                <div class="ml-2 w-full">
-                                    <label for="attachmentOther" class="block text-sm thai-font">เอกสารอื่นๆ /
-                                        Other(s):</label>
-                                    <input type="text" id="attachmentOtherText" name="attachmentOtherText"
-                                        placeholder="ระบุเอกสารอื่น ๆ"
-                                        class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div id="lastMedicinePickupDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-7">
+                <div>
+                    <label for="lastMedicinePickupDate" class="block text-sm font-medium thai-font">เมื่อ / On
+                        Date <span class="required-asterisk">*</span></label>
+                    <input type="text" id="lastMedicinePickupDate" name="lastMedicinePickupDate"
+                        placeholder="DD/MM/YYYY"
+                        class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                 </div>
-            </fieldset>
-
-            <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลแพทย์ / Doctor Information
-                </legend>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                    <div>
-                        <label for="doctorNameThai" class="block text-sm font-medium thai-font">ชื่อแพทย์ (ภาษาไทย) /
-                            Doctor's Name (Thai) <span class="required-asterisk">*</span></label>
-                        <input type="text" id="doctorNameThai" name="doctorNameThai" required
-                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="doctorNameEnglish" class="block text-sm font-medium">Doctor's Name (English)</label>
-                        <input type="text" id="doctorNameEnglish" name="doctorNameEnglish"
-                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
-                            style="text-transform: uppercase;">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="medicalLicense" class="block text-sm font-medium thai-font">เลขที่ใบประกอบวิชาชีพ /
-                            Medical License No.</label>
-                        <input type="text" id="medicalLicense" name="medicalLicense"
-                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">บันทึกเพิ่มเติม / Additional Notes</legend>
-                <div class="mt-2">
-                    <label for="additionalNotes" class="block text-sm font-medium thai-font">บันทึกเพิ่มเติม / Notes:</label>
-                    <textarea id="additionalNotes" name="additionalNotes" rows="3"
-                        class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"></textarea>
-                </div>
-            </fieldset>
-
-            <div class="pt-5">
-                <div class="flex justify-end space-x-3"> <a href="../index.html"
-                        class="inline-flex justify-center py-2.5 px-6 border border-gray-600 hover:border-gray-500 shadow-sm text-base font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
-                        กลับ / Back
-                    </a>
-                    <button type="button" id="previewButton"
-                        class="inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
-                        ดูตัวอย่างและพิมพ์ / Preview & Print
-                    </button>
+                <div>
+                    <label for="medicineDuration" class="block text-sm font-medium thai-font">สำหรับกี่วัน / for
+                        how
+                        many days:</label>
+                    <input type="number" id="medicineDuration" name="medicineDuration" placeholder="เช่น 180" min="0"
+                        value="60" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                 </div>
             </div>
-        </form>
+
+            <div class="flex items-center pt-2">
+                <input id="includeReferralForAdmission" name="includeReferralForAdmission" type="checkbox"
+                    class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
+                <label for="includeReferralForAdmission" class="ml-2 text-sm font-medium thai-font">
+                    ส่งตัวผู้ป่วยเพื่อรับการรักษาที่ รพ ของท่าน / Patient referral for admission to your
+                    hospital
+                </label>
+            </div>
+
+            <div class="md:col-span-2 mt-2">
+                <label class="block text-sm font-medium thai-font">เอกสารแนบ / Attachments:</label>
+                <div class="mt-2 space-y-2">
+                    <div class="flex items-center">
+                        <input id="attachmentLabResults" name="attachmentLabResults" type="checkbox" checked
+                            class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
+                        <label for="attachmentLabResults"
+                            class="ml-2 block text-md thai-font">ผลตรวจทางห้องปฏิบัติการล่าสุด / Latest
+                            laboratory results</label>
+                    </div>
+                    <div class="flex items-start">
+                        <input id="attachmentOther" name="attachmentOther" type="checkbox"
+                            class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400 mt-0.5">
+                        <div class="ml-2 w-full">
+                            <label for="attachmentOther" class="block text-sm thai-font">เอกสารอื่นๆ /
+                                Other(s):</label>
+                            <input type="text" id="attachmentOtherText" name="attachmentOtherText"
+                                placeholder="ระบุเอกสารอื่น ๆ"
+                                class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="border p-4 rounded-md shadow-sm">
+        <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลแพทย์ / Doctor Information
+        </legend>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div>
+                <label for="doctorNameThai" class="block text-sm font-medium thai-font">ชื่อแพทย์ (ภาษาไทย) /
+                    Doctor's Name (Thai) <span class="required-asterisk">*</span></label>
+                <input type="text" id="doctorNameThai" name="doctorNameThai" required
+                    class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+            </div>
+            <div>
+                <label for="doctorNameEnglish" class="block text-sm font-medium">Doctor's Name (English)</label>
+                <input type="text" id="doctorNameEnglish" name="doctorNameEnglish"
+                    class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                    style="text-transform: uppercase;">
+            </div>
+            <div class="md:col-span-2">
+                <label for="medicalLicense" class="block text-sm font-medium thai-font">เลขที่ใบประกอบวิชาชีพ /
+                    Medical License No.</label>
+                <input type="text" id="medicalLicense" name="medicalLicense"
+                    class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="border p-4 rounded-md shadow-sm">
+        <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">บันทึกเพิ่มเติม / Additional Notes</legend>
+        <div class="mt-2">
+            <label for="additionalNotes" class="block text-sm font-medium thai-font">บันทึกเพิ่มเติม / Notes:</label>
+            <textarea id="additionalNotes" name="additionalNotes" rows="3"
+                class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"></textarea>
+        </div>
+    </fieldset>
+
+    <div class="pt-5">
+        <div class="flex justify-end space-x-3"> <a href="../index.html"
+                class="inline-flex justify-center py-2.5 px-6 border border-gray-600 hover:border-gray-500 shadow-sm text-base font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
+                กลับ / Back
+            </a>
+            <button type="button" id="previewButton"
+                class="inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
+                ดูตัวอย่างและพิมพ์ / Preview & Print
+            </button>
+        </div>
+    </div>
+    </form>
     </div>
 
     <footer class="text-center text-gray-500 mt-12 sm:mt-16 pb-8">
         <p>&copy; <span id="currentYear">2024</span> Clinical Letter Generators by Rommy~*. All rights reserved.</p>
     </footer>
 
+    <script src="/vendor/pdfmake/pdfmake.min.js"></script>
+    <script src="/shared/pdf-generator.js"></script>
+    <script src="/shared/pdf-templates.js"></script>
     <script src="/js/common.js"></script>
     <script src="script.js"></script>
     <script>

@@ -87,11 +87,24 @@
     if (!root) return;
     root.querySelectorAll('label').forEach(lab => {
       const txt = lab.textContent || '';
-      const cleaned = txt.replace(/\((พ\.ศ\.|BE|CE)\)/gi, '').replace(/\s+$/,'');
+      const hasRequiredMarker = !!lab.querySelector('.required-asterisk') || /\*/.test(txt);
+      const cleaned = txt
+        .replace(/\((พ\.ศ\.|BE|CE)\)/gi, '')
+        .replace(/\*/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
       // Skip labels that are not true date fields, e.g., medicineDuration
       if (/(วัน|Date)/i.test(cleaned) && lab.htmlFor && lab.htmlFor !== 'medicineDuration') {
         const suffix = era === ERA_BE ? ' (พ.ศ.)' : ' (CE)';
-        lab.textContent = cleaned + suffix;
+        lab.textContent = cleaned;
+        if (hasRequiredMarker) {
+          lab.appendChild(document.createTextNode(' '));
+          const requiredMarker = document.createElement('span');
+          requiredMarker.className = 'required-asterisk';
+          requiredMarker.textContent = '*';
+          lab.appendChild(requiredMarker);
+        }
+        lab.appendChild(document.createTextNode(suffix));
       }
     });
     root.querySelectorAll('input.date-input').forEach(inp => {

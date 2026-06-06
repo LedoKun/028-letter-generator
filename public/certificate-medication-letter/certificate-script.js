@@ -85,13 +85,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function initializeSalutationField() {
         const salutationSelect = document.getElementById('salutation');
         const otherSalutationInput = document.getElementById('otherSalutation');
+        const otherSalutationLabel = document.querySelector('label[for="otherSalutation"]');
         if (salutationSelect && otherSalutationInput) {
             salutationSelect.addEventListener('change', function () {
                 if (this.value === 'OTHER') {
+                    if (otherSalutationLabel) otherSalutationLabel.classList.remove('hidden-field');
                     otherSalutationInput.classList.remove('hidden-field');
                     otherSalutationInput.required = true;
                     otherSalutationInput.focus();
                 } else {
+                    if (otherSalutationLabel) otherSalutationLabel.classList.add('hidden-field');
                     otherSalutationInput.classList.add('hidden-field');
                     otherSalutationInput.required = false;
                     otherSalutationInput.value = '';
@@ -103,13 +106,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function initializeNationalityField() {
         const nationalitySelect = document.getElementById('nationality');
         const otherNationalityInput = document.getElementById('otherNationality');
+        const otherNationalityLabel = document.querySelector('label[for="otherNationality"]');
         if (nationalitySelect && otherNationalityInput) {
             nationalitySelect.addEventListener('change', function () {
                 if (this.value === 'OTHER') {
+                    if (otherNationalityLabel) otherNationalityLabel.classList.remove('hidden-field');
                     otherNationalityInput.classList.remove('hidden-field');
                     otherNationalityInput.required = true;
                     otherNationalityInput.focus();
                 } else {
+                    if (otherNationalityLabel) otherNationalityLabel.classList.add('hidden-field');
                     otherNationalityInput.classList.add('hidden-field');
                     otherNationalityInput.required = false;
                     otherNationalityInput.value = '';
@@ -174,6 +180,15 @@ document.addEventListener('DOMContentLoaded', function () {
         otherMedInput.id = `artMedOther-${idSuffix}`;
         otherMedInput.name = `artMedOther-${idSuffix}`;
         otherMedInput.placeholder = "SPECIFY MEDICATION (ALL CAPS)";
+        const otherMedLabel = document.createElement('label');
+        otherMedLabel.htmlFor = `artMedOther-${idSuffix}`;
+        otherMedLabel.textContent = 'Other Medication ';
+        otherMedLabel.classList.add('mt-2', 'block', 'text-xs', 'font-medium', 'thai-font', 'hidden-field');
+        const otherMedRequired = document.createElement('span');
+        otherMedRequired.textContent = '*';
+        otherMedRequired.classList.add('required-asterisk');
+        otherMedLabel.appendChild(otherMedRequired);
+        medDiv.appendChild(otherMedLabel);
         otherMedInput.classList.add('mt-2', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm', 'hidden-field'); // Added mt-2 for spacing
         otherMedInput.style.textTransform = 'uppercase';
         otherMedInput.addEventListener('input', function () { // Live uppercase
@@ -183,11 +198,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         medSelect.addEventListener('change', function () {
             if (this.value === 'OTHER') {
+                otherMedLabel.classList.remove('hidden-field');
                 otherMedInput.classList.remove('hidden-field');
                 otherMedInput.required = true; // Make it required for validation
                 otherMedInput.disabled = false;
                 otherMedInput.focus();
             } else {
+                otherMedLabel.classList.add('hidden-field');
                 otherMedInput.classList.add('hidden-field');
                 otherMedInput.required = false;
                 otherMedInput.disabled = true;
@@ -246,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    function previewCertificate() {
+    async function previewCertificate() {
         const form = document.getElementById('certificateForm');
         const data = {};
         let isValid = true;
@@ -404,7 +421,15 @@ document.addEventListener('DOMContentLoaded', function () {
         data.dob = toCE(data.dob);
         data._yearEra = era;
 
-        localStorage.setItem('certificateDataForPrint', JSON.stringify(data));
-        window.open('print-certificate.html', '_blank');
+        try {
+            await window.PdfGenerator.generateAndPrint({
+                type: 'Medication-Certificate',
+                patientName: data.patientName,
+                content: window.PdfTemplates.buildMedicationCertificate(data)
+            });
+        } catch (error) {
+            console.error('Error generating medication certificate PDF:', error);
+            alert('Unable to generate PDF. Please check the console for details.');
+        }
     }
 });

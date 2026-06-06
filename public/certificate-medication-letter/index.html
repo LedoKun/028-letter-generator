@@ -63,8 +63,10 @@
             border-color: #4f46e5;
         }
 
-        .dark .required-asterisk {
+        .required-asterisk {
             color: #ef4444;
+            font-weight: 700;
+            margin-left: 0.125rem;
         }
 
         .input-prefix {
@@ -130,6 +132,8 @@
                             <option value="NONE">(Leave Blank)</option>
                             <option value="OTHER">Other (Specify)</option>
                         </select>
+                        <label for="otherSalutation" class="mt-2 block text-sm font-medium thai-font hidden-field">Specify
+                            Salutation <span class="required-asterisk">*</span></label>
                         <input type="text" id="otherSalutation" name="otherSalutation" placeholder="Specify Salutation"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field">
                     </div>
@@ -351,6 +355,9 @@
                             <option value="STATELESS">STATELESS / NATIONALITY PROBLEM</option>
                             <option value="OTHER">OTHER (SPECIFY)</option>
                         </select>
+                        <label for="otherNationality"
+                            class="mt-2 block text-sm font-medium thai-font hidden-field">Specify Nationality <span
+                                class="required-asterisk">*</span></label>
                         <input type="text" id="otherNationality" name="otherNationality"
                             placeholder="Specify Nationality (ALL CAPS)"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field"
@@ -435,6 +442,9 @@
         <p>&copy; <span id="currentYear"></span> Clinical Letter Generators by Rommy~*. All rights reserved.</p>
     </footer>
 
+    <script src="/vendor/pdfmake/pdfmake.min.js"></script>
+    <script src="/shared/pdf-generator.js"></script>
+    <script src="/shared/pdf-templates.js"></script>
     <script src="/js/common.js"></script>
     <script src="certificate-script.js"></script>
 </body>
