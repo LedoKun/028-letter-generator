@@ -664,8 +664,8 @@
             if (duration) {
                 nested.push(pairedDetail(
                     H,
-                    [H.bold('เริ่มมีอาการ '), H.highlight(duration), ' วันก่อนส่งต่อ'],
-                    [H.bold('Symptom onset: '), H.highlight(duration), duration === '1' ? ' day before referral' : ' days before referral']
+                    [H.bold('เริ่มมีอาการ '), H.highlight(duration), ' วัน'],
+                    [H.bold('Symptom onset: '), H.highlight(duration), duration === '1' ? ' day' : ' days']
                 ));
             }
             const symptomsThai = mpoxOptionText(data.mpoxSymptoms, MPOX_SYMPTOM_LABELS, 'thai', data.mpoxSymptomOtherText);

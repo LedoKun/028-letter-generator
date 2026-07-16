@@ -111,7 +111,7 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.match(output, /ซิฟิลิสที่อยู่ระหว่างการรักษา \/ Active syphilis/);
     assert.match(output, /การติดเชื้อ HBV ร่วม \/ HBV co-infection/);
     assert.match(output, /สงสัยโรคฝีดาษวานร \/ Suspected mpox/);
-    assert.match(output, /เริ่มมีอาการ 4 วันก่อนส่งต่อ/);
+    assert.match(output, /เริ่มมีอาการ 4 วัน/);
     assert.match(output, /ผื่น ตุ่ม หรือแผลบริเวณผิวหนังหรือเยื่อบุ/);
     assert.match(output, /ปวดบริเวณทวารหนักหรือมีอาการเข้าได้กับ proctitis/);
     assert.match(output, /อาการอื่น ๆ: คลื่นไส้/);
@@ -151,7 +151,7 @@ test('keeps Thai and English referral prose in compact shared paragraphs', () =>
     assert.ok(paragraphs.includes('เลขประจำตัวประชาชน / National ID: 1-2345-67890-12-3    เลขที่หนังสือเดินทาง / Passport no.: AB1234'));
     assert.ok(paragraphs.includes('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี ขอส่งผู้ป่วยรายนี้เพื่อรับการรักษาต่อ พร้อมรายละเอียดการรักษาโดยสรุปดังนี้ / We are referring this patient for continued care. The relevant clinical details are provided below.'));
     assert.ok(paragraphs.includes('จึงขอส่งผู้ป่วยรายนี้เพื่อพิจารณารับไว้รักษาในโรงพยาบาลของท่าน / Hospital admission is requested for further management.'));
-    assert.ok(paragraphs.some(text => text.includes('เริ่มมีอาการ 4 วันก่อนส่งต่อ / Symptom onset: 4 days before referral')));
+    assert.ok(paragraphs.some(text => text.includes('เริ่มมีอาการ 4 วัน / Symptom onset: 4 days')));
     assert.ok(paragraphs.some(text => text.includes('อาการสำคัญ:') && text.includes('/ Presenting symptoms:')));
     assert.ok(paragraphs.some(text => text.includes('ผู้ป่วยให้ประวัติว่า') && text.includes('/ The patient reported')));
     assert.ok(paragraphs.includes('ขอแสดงความนับถือ / Respectfully,'));
@@ -210,8 +210,9 @@ test('renders the concise no-known-exposure Mpox wording', () => {
     };
     const output = paragraphTexts(buildReferral(data)).join('\n');
 
-    assert.match(output, /เริ่มมีอาการ 1 วันก่อนส่งต่อ/);
-    assert.match(output, /Symptom onset: 1 day before referral/);
+    assert.match(output, /เริ่มมีอาการ 1 วัน/);
+    assert.match(output, /Symptom onset: 1 day/);
+    assert.doesNotMatch(output, /before referral|ก่อนส่งต่อ/);
     assert.match(output, /ผู้ป่วยไม่ให้ประวัติความเสี่ยง/);
     assert.match(output, /The patient did not report any risk factors/);
     assert.doesNotMatch(output, /listed risk factors|รายการข้างต้น/i);
