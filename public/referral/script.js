@@ -61,6 +61,9 @@ document.addEventListener('DOMContentLoaded', function () {
             window.Common.attachDateAutoFormat(input, getEra);
             input.placeholder = 'DD/MM/YYYY';
         });
+        document.querySelectorAll('.month-year-input').forEach(input => {
+            window.Common.attachMonthYearAutoFormat(input, getEra);
+        });
         const letterDateInput = document.getElementById('letterDate');
         window.Common.setTodayIfEmpty(letterDateInput, getEra());
         const eraSelect = document.getElementById('yearEra');
@@ -73,6 +76,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (v && v.length === 10) {
                         const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
                         const converted = window.Common.convertDateString(v, fromEra, newEra);
+                        if (converted) inp.value = converted;
+                    }
+                });
+                document.querySelectorAll('.month-year-input').forEach(inp => {
+                    const v = inp.value;
+                    if (v && v.length === 7) {
+                        const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
+                        const converted = window.Common.convertMonthYearString(v, fromEra, newEra);
                         if (converted) inp.value = converted;
                     }
                 });
@@ -219,35 +230,11 @@ document.addEventListener('DOMContentLoaded', function () {
         timeLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
         const timeInput = document.createElement('input');
         timeInput.type = 'text';
-        timeInput.placeholder = 'HH:MM';
-        timeInput.inputMode = 'numeric';
-        timeInput.pattern = '^([01]\\d|2[0-3]):([0-5]\\d)$';
-        timeInput.maxLength = '5';
         timeInput.title = '24-hour time, e.g., 09:30';
         timeInput.id = `artTime-${idSuffix}`;
         timeInput.name = `artTime-${idSuffix}`;
-        timeInput.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm');
-        // Enforce 24-hour format across browsers
-        const onlyDigitsColon = (e) => {
-            const cur = e.target.value;
-            const filtered = cur.replace(/[^0-9:]/g, '');
-            if (filtered !== cur) e.target.value = filtered;
-        };
-        const autoFormatTime = (e) => {
-            let v = e.target.value.replace(/[^0-9]/g, '');
-            if (v.length === 3) v = '0' + v; // e.g., 930 -> 0930
-            if (v.length === 4) {
-                const hh = v.slice(0, 2);
-                const mm = v.slice(2, 4);
-                const h = parseInt(hh, 10);
-                const m = parseInt(mm, 10);
-                if (!isNaN(h) && !isNaN(m) && h >= 0 && h <= 23 && m >= 0 && m <= 59) {
-                    e.target.value = `${hh}:${mm}`;
-                }
-            }
-        };
-        timeInput.addEventListener('input', onlyDigitsColon);
-        timeInput.addEventListener('blur', autoFormatTime);
+        timeInput.classList.add('time-input', 'mt-1', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm');
+        window.Common.attachTimeAutoFormat(timeInput);
         timeDiv.appendChild(timeLabel);
         timeDiv.appendChild(timeInput);
 
@@ -499,8 +486,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        const partialDateFields = ['completedTPTStartDate', 'ongoingTPTStartDate'];
-        partialDateFields.forEach(id => {
+        const monthYearFields = ['completedTPTStartDate', 'ongoingTPTStartDate'];
+        monthYearFields.forEach(id => {
             const el = document.getElementById(id);
             if (!el || !el.value.trim()) {
                 if (el) el.style.borderColor = '';
@@ -508,13 +495,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             const value = el.value.trim();
             const era = window.Common.getEraFromForm('referralForm');
-            const isFullDate = /^\d{2}\/\d{2}\/\d{4}$/.test(value);
-            const isMonthYear = /^\d{2}\/\d{4}$/.test(value);
-            const month = isMonthYear ? parseInt(value.slice(0, 2), 10) : 0;
-            const okMonthYear = isMonthYear && month >= 1 && month <= 12;
-            const ok = (isFullDate && !!window.Common.parseDate(value, era)) || okMonthYear;
-            if (!ok) {
+            if (!window.Common.parseMonthYear(value, era)) {
                 missingFieldsMessages.push(`${el.labels[0] ? el.labels[0].textContent.split(' /')[0].trim() : id} (รูปแบบไม่ถูกต้อง / Invalid format: ${value})`);
+                el.style.borderColor = 'red';
+                isValid = false;
+            } else {
+                el.style.borderColor = '';
+            }
+        });
+
+        document.querySelectorAll('#artMedicationsContainer input[id^="artTime-"]').forEach(el => {
+            if (!el.value.trim()) {
+                el.style.borderColor = '';
+                return;
+            }
+            el.value = window.Common.formatTimeInputValue(el.value, true);
+            if (!window.Common.parseTime24(el.value)) {
+                missingFieldsMessages.push(`เวลาให้ยา ART (รูปแบบไม่ถูกต้อง / Invalid 24-hour time: ${el.value})`);
                 el.style.borderColor = 'red';
                 isValid = false;
             } else {

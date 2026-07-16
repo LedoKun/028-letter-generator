@@ -212,7 +212,7 @@
         if (med.toLowerCase() === 'other' && trim(otherMedication)) med = trim(otherMedication);
         const nested = [];
         if (med && med.toLowerCase() !== 'select medication') nested.push(H.listItem([H.bold('สูตรยาที่ใช้ / Regimen: '), H.highlight(med)]));
-        if (trim(startDate)) nested.push(H.listItem([H.bold('วันที่เริ่มการรักษา / Treatment start date: '), ...H.partialDatePair(trim(startDate))]));
+        if (trim(startDate)) nested.push(H.listItem([H.bold('เริ่มการรักษาเมื่อ / Treatment started: '), ...H.partialDatePair(trim(startDate))]));
         if (trim(notes)) nested.push(H.listItem([H.bold('หมายเหตุทางการแพทย์ / Clinical notes: '), H.highlight(trim(notes))]));
         return H.listItem(H.bold(title), nested);
     }

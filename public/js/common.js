@@ -39,19 +39,67 @@
     return formatDate(dt, toEra);
   }
 
+  function parseMonthYear(str, era) {
+    if (!str) return null;
+    const match = String(str).match(/^(\d{2})\/(\d{4})$/);
+    if (!match) return null;
+    const month = parseInt(match[1], 10);
+    let year = parseInt(match[2], 10);
+    if (Number.isNaN(month) || Number.isNaN(year) || month < 1 || month > 12) return null;
+    if (era === ERA_BE) year -= 543;
+    return { month, year };
+  }
+
+  function convertMonthYearString(str, fromEra, toEra) {
+    const parsed = parseMonthYear(str, fromEra);
+    if (!parsed) return '';
+    let year = parsed.year;
+    if (toEra === ERA_BE) year += 543;
+    return `${pad2(parsed.month)}/${year}`;
+  }
+
+  function parseTime24(str) {
+    if (!str) return null;
+    const match = String(str).match(/^(\d{2}):(\d{2})$/);
+    if (!match) return null;
+    const hour = parseInt(match[1], 10);
+    const minute = parseInt(match[2], 10);
+    if (Number.isNaN(hour) || Number.isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return { hour, minute };
+  }
+
+  function formatDateInputValue(value) {
+    const raw = normalizeDigits(value).slice(0, 8);
+    let formatted = raw.slice(0, 2);
+    if (raw.length >= 3) formatted += `/${raw.slice(2, 4)}`;
+    if (raw.length >= 5) formatted += `/${raw.slice(4, 8)}`;
+    return formatted;
+  }
+
+  function formatMonthYearInputValue(value) {
+    const raw = normalizeDigits(value).slice(0, 6);
+    let formatted = raw.slice(0, 2);
+    if (raw.length >= 3) formatted += `/${raw.slice(2, 6)}`;
+    return formatted;
+  }
+
+  function formatTimeInputValue(value, padThreeDigits = false) {
+    let raw = normalizeDigits(value).slice(0, 4);
+    if (padThreeDigits && raw.length === 3) raw = `0${raw}`;
+    if (raw.length === 3) return raw;
+    let formatted = raw.slice(0, 2);
+    if (raw.length >= 3) formatted += `:${raw.slice(2, 4)}`;
+    return formatted;
+  }
+
   function attachDateAutoFormat(input, getEra) {
     if (!input) return;
     const handler = (event) => {
-      let raw = normalizeDigits(input.value);
       if (event && event.inputType === 'deleteContentBackward' && input.value.slice(-1) === '/') {
         input.value = input.value.slice(0, -1);
         return;
       }
-      if (raw.length > 8) raw = raw.slice(0, 8);
-      let v = '';
-      if (raw.length > 0) v += raw.slice(0, 2);
-      if (raw.length >= 3) v += '/' + raw.slice(2, 4);
-      if (raw.length >= 5) v += '/' + raw.slice(4, 8);
+      const v = formatDateInputValue(input.value);
       input.value = v;
 
       if (event && (event.type === 'blur' || (event.type === 'input' && v.length === 10))) {
@@ -63,6 +111,59 @@
     input.addEventListener('input', handler);
     input.addEventListener('blur', handler);
     input.maxLength = 10;
+    input.inputMode = 'numeric';
+    input.pattern = '\\d{2}/\\d{2}/\\d{4}';
+    return () => {
+      input.removeEventListener('input', handler);
+      input.removeEventListener('blur', handler);
+    };
+  }
+
+  function attachMonthYearAutoFormat(input, getEra) {
+    if (!input) return;
+    const handler = (event) => {
+      if (event && event.inputType === 'deleteContentBackward' && input.value.slice(-1) === '/') {
+        input.value = input.value.slice(0, -1);
+        return;
+      }
+      const value = formatMonthYearInputValue(input.value);
+      input.value = value;
+      if (event && (event.type === 'blur' || (event.type === 'input' && value.length === 7))) {
+        const era = getEra ? getEra() : ERA_CE;
+        input.style.borderColor = (!value || parseMonthYear(value, era)) ? '' : 'red';
+      }
+    };
+    input.addEventListener('input', handler);
+    input.addEventListener('blur', handler);
+    input.maxLength = 7;
+    input.inputMode = 'numeric';
+    input.pattern = '\\d{2}/\\d{4}';
+    input.placeholder = 'MM/YYYY';
+    return () => {
+      input.removeEventListener('input', handler);
+      input.removeEventListener('blur', handler);
+    };
+  }
+
+  function attachTimeAutoFormat(input) {
+    if (!input) return;
+    const handler = (event) => {
+      if (event && event.inputType === 'deleteContentBackward' && input.value.slice(-1) === ':') {
+        input.value = input.value.slice(0, -1);
+        return;
+      }
+      const value = formatTimeInputValue(input.value, event && event.type === 'blur');
+      input.value = value;
+      if (event && (event.type === 'blur' || (event.type === 'input' && value.length === 5))) {
+        input.style.borderColor = (!value || parseTime24(value)) ? '' : 'red';
+      }
+    };
+    input.addEventListener('input', handler);
+    input.addEventListener('blur', handler);
+    input.maxLength = 5;
+    input.inputMode = 'numeric';
+    input.pattern = '([01]\\d|2[0-3]):[0-5]\\d';
+    input.placeholder = 'HH:MM';
     return () => {
       input.removeEventListener('input', handler);
       input.removeEventListener('blur', handler);
@@ -88,13 +189,15 @@
     root.querySelectorAll('label').forEach(lab => {
       const txt = lab.textContent || '';
       const hasRequiredMarker = !!lab.querySelector('.required-asterisk') || /\*/.test(txt);
+      const linkedInput = lab.htmlFor ? root.querySelector(`#${lab.htmlFor}`) : null;
+      const isFormattedDateInput = linkedInput
+        && (linkedInput.classList.contains('date-input') || linkedInput.classList.contains('month-year-input'));
       const cleaned = txt
         .replace(/\((พ\.ศ\.|BE|CE)\)/gi, '')
         .replace(/\*/g, '')
         .replace(/\s+/g, ' ')
         .trim();
-      // Skip labels that are not true date fields, e.g., medicineDuration
-      if (/(วัน|Date)/i.test(cleaned) && lab.htmlFor && lab.htmlFor !== 'medicineDuration') {
+      if (isFormattedDateInput) {
         const suffix = era === ERA_BE ? ' (พ.ศ.)' : ' (CE)';
         lab.textContent = cleaned;
         if (hasRequiredMarker) {
@@ -109,6 +212,9 @@
     });
     root.querySelectorAll('input.date-input').forEach(inp => {
       inp.placeholder = 'DD/MM/YYYY';
+    });
+    root.querySelectorAll('input.month-year-input').forEach(inp => {
+      inp.placeholder = 'MM/YYYY';
     });
   }
 
@@ -211,7 +317,15 @@
     parseDate,
     formatDate,
     convertDateString,
+    parseMonthYear,
+    convertMonthYearString,
+    parseTime24,
+    formatDateInputValue,
+    formatMonthYearInputValue,
+    formatTimeInputValue,
     attachDateAutoFormat,
+    attachMonthYearAutoFormat,
+    attachTimeAutoFormat,
     setTodayIfEmpty,
     getEraFromForm,
     updateDateLabelsForEra,

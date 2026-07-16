@@ -120,7 +120,7 @@ function fullElements() {
         completedTPTNotes: field('ครบตามแผน'),
         ongoingTPTMedication: select('3HP', '3HP'),
         ongoingTPTMedicationOther: field('stale value'),
-        ongoingTPTStartDate: field('09/09/2025'),
+        ongoingTPTStartDate: field('09/2025'),
         ongoingTPTNotes: field('อยู่ระหว่างติดตาม'),
         otherMedicalHistory: field('Dyslipidemia'),
         lastMedicinePickupDate: field('10/07/2026'),
@@ -142,7 +142,7 @@ test('collects every selected referral section and normalizes CE dates to BE', (
     assert.equal(data.firstDiagnosisDateRetro, '02/02/2563');
     assert.equal(data.syphilisDose3Date, '20/06/2569');
     assert.equal(data.completedTPTStartDate, '09/2565');
-    assert.equal(data.ongoingTPTStartDate, '09/09/2568');
+    assert.equal(data.ongoingTPTStartDate, '09/2568');
     assert.equal(data.passportNumber, 'AB1234');
     assert.equal(data.doctorNameEnglish, 'TEST DOCTOR');
     assert.equal(data.includeHBV, true);

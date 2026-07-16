@@ -78,7 +78,7 @@ function fullReferralData() {
         completedTPTNotes: 'ครบตามแผน',
         includeOngoingTPT: true,
         ongoingTPTMedicationText: '3HP',
-        ongoingTPTStartDate: '09/09/2568',
+        ongoingTPTStartDate: '09/2568',
         ongoingTPTNotes: 'อยู่ระหว่างติดตาม',
         includeOtherHistory: true,
         otherMedicalHistory: 'Dyslipidemia',
