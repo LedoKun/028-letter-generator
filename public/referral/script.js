@@ -451,7 +451,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function previewLetter() {
         const form = document.getElementById('referralForm');
-        const data = {};
         let isValid = true;
         let missingFieldsMessages = [];
 
@@ -575,137 +574,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        new FormData(form).forEach((value, key) => {
-            const element = form.elements[key];
-            if (key.startsWith('artMedSelect-') || key.startsWith('artTablets-') || key.startsWith('artTime-')) return;
-
-            if (element && element.type === 'checkbox') return;
-            if (element && typeof value === 'string') data[key] = value.trim();
-            else data[key] = value;
-        });
-
-        data.doctorNameEnglish = (data.doctorNameEnglish || '').toUpperCase();
-        data.passportNumber = (data.passportNumber || '').toUpperCase(); // Ensure passport number is collected as uppercase too
-
-
-        const checkboxIds = [
-            'includeRetroviral', 'includeSyphilisActive', 'includeHBV',
-            'includeHCVActive', 'includeTreatedSyphilis', 'includeTreatedHCV',
-            'includeTreatedTB', 'includeCompletedTPT', 'includeOngoingTPT', 'includeOtherHistory',
-            'includeLastMedicinePickup', 'attachmentLabResults', 'attachmentOther',
-            'includeTmxSmp', 'includeReferralForAdmission'
-        ];
-        checkboxIds.forEach(id => {
-            const cb = document.getElementById(id);
-            if (cb) data[id] = cb.checked;
-        });
-
-        data.artMedications = [];
-        if (data.includeRetroviral) {
-            document.querySelectorAll('#artMedicationsContainer .medication-item').forEach(item => {
-                const selectEl = item.querySelector('select[id^="artMedSelect-"]');
-                const tabletsEl = item.querySelector('input[id^="artTablets-"]');
-                const timeEl = item.querySelector('input[id^="artTime-"]');
-                if (selectEl && tabletsEl && timeEl && selectEl.value) {
-                    data.artMedications.push({
-                        medication: selectEl.options[selectEl.selectedIndex].text,
-                        value: selectEl.value,
-                        tablets: tabletsEl.value,
-                        time: timeEl.value
-                    });
-                }
-            });
-        }
-        if (data.includeRetroviral && data.includeTmxSmp) {
-            data.tmxSmpTablets = document.getElementById('tmxSmpTablets').value;
-        } else {
-            delete data.tmxSmpTablets;
-        }
-
-
-        if (data.includeSyphilisActive) {
-            data.syphilisStartDate = document.getElementById('syphilisStartDate').value;
-            const medSelect = document.getElementById('syphilisMedication');
-            data.syphilisMedication = medSelect ? medSelect.value : 'Benzathine';
-            data.syphilisMedicationText = medSelect ? medSelect.options[medSelect.selectedIndex].text : 'Benzathine Penicillin G 2.4 million units IM';
-
-            if (data.syphilisMedication === 'Benzathine') {
-                data.syphilisDose1Date = document.getElementById('syphilisDose1Date').textContent;
-                data.syphilisDose2Date = document.getElementById('syphilisDose2Date').textContent;
-                data.syphilisDose3Date = document.getElementById('syphilisDose3Date').textContent;
-            } else {
-                data.syphilisDuration = data.syphilisMedication === 'Doxycycline2Weeks' ? '2 weeks' : '28 days';
-            }
-        }
-
-        if (data.includeTreatedTB) {
-            const sitesSelect = document.getElementById('treatedTBSitesSelect');
-            const selectedSites = Array.from(sitesSelect.selectedOptions).map(opt => opt.value);
-            let tbSitesArray = [];
-            if (selectedSites.includes('Other')) {
-                const otherText = document.getElementById('treatedTBSitesOther').value.trim();
-                tbSitesArray = selectedSites.filter(s => s !== 'Other');
-                if (otherText) tbSitesArray.push(...otherText.split(',').map(s => s.trim()).filter(s => s));
-            } else {
-                tbSitesArray = selectedSites;
-            }
-            data.treatedTBSites = tbSitesArray.join(', ');
-        }
-
-        if (data.includeCompletedTPT) {
-            const tptSelect = document.getElementById('completedTPTMedication');
-            const tptOtherInput = document.getElementById('completedTPTMedicationOther');
-            data.completedTPTMedicationText = tptSelect.value === 'Other' ?
-                tptOtherInput.value : tptSelect.options[tptSelect.selectedIndex].text;
-            data.completedTPTMedicationOther = tptOtherInput.value;
-        }
-
-        if (data.includeOngoingTPT) {
-            const tptSelect = document.getElementById('ongoingTPTMedication');
-            const tptOtherInput = document.getElementById('ongoingTPTMedicationOther');
-            data.ongoingTPTMedicationText = tptSelect.value === 'Other' ?
-                tptOtherInput.value : tptSelect.options[tptSelect.selectedIndex].text;
-            data.ongoingTPTMedicationOther = tptOtherInput.value;
-        }
-
-
-        if (!data.includeLastMedicinePickup || !document.getElementById('lastMedicinePickupDate').value.trim()) {
-            delete data.lastMedicinePickupDate;
-        } else {
-            data.lastMedicinePickupDate = document.getElementById('lastMedicinePickupDate').value;
-        }
-
-        if (!data.includeLastMedicinePickup || !document.getElementById('medicineDuration').value.trim()) {
-            delete data.medicineDuration;
-        } else {
-            data.medicineDuration = document.getElementById('medicineDuration').value;
-        }
-
-        if (!data.attachmentOther || !data.attachmentOtherText?.trim()) {
-            delete data.attachmentOtherText;
-        }
-
-
-        // Normalize all date fields to BE (letter displays BE (CE))
-        const era = window.Common.getEraFromForm('referralForm');
-        const toBE = (v) => v ? window.Common.convertDateString(v, era, window.Common.ERA_BE) : '';
-        const partialToBE = (v) => {
-            if (!v) return '';
-            if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) return toBE(v);
-            if (!/^\d{2}\/\d{4}$/.test(v)) return v;
-            const [month, yearString] = v.split('/');
-            const year = parseInt(yearString, 10);
-            if (Number.isNaN(year)) return v;
-            return era === window.Common.ERA_CE ? `${month}/${year + 543}` : v;
-        };
-        const dateKeys = ['letterDate', 'dob', 'firstDiagnosisDateRetro', 'artStartDate', 'initialCD4Date', 'latestVLDate',
-            'treatedHCVCompletionDate', 'treatedTBCompletionDate', 'lastMedicinePickupDate'];
-        dateKeys.forEach(k => { if (data[k]) data[k] = toBE(data[k]); });
-        ['completedTPTStartDate', 'ongoingTPTStartDate'].forEach(k => { if (data[k]) data[k] = partialToBE(data[k]); });
-        if (data.includeSyphilisActive && data.syphilisStartDate) data.syphilisStartDate = toBE(data.syphilisStartDate);
-        data._yearEra = era;
-
-        data.additionalNotes = (document.getElementById('additionalNotes')?.value || '').trim();
+        const data = window.ReferralData.collect(form, window.Common);
         try {
             await window.PdfGenerator.generateAndPrint({
                 type: 'Referral-Letter',

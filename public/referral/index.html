@@ -182,8 +182,8 @@
                     <div>
                         <input type="radio" id="letterTypeReferral" name="letterType" value="referralForCare"
                             class="h-4 w-4 text-indigo-500 focus:ring-indigo-400">
-                        <label for="letterTypeReferral" class="ml-2 thai-font">ขอส่งตัวผู้ป่วยเพื่อรับการรักษาต่อเนื่อง
-                            / Patient Referral for Continued Care</label>
+                        <label for="letterTypeReferral" class="ml-2 thai-font">ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ
+                            / Referral for Continued Care</label>
                     </div>
                 </div>
             </fieldset>
@@ -196,7 +196,7 @@
                         <input id="includeRetroviral" name="includeRetroviral" type="checkbox"
                             class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
                         <label for="includeRetroviral" class="ml-2 block text-md font-medium thai-font">Retroviral
-                            Infection</label>
+                            infection</label>
                     </div>
                     <div id="retroviralDetails" class="ml-2 space-y-3 hidden border-l-2 border-indigo-500 pl-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -251,14 +251,14 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="latestVL" class="block text-xs font-medium thai-font">Latest VL
-                                    (copies/mL):</label>
+                                <label for="latestVL" class="block text-xs font-medium thai-font">HIV VL ล่าสุด /
+                                    Latest HIV VL (copies/mL):</label>
                                 <input type="text" id="latestVL" name="latestVL" placeholder="เช่น <20"
                                     class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                             </div>
                             <div>
-                                <label for="latestVLDate" class="block text-xs font-medium thai-font">วันที่ Latest VL /
-                                    Latest VL Date</label>
+                                <label for="latestVLDate" class="block text-xs font-medium thai-font">วันที่ตรวจ HIV VL /
+                                    HIV VL Date</label>
                                 <input type="text" id="latestVLDate" placeholder="DD/MM/YYYY" name="latestVLDate"
                                     class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                             </div>
@@ -316,14 +316,14 @@
                                 Medication:</label>
                             <select id="syphilisMedication" name="syphilisMedication"
                                 class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
-                                <option value="Benzathine">Benzathine Penicillin G 2.4 million units IM</option>
-                                <option value="Doxycycline2Weeks">Doxycycline (200) 1 tab oral bid for 2 weeks</option>
-                                <option value="Doxycycline28Days">Doxycycline (200) 1 tab oral bid for 28 days</option>
+                                <option value="Benzathine">Benzathine penicillin G 2.4 million units IM</option>
+                                <option value="Doxycycline2Weeks">Doxycycline 200 mg PO BID for 14 days</option>
+                                <option value="Doxycycline28Days">Doxycycline 200 mg PO BID for 28 days</option>
                             </select>
                         </div>
 
                         <div id="syphilisBenzathineSchedule">
-                            <p class="text-sm thai-font">หมายกำหนดการ / Schedule: (Calculated for 3 weekly doses)</p>
+                            <p class="text-sm thai-font">กำหนดการฉีดยา / Injection schedule: (3 weekly doses)</p>
                             <div class="text-sm space-y-1">
                                 <p>ครั้งที่ 1 / Dose 1: <span id="syphilisDose1Date"
                                         class="font-semibold text-indigo-300"></span></p>
@@ -667,6 +667,7 @@
     <script src="/shared/pdf-generator.js"></script>
     <script src="/shared/pdf-templates.js"></script>
     <script src="/js/common.js"></script>
+    <script src="referral-data.js"></script>
     <script src="script.js"></script>
     <script>
         document.getElementById('currentYear').textContent = new Date().getFullYear();
