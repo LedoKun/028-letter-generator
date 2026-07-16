@@ -177,29 +177,29 @@
             </fieldset>
 
             <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รายละเอียดการเจ็บป่วย (เลือกได้) /
-                    Sickness Details (Optional)</legend>
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลการตรวจรักษา / Clinical
+                    Details</legend>
 
                 <div class="mt-4 space-y-3 p-3 border border-gray-700 rounded-md">
                     <div class="flex items-center">
                         <input id="includeConsultationDiagnosis" name="includeConsultationDiagnosis" type="checkbox"
                             class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
                         <label for="includeConsultationDiagnosis"
-                            class="ml-2 block text-md font-medium thai-font">ระบุการปรึกษาและวินิจฉัย / Include
-                            Consultation & Diagnosis</label>
+                            class="ml-2 block text-md font-medium thai-font">การตรวจและวินิจฉัยโรค /
+                            Examination and diagnosis</label>
                     </div>
                     <div id="consultationDiagnosisDetails" class="optional-section-content space-y-3"
                         style="display: none;">
                         <div>
                             <label for="consultationDate"
-                                class="block text-xs font-medium thai-font">ผู้ป่วยได้มารับการปรึกษาเมื่อวันที่ /
-                                Patient had consultation on</label>
+                                class="block text-xs font-medium thai-font">เข้ารับการตรวจรักษาเมื่อวันที่ /
+                                Examined on</label>
                             <input type="text" id="consultationDate" name="consultationDate" placeholder="DD/MM/YYYY"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                         </div>
                         <div>
-                            <label for="diagnosis" class="block text-xs font-medium thai-font">และได้รับการวินิจฉัยเป็น
-                                / And is currently sick with:</label>
+                            <label for="diagnosis" class="block text-xs font-medium thai-font">การวินิจฉัย /
+                                Diagnosis</label>
                             <textarea id="diagnosis" name="diagnosis" rows="2"
                                 class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
@@ -211,14 +211,16 @@
                         <input id="includeAdvisedRest" name="includeAdvisedRest" type="checkbox"
                             class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
                         <label for="includeAdvisedRest"
-                            class="ml-2 block text-md font-medium thai-font">ระบุคำแนะนำการพัก / Include Advised
-                            Rest</label>
+                            class="ml-2 block text-md font-medium thai-font">มีความเห็นว่าควรพักรักษาตัว / Medical
+                            leave advised</label>
                     </div>
                     <div id="advisedRestDetails" class="optional-section-content space-y-3" style="display: none;">
+                        <p class="text-sm thai-font">มีความเห็นว่าควรพักรักษาตัวตามระยะเวลาดังต่อไปนี้ / Medical leave
+                            is advised for the following period</p>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                             <div>
-                                <label for="restStartDate" class="block text-xs font-medium thai-font">พักตั้งแต่วันที่
-                                    / Rest from</label>
+                                <label for="restStartDate" class="block text-xs font-medium thai-font">ตั้งแต่วันที่ /
+                                    From</label>
                                 <input type="text" id="restStartDate" name="restStartDate" placeholder="DD/MM/YYYY"
                                     class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                             </div>
@@ -229,16 +231,15 @@
                                     class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                             </div>
                             <div>
-                                <label for="restDurationDays" class="block text-xs font-medium thai-font">เป็นเวลา (วัน)
-                                    / For (Days):</label>
+                                <label for="restDurationDays" class="block text-xs font-medium thai-font">รวมระยะเวลา /
+                                    Total days</label>
                                 <input type="text" id="restDurationDays" name="restDurationDays" readonly
                                     class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm bg-gray-600">
                             </div>
                         </div>
                         <div>
-                            <label for="advisedRestNotes" class="block text-xs font-medium thai-font">บันทึกแพทย์
-                                (ถ้ามี) /
-                                Doctor's Notes (optional):</label>
+                            <label for="advisedRestNotes" class="block text-xs font-medium thai-font">หมายเหตุทางการแพทย์
+                                (ถ้ามี) / Clinical notes (optional)</label>
                             <textarea id="advisedRestNotes" name="advisedRestNotes" rows="2"
                                 class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
@@ -247,29 +248,29 @@
             </fieldset>
 
             <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ประวัติการรักษาเพิ่มเติม (เลือกได้)
-                    / Additional Treatment History (Optional)</legend>
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ประวัติการรักษา / Treatment
+                    History</legend>
                 <div class="mt-4 space-y-3 p-3 border border-gray-700 rounded-md">
                     <div class="flex items-center">
                         <input id="includeSyphilisTreatment" name="includeSyphilisTreatment" type="checkbox"
                             class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
                         <label for="includeSyphilisTreatment"
-                            class="ml-2 block text-md font-medium thai-font">ระบุการรักษาซิฟิลิส / Include Syphilis
-                            Treatment</label>
+                            class="ml-2 block text-md font-medium thai-font">ได้รับการรักษาซิฟิลิส / Syphilis
+                            treatment</label>
                     </div>
                     <div id="syphilisTreatmentDetails" class="optional-section-content space-y-3"
                         style="display: none;">
                         <div>
                             <label for="syphilisTreatmentDate"
-                                class="block text-xs font-medium thai-font">ผู้ป่วยได้รับการรักษาโรคซิฟิลิสเมื่อวันที่ /
-                                Patient treated for Syphilis on</label>
+                                class="block text-xs font-medium thai-font">ได้รับการรักษาเมื่อวันที่ / Treated
+                                on</label>
                             <input type="text" id="syphilisTreatmentDate" name="syphilisTreatmentDate"
                                 placeholder="DD/MM/YYYY"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                         </div>
                         <div>
-                            <label for="syphilisNotes" class="block text-xs font-medium thai-font">บันทึกแพทย์ (ถ้ามี) /
-                                Doctor's Notes (optional):</label>
+                            <label for="syphilisNotes" class="block text-xs font-medium thai-font">หมายเหตุทางการแพทย์
+                                (ถ้ามี) / Clinical notes (optional)</label>
                             <textarea id="syphilisNotes" name="syphilisNotes" rows="2"
                                 class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
@@ -281,21 +282,21 @@
                         <input id="includeTBTreatment" name="includeTBTreatment" type="checkbox"
                             class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
                         <label for="includeTBTreatment"
-                            class="ml-2 block text-md font-medium thai-font">ระบุการรักษาวัณโรคเสร็จสิ้น / Include
-                            Completed TB Treatment</label>
+                            class="ml-2 block text-md font-medium thai-font">รักษาวัณโรคครบถ้วนแล้ว /
+                            Completed TB treatment</label>
                     </div>
                     <div id="tbTreatmentDetails" class="optional-section-content space-y-3" style="display: none;">
                         <div>
                             <label for="tbTreatmentCompletionDate"
-                                class="block text-xs font-medium thai-font">ผู้ป่วยได้ทำการรักษาวัณโรคเสร็จสิ้นเมื่อวันที่
-                                / Patient completed TB treatment on</label>
+                                class="block text-xs font-medium thai-font">รักษาครบถ้วนเมื่อวันที่ / Treatment
+                                completed on</label>
                             <input type="text" id="tbTreatmentCompletionDate" name="tbTreatmentCompletionDate"
                                 placeholder="DD/MM/YYYY"
                                 class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                         </div>
                         <div>
-                            <label for="tbNotes" class="block text-xs font-medium thai-font">บันทึกแพทย์ (ถ้ามี) /
-                                Doctor's Notes (optional):</label>
+                            <label for="tbNotes" class="block text-xs font-medium thai-font">หมายเหตุทางการแพทย์
+                                (ถ้ามี) / Clinical notes (optional)</label>
                             <textarea id="tbNotes" name="tbNotes" rows="2"
                                 class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
@@ -304,20 +305,20 @@
             </fieldset>
 
             <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ความเห็นแพทย์ (เลือกได้) / Doctor's
-                    Comment (Optional)</legend>
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ความเห็นแพทย์ / Physician
+                    Comment</legend>
                 <div class="mt-4 space-y-3 p-3 border border-gray-700 rounded-md">
                     <div class="flex items-center">
                         <input id="includeDoctorComment" name="includeDoctorComment" type="checkbox"
                             class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
                         <label for="includeDoctorComment"
-                            class="ml-2 block text-md font-medium thai-font">ระบุความเห็นแพทย์ / Include Doctor's
-                            Comment</label>
+                            class="ml-2 block text-md font-medium thai-font">ความเห็นแพทย์เพิ่มเติม / Additional
+                            physician comment</label>
                     </div>
                     <div id="doctorCommentDetails" class="optional-section-content space-y-3" style="display: none;">
                         <div>
                             <label for="doctorComment" class="block text-xs font-medium thai-font">ความเห็นแพทย์ /
-                                Doctor's Comment:</label>
+                                Physician comment</label>
                             <textarea id="doctorComment" name="doctorComment" rows="3"
                                 class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"></textarea>
                         </div>
@@ -331,12 +332,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     <div>
                         <label for="doctorNameThai" class="block text-sm font-medium thai-font">ชื่อแพทย์ (ภาษาไทย) /
-                            Doctor's Name (Thai)</label>
+                            Doctor's name (Thai)</label>
                         <input type="text" id="doctorNameThai" name="doctorNameThai" placeholder="เช่น นพ.กรุง ธนบุรี"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
                     <div>
-                        <label for="doctorNameEnglish" class="block text-sm font-medium">Doctor's Name (English)</label>
+                        <label for="doctorNameEnglish" class="block text-sm font-medium thai-font">ชื่อแพทย์
+                            (ภาษาอังกฤษ) / Doctor's name (English)</label>
                         <input type="text" id="doctorNameEnglish" name="doctorNameEnglish"
                             placeholder="DR. KRUNG THONBURI"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"

@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
         otherMedInput.placeholder = "SPECIFY MEDICATION (ALL CAPS)";
         const otherMedLabel = document.createElement('label');
         otherMedLabel.htmlFor = `artMedOther-${idSuffix}`;
-        otherMedLabel.textContent = 'Other Medication ';
+        otherMedLabel.textContent = 'ยาอื่น ๆ / Other medication ';
         otherMedLabel.classList.add('mt-2', 'block', 'text-xs', 'font-medium', 'thai-font', 'hidden-field');
         const otherMedRequired = document.createElement('span');
         otherMedRequired.textContent = '*';
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
         removeBtnDiv.classList.add('flex', 'items-end', 'h-full'); // Align button to bottom
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
-        removeBtn.textContent = 'ลบ';
+        removeBtn.textContent = 'ลบ / Remove';
         removeBtn.classList.add('text-red-400', 'hover:text-red-300', 'text-xs', 'thai-font', 'py-1', 'px-2', 'border', 'border-red-400', 'rounded', 'w-full', 'md:w-auto', 'mt-2', 'md:mt-0'); // Adjusted margin
         removeBtn.onclick = function () { itemDiv.remove(); };
         removeBtnDiv.appendChild(removeBtn);
@@ -270,12 +270,12 @@ document.addEventListener('DOMContentLoaded', function () {
         let missingFieldsMessages = [];
 
         const requiredFields = [
-            { id: 'letterDate', name: 'Certificate Date' },
-            { id: 'patientName', name: 'Patient Full Name' },
-            { id: 'dob', name: 'Date of Birth' },
-            { id: 'nationality', name: 'Nationality' },
-            { id: 'doctorNameEnglish', name: 'Doctor\'s Name (English)' },
-            { id: 'medicalLicense', name: 'Medical License No.' }
+            { id: 'letterDate', name: 'วันที่ออกเอกสาร / Certificate date' },
+            { id: 'patientName', name: 'ชื่อ-นามสกุลผู้ป่วย / Patient full name' },
+            { id: 'dob', name: 'วันเกิด / Date of birth' },
+            { id: 'nationality', name: 'สัญชาติ / Nationality' },
+            { id: 'doctorNameEnglish', name: 'ชื่อแพทย์ (ภาษาอังกฤษ) / Doctor\'s name (English)' },
+            { id: 'medicalLicense', name: 'เลขที่ใบประกอบวิชาชีพ / Medical license no.' }
         ];
 
         requiredFields.forEach(fieldInfo => {
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (salutationSelect && salutationSelect.value === 'OTHER') {
             const otherSalutationInput = document.getElementById('otherSalutation');
             if (!otherSalutationInput || !otherSalutationInput.value.trim()) {
-                missingFieldsMessages.push('Salutation (Other)');
+                missingFieldsMessages.push('คำนำหน้าชื่อ (อื่น ๆ) / Salutation (Other)');
                 if (otherSalutationInput) otherSalutationInput.style.borderColor = 'red';
                 isValid = false;
             } else if (otherSalutationInput) {
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (nationalitySelect && nationalitySelect.value === 'OTHER') {
             const otherNationalityInput = document.getElementById('otherNationality');
             if (!otherNationalityInput || !otherNationalityInput.value.trim()) {
-                missingFieldsMessages.push('Nationality (Other)');
+                missingFieldsMessages.push('สัญชาติ (อื่น ๆ) / Nationality (Other)');
                 if (otherNationalityInput) otherNationalityInput.style.borderColor = 'red';
                 isValid = false;
             } else if (otherNationalityInput) {
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.includeMedications) {
             const medItems = document.querySelectorAll('#artMedicationsContainer .medication-item');
             if (medItems.length === 0) {
-                missingFieldsMessages.push('Medications (at least 1)');
+                missingFieldsMessages.push('รายการยาอย่างน้อย 1 รายการ / At least one medication');
                 isValid = false;
                 const artContainer = document.getElementById('artMedicationsContainer');
                 if (artContainer) artContainer.style.border = '1px solid red';
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (otherInputEl && otherInputEl.value.trim()) {
                                 medicationName = otherInputEl.value.trim().toUpperCase();
                             } else {
-                                missingFieldsMessages.push(`Medication ${index + 1} (Specify Other Name)`);
+                                missingFieldsMessages.push(`รายการยาที่ ${index + 1} (ระบุชื่อยา / Specify medication)`);
                                 isValid = false;
                                 if (otherInputEl) otherInputEl.style.borderColor = 'red';
                             }
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             data.artMedications.push({ medication: medicationName });
                         }
                     } else if (selectEl) { // Case where select element exists but no value selected (should not happen with default)
-                        missingFieldsMessages.push(`Medication ${index + 1} (Not selected)`);
+                        missingFieldsMessages.push(`รายการยาที่ ${index + 1} (ยังไม่ได้เลือก / Not selected)`);
                         isValid = false;
                         selectEl.style.borderColor = 'red';
                     }
@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         if (!isValid) {
-            alert(`Please complete all required fields correctly:\n- ${missingFieldsMessages.join('\n- ')}`);
+            alert(`กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วนและถูกต้อง / Complete all required fields correctly:\n- ${missingFieldsMessages.join('\n- ')}`);
             // Focus logic can be improved to find the first actual invalid medication item
             const firstInvalidField = requiredFields.find(f => missingFieldsMessages.some(m => m.includes(f.name)));
             if (firstInvalidField) document.getElementById(firstInvalidField.id)?.focus();

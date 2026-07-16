@@ -209,8 +209,8 @@ document.addEventListener('DOMContentLoaded', function () {
         let missingFieldsMessages = [];
 
         const requiredFields = [
-            { id: 'letterDate', name: 'วันที่ออกเอกสาร / Certificate Date' },
-            { id: 'patientName', name: 'ชื่อ-นามสกุลผู้ป่วย / Patient Full Name' }
+            { id: 'letterDate', name: 'วันที่ออกเอกสาร / Certificate date' },
+            { id: 'patientName', name: 'ชื่อ-นามสกุลผู้ป่วย / Patient full name' }
         ];
 
         requiredFields.forEach(fieldInfo => {
@@ -247,11 +247,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         const optionalDateSections = [
-            { checkboxId: 'includeConsultationDiagnosis', dateFieldId: 'consultationDate', name: 'วันที่ปรึกษา / Consultation Date' },
-            { checkboxId: 'includeAdvisedRest', dateFieldId: 'restStartDate', name: 'วันที่เริ่มพัก / Rest Start Date' },
-            { checkboxId: 'includeAdvisedRest', dateFieldId: 'restEndDate', name: 'วันที่สิ้นสุดการพัก / Rest End Date' },
-            { checkboxId: 'includeSyphilisTreatment', dateFieldId: 'syphilisTreatmentDate', name: 'วันที่รักษาซิฟิลิส / Syphilis Treatment Date' },
-            { checkboxId: 'includeTBTreatment', dateFieldId: 'tbTreatmentCompletionDate', name: 'วันที่รักษาวัณโรคครบ / TB Treatment Completion Date' }
+            { checkboxId: 'includeConsultationDiagnosis', dateFieldId: 'consultationDate', name: 'วันที่เข้ารับการตรวจรักษา / Examination date' },
+            { checkboxId: 'includeAdvisedRest', dateFieldId: 'restStartDate', name: 'วันที่เริ่มพักรักษาตัว / Medical leave start date' },
+            { checkboxId: 'includeAdvisedRest', dateFieldId: 'restEndDate', name: 'วันที่สิ้นสุดการพักรักษาตัว / Medical leave end date' },
+            { checkboxId: 'includeSyphilisTreatment', dateFieldId: 'syphilisTreatmentDate', name: 'วันที่ได้รับการรักษาซิฟิลิส / Syphilis treatment date' },
+            { checkboxId: 'includeTBTreatment', dateFieldId: 'tbTreatmentCompletionDate', name: 'วันที่รักษาวัณโรคครบถ้วน / TB treatment completion date' }
         ];
 
         optionalDateSections.forEach(sec => {
@@ -281,12 +281,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const restEndDate = window.Common.parseDate(restEndDateInput.value, era);
 
             if (restStartDate && restEndDate && restEndDate < restStartDate) {
-                missingFieldsMessages.push('วันที่สิ้นสุดการพักต้องไม่มาก่อนวันที่เริ่มพัก / Rest end date cannot be before rest start date');
+                missingFieldsMessages.push('วันที่สิ้นสุดการพักรักษาตัวต้องตรงกับหรืออยู่หลังวันที่เริ่มพักรักษาตัว / Medical leave end date must be on or after the start date');
                 restEndDateInput.style.borderColor = 'red';
                 isValid = false;
             }
             if ((restStartDateInput.value && !restEndDateInput.value) || (!restStartDateInput.value && restEndDateInput.value)) {
-                missingFieldsMessages.push('กรุณาระบุทั้งวันที่เริ่มและสิ้นสุดการพัก / Please provide both start and end dates for rest period');
+                missingFieldsMessages.push('ระบุทั้งวันที่เริ่มและวันที่สิ้นสุดการพักรักษาตัว / Enter both the start and end dates for medical leave');
                 if (!restStartDateInput.value) restStartDateInput.style.borderColor = 'red';
                 if (!restEndDateInput.value) restEndDateInput.style.borderColor = 'red';
                 isValid = false;

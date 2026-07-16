@@ -106,8 +106,8 @@
                 </legend>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     <div>
-                        <label for="letterDate" class="block text-sm font-medium">Certificate Date (CE) <span
-                                class="required-asterisk">*</span></label>
+                        <label for="letterDate" class="block text-sm font-medium thai-font">วันที่ออกเอกสาร /
+                            Certificate date <span class="required-asterisk">*</span></label>
                         <input type="text" id="letterDate" name="letterDate" placeholder="DD/MM/YYYY" required
                             class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
@@ -122,19 +122,20 @@
                         <label for="salutation" class="block text-sm font-medium thai-font">คำนำหน้าชื่อ / Salutation</label>
                         <select id="salutation" name="salutation"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                            <option value="">-- Select --</option>
-                            <option value="MR.">MR.</option>
-                            <option value="MS.">MS.</option>
-                            <option value="MRS.">MRS.</option>
-                            <option value="MISS">MISS</option>
-                            <option value="DR.">DR.</option>
-                            <option value="PROF.">PROF.</option>
-                            <option value="NONE">(Leave Blank)</option>
-                            <option value="OTHER">Other (Specify)</option>
+                            <option value="">เลือก / Select</option>
+                            <option value="MR.">นาย / Mr.</option>
+                            <option value="MS.">นางสาว / Ms.</option>
+                            <option value="MRS.">นาง / Mrs.</option>
+                            <option value="MISS">นางสาว / Miss</option>
+                            <option value="DR.">ดร. / Dr.</option>
+                            <option value="PROF.">ศ. / Prof.</option>
+                            <option value="NONE">เว้นว่าง / Leave blank</option>
+                            <option value="OTHER">อื่น ๆ / Other</option>
                         </select>
-                        <label for="otherSalutation" class="mt-2 block text-sm font-medium thai-font hidden-field">Specify
-                            Salutation <span class="required-asterisk">*</span></label>
-                        <input type="text" id="otherSalutation" name="otherSalutation" placeholder="Specify Salutation"
+                        <label for="otherSalutation" class="mt-2 block text-sm font-medium thai-font hidden-field">ระบุคำนำหน้า
+                            / Specify salutation <span class="required-asterisk">*</span></label>
+                        <input type="text" id="otherSalutation" name="otherSalutation"
+                            placeholder="ระบุคำนำหน้า / Specify salutation"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field">
                     </div>
                     <div class="md:col-span-2">
@@ -146,7 +147,7 @@
                             style="text-transform: uppercase;">
                     </div>
                     <div>
-                        <label for="dob" class="block text-sm font-medium">Date of Birth (CE) <span
+                        <label for="dob" class="block text-sm font-medium thai-font">วันเกิด / Date of birth <span
                                 class="required-asterisk">*</span></label>
                         <input type="text" id="dob" name="dob" placeholder="DD/MM/YYYY" required
                             class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
@@ -156,7 +157,7 @@
                                 class="required-asterisk">*</span></label>
                         <select id="nationality" name="nationality" required
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                            <option value="">-- SELECT NATIONALITY --</option>
+                            <option value="">เลือกสัญชาติ / Select nationality</option>
                             <option value="CAMBODIAN">CAMBODIAN</option>
                             <option value="CHINESE">CHINESE</option>
                             <option value="FILIPINO">FILIPINO</option>
@@ -356,10 +357,10 @@
                             <option value="OTHER">OTHER (SPECIFY)</option>
                         </select>
                         <label for="otherNationality"
-                            class="mt-2 block text-sm font-medium thai-font hidden-field">Specify Nationality <span
-                                class="required-asterisk">*</span></label>
+                            class="mt-2 block text-sm font-medium thai-font hidden-field">ระบุสัญชาติ / Specify
+                            nationality <span class="required-asterisk">*</span></label>
                         <input type="text" id="otherNationality" name="otherNationality"
-                            placeholder="Specify Nationality (ALL CAPS)"
+                            placeholder="ระบุสัญชาติเป็นภาษาอังกฤษ / Specify nationality in English"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field"
                             style="text-transform: uppercase;">
                     </div>
@@ -381,8 +382,8 @@
                     <div class="flex items-center">
                         <input id="includeMedications" name="includeMedications" type="checkbox" checked
                             class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
-                        <label for="includeMedications" class="ml-2 block text-md font-medium thai-font">ระบุรายการยา /
-                            Include Medications</label>
+                        <label for="includeMedications" class="ml-2 block text-md font-medium thai-font">รายการยาที่ต้องพก
+                            / Medications to be carried</label>
                     </div>
                     <div id="medicationsDetails" class="ml-2 space-y-3 border-l-2 border-indigo-500 pl-4">
                         <div id="artMedicationsContainer" class="space-y-3 pt-2">
@@ -399,8 +400,9 @@
                 </legend>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     <div>
-                        <label for="doctorNameEnglish" class="block text-sm font-medium">Doctor's Name (English, ALL
-                            CAPS) <span class="required-asterisk">*</span></label>
+                        <label for="doctorNameEnglish" class="block text-sm font-medium thai-font">ชื่อแพทย์
+                            (ภาษาอังกฤษตัวพิมพ์ใหญ่) / Doctor's name (English, all caps) <span
+                                class="required-asterisk">*</span></label>
                         <input type="text" id="doctorNameEnglish" name="doctorNameEnglish" required
                             placeholder="DR. JANE SMITH"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
@@ -416,9 +418,10 @@
             </fieldset>
 
             <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">บันทึกเพิ่มเติม / Additional Notes</legend>
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">หมายเหตุเพิ่มเติม / Additional
+                    Notes</legend>
                 <div class="mt-2">
-                    <label for="additionalNotes" class="block text-sm font-medium thai-font">บันทึกเพิ่มเติม / Notes:</label>
+                    <label for="additionalNotes" class="block text-sm font-medium thai-font">หมายเหตุ / Notes</label>
                     <textarea id="additionalNotes" name="additionalNotes" rows="3"
                         class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"></textarea>
                 </div>

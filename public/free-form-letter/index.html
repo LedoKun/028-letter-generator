@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สร้างจดหมายอิสระ (Free Form)</title>
+    <title>สร้างหนังสือแบบกำหนดเอง</title>
     <link rel="stylesheet" href="/css/style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@400;700&family=Noto+Sans:wght@400;700&display=swap"
@@ -54,14 +54,14 @@
 
     <div class="container mx-auto max-w-3xl">
         <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold thai-font text-white">สร้างจดหมายอิสระ</h1>
-            <p class="text-xl text-gray-400">Free Form Letter Generator</p>
+            <h1 class="text-3xl font-bold thai-font text-white">สร้างหนังสือแบบกำหนดเอง</h1>
+            <p class="text-xl text-gray-400">Custom Letter Generator</p>
         </header>
 
         <form id="freeFormLetterForm" class="space-y-6">
 
             <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รายละเอียดจดหมาย / Letter Details
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รายละเอียดหนังสือ / Letter Details
                 </legend>
                 <div class="grid grid-cols-1 gap-4 mt-2">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,10 +83,10 @@
                     </div>
 
                     <div>
-                        <label for="documentTitle" class="block text-sm font-medium thai-font">หัวข้อเอกสาร / Document
-                            Title <span class="required-asterisk">*</span></label>
+                        <label for="documentTitle" class="block text-sm font-medium thai-font">หัวเอกสาร / Document
+                            heading <span class="required-asterisk">*</span></label>
                         <input type="text" id="documentTitle" name="documentTitle" value="บันทึกข้อความ"
-                            placeholder="e.g. MEDICAL CERTIFICATE, TO WHOM IT MAY CONCERN" required
+                            placeholder="เช่น บันทึกข้อความ / e.g., MEDICAL CERTIFICATE" required
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
                             style="text-transform: uppercase;">
                     </div>
@@ -95,16 +95,16 @@
                         <label for="addressee" class="block text-sm font-medium thai-font">เรียน / Addressee
                             (To...)</label>
                         <input type="text" id="addressee" name="addressee" value="เจ้าหน้าที่ผู้เกี่ยวข้อง"
-                            placeholder="e.g. The Immigration Officer"
+                            placeholder="เช่น ผู้อำนวยการโรงพยาบาล / e.g., The Immigration Officer"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
 
                     <div>
-                        <label for="letterBody" class="block text-sm font-medium thai-font">เนื้อหาจดหมาย / Letter Body
+                        <label for="letterBody" class="block text-sm font-medium thai-font">เนื้อหาหนังสือ / Letter body
                             <span class="required-asterisk">*</span></label>
                         <textarea id="letterBody" name="letterBody" rows="10" required
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm placeholder-gray-500"
-                            placeholder="Type your letter content here..."></textarea>
+                            placeholder="ระบุเนื้อหาหนังสือ / Enter the letter content"></textarea>
                     </div>
                 </div>
             </fieldset>
@@ -115,12 +115,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     <div>
                         <label for="doctorNameThai" class="block text-sm font-medium thai-font">ชื่อแพทย์ (ภาษาไทย) /
-                            Doctor's Name (Thai)</label>
+                            Doctor's name (Thai)</label>
                         <input type="text" id="doctorNameThai" name="doctorNameThai"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
                     <div>
-                        <label for="doctorNameEnglish" class="block text-sm font-medium">Doctor's Name (English)</label>
+                        <label for="doctorNameEnglish" class="block text-sm font-medium thai-font">ชื่อแพทย์
+                            (ภาษาอังกฤษ) / Doctor's name (English)</label>
                         <input type="text" id="doctorNameEnglish" name="doctorNameEnglish"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
                             style="text-transform: uppercase;">

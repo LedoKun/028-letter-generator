@@ -107,8 +107,10 @@ test('renders all selected conditions with concise clinical wording', () => {
     const output = paragraphs.join('\n');
 
     assert.match(output, /Retroviral infection/);
-    assert.match(output, /ผลตรวจ HIV VL ล่าสุด \/ Latest HIV VL/);
-    assert.match(output, /HBV co-infection/);
+    assert.match(output, /ผลตรวจ HIV VL ล่าสุด: <20 copies\/mL/);
+    assert.match(output, /Latest HIV VL: <20 copies\/mL/);
+    assert.match(output, /ซิฟิลิสที่อยู่ระหว่างการรักษา \/ Active syphilis/);
+    assert.match(output, /การติดเชื้อ HBV ร่วม \/ HBV co-infection/);
     assert.match(output, /สงสัยโรคฝีดาษวานร \/ Suspected mpox/);
     assert.match(output, /เริ่มมีอาการ 4 วันก่อนส่งต่อ/);
     assert.match(output, /ผื่น ตุ่ม หรือแผลบริเวณผิวหนังหรือเยื่อบุ/);
@@ -120,15 +122,19 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.match(output, /สัมผัสผู้ป่วยระหว่างเดินทาง/);
     assert.doesNotMatch(output, /epidemiologic exposure/i);
     assert.doesNotMatch(output, /21 days before symptom onset/i);
-    assert.match(output, /Untreated HCV co-infection/);
-    assert.match(output, /Treated syphilis/);
-    assert.match(output, /Treated HCV/);
-    assert.match(output, /Treated TB/);
-    assert.match(output, /Completed TPT/);
-    assert.match(output, /Ongoing TPT/);
-    assert.match(output, /Pulmonary, Lymph nodes/);
+    assert.match(output, /การติดเชื้อ HCV ร่วม \(ยังไม่ได้รับการรักษา\) \/ Untreated HCV co-infection/);
+    assert.match(output, /ประวัติซิฟิลิสที่รักษาครบแล้ว \/ Treated syphilis/);
+    assert.match(output, /ประวัติ HCV ที่รักษาครบแล้ว \/ Treated HCV/);
+    assert.match(output, /ประวัติวัณโรคที่รักษาครบแล้ว \/ Treated TB/);
+    assert.match(output, /ได้รับ TPT ครบแล้ว \/ Completed TPT/);
+    assert.match(output, /อยู่ระหว่างรับ TPT \/ Ongoing TPT/);
+    assert.match(output, /เดือน\/ปีที่เริ่ม TPT: 09\/2565/);
+    assert.match(output, /TPT start month: 09\/2022/);
+    assert.match(output, /ตำแหน่งของโรค: ปอด และ ต่อมน้ำเหลือง/);
+    assert.match(output, /Disease site: pulmonary and lymph nodes/);
     assert.match(output, /Treatment record/);
-    assert.match(output, /ผู้ป่วยได้รับยาครั้งล่าสุดเมื่อวันที่/);
+    assert.match(output, /ผู้ป่วยรับยาครั้งล่าสุดเมื่อวันที่/);
+    assert.match(output, /พร้อมยาสำหรับใช้ต่อเนื่องอีก 60 วัน/);
     assert.match(output, /60-day supply/);
     assert.doesNotMatch(output, /HIV infection/i);
     assert.doesNotMatch(output, /1%%/);
@@ -175,12 +181,13 @@ test('excludes translation-like Thai wording and unselected stale values', () =>
 
     assert.doesNotMatch(output, /โปรด/);
     assert.doesNotMatch(output, /ได้รับยาครอบคลุมเป็นเวลา/);
+    assert.doesNotMatch(output, /ผู้ป่วยได้รับยาไป/);
     assert.doesNotMatch(output, /เริ่ม \/ Started/);
     assert.doesNotMatch(output, /จ่ายยา \/ supplied for/);
     assert.doesNotMatch(output, /stale/);
     assert.doesNotMatch(output, /Retroviral infection/);
     assert.doesNotMatch(output, /Suspected mpox/);
-    assert.doesNotMatch(output, /Clinical Summary/);
+    assert.doesNotMatch(output, /Medical Summary/);
     assert.match(output, /หากต้องการข้อมูลเพิ่มเติม สามารถติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรีได้/);
 });
 
@@ -199,7 +206,7 @@ test('renders the concise no-known-exposure Mpox wording', () => {
 
     assert.match(output, /เริ่มมีอาการ 1 วันก่อนส่งต่อ/);
     assert.match(output, /Symptom onset: 1 day before referral/);
-    assert.match(output, /ผู้ป่วยไม่รายงานข้อมูลความเสี่ยงข้างต้น/);
+    assert.match(output, /ผู้ป่วยไม่ให้ประวัติความเสี่ยงตามรายการข้างต้น/);
     assert.match(output, /The patient did not report any of the listed risk factors/);
     assert.doesNotMatch(output, /epidemiologic exposure/i);
 });

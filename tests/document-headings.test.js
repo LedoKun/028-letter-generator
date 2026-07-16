@@ -53,3 +53,64 @@ test('free-form title and recipient remain editable', () => {
     assert.equal(textValue(content[0].text), 'CUSTOM MEMO');
     assert.ok(paragraphs.includes('เรียนผู้รับหนังสือ'));
 });
+
+test('medication certificate uses concise paired Thai and English wording', () => {
+    const output = paragraphTexts(buildMedicationCertificate({
+        letterDate: '16/07/2026',
+        salutation: 'MR.',
+        patientName: 'JOHN DOE',
+        nationality: 'THAI',
+        passportNumber: 'AB1234',
+        dob: '01/01/1990',
+        includeMedications: true,
+        artMedications: [{ medication: 'DOLUTEGRAVIR' }],
+        doctorNameEnglish: 'TEST DOCTOR',
+        medicalLicense: '12345',
+        additionalNotes: 'For personal use'
+    })).join('\n');
+
+    assert.match(output, /ขอรับรองว่า MR\. JOHN DOE สัญชาติ THAI/);
+    assert.match(output, /This is to certify that MR\. JOHN DOE, a THAI national/);
+    assert.match(output, /ผู้ป่วยจำเป็นต้องนำยารายการต่อไปนี้ติดตัวเพื่อใช้ในการรักษาระหว่างการเดินทาง/);
+    assert.match(output, /The patient is required to carry the following medications for personal use during travel/);
+    assert.match(output, /รายการยาปัจจุบัน \/ Current Medications/);
+    assert.match(output, /หมายเหตุเพิ่มเติม \/ Additional notes/);
+});
+
+test('medical certificate uses formal paired clinical sentences', () => {
+    const output = paragraphTexts(buildMedicalCertificate({
+        letterDate: '16/07/2026',
+        patientSalutation: 'นาย',
+        patientSalutationEnglish: 'Mr.',
+        patientName: 'สมชาย ใจดี',
+        patientGender: 'ชาย',
+        patientGenderEnglish: 'Male',
+        patientAge: '30',
+        includeConsultationDiagnosis: true,
+        consultationDate: '16/07/2026',
+        diagnosis: 'Acute gastroenteritis',
+        includeAdvisedRest: true,
+        restStartDate: '16/07/2026',
+        restEndDate: '17/07/2026',
+        restDurationDays: '2',
+        includeSyphilisTreatment: true,
+        syphilisTreatmentDate: '10/07/2026',
+        includeTBTreatment: true,
+        tbTreatmentCompletionDate: '01/06/2026',
+        doctorNameThai: 'นพ. ทดสอบ ระบบ',
+        doctorNameEnglish: 'TEST DOCTOR',
+        medicalLicense: '12345'
+    })).join('\n');
+
+    assert.match(output, /ผู้ป่วยเข้ารับการตรวจรักษาเมื่อวันที่ 16\/07\/2569/);
+    assert.match(output, /The patient was examined on 16\/07\/2026/);
+    assert.match(output, /ได้รับการวินิจฉัยว่า Acute gastroenteritis/);
+    assert.match(output, /มีความเห็นว่าควรพักรักษาตัวตั้งแต่วันที่/);
+    assert.match(output, /Medical leave is advised from/);
+    assert.match(output, /ผู้ป่วยได้รับการรักษาซิฟิลิสเมื่อวันที่/);
+    assert.match(output, /ผู้ป่วยได้รับการรักษาวัณโรคครบถ้วนเมื่อวันที่/);
+    assert.doesNotMatch(output, /วันที่เริ่มพัก/);
+    assert.doesNotMatch(output, /เห็นสมควรให้พักรักษาตัว/);
+    assert.doesNotMatch(output, /ผู้ป่วยได้ทำการ/);
+    assert.doesNotMatch(output, /โปรด/);
+});

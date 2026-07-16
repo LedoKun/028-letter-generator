@@ -232,9 +232,10 @@
                 .split(',')
                 .map(site => site.trim())
                 .filter(Boolean);
-            data.treatedTBSites = selectedSites
-                .filter(site => site !== 'Other')
-                .concat(selectedSites.includes('Other') ? otherSites : [])
+            data.treatedTBSiteValues = selectedSites.filter(site => site !== 'Other');
+            data.treatedTBSitesOther = selectedSites.includes('Other') ? otherSites.join(', ') : '';
+            data.treatedTBSites = data.treatedTBSiteValues
+                .concat(data.treatedTBSitesOther ? [data.treatedTBSitesOther] : [])
                 .join(', ');
             copyValues(data, form, ['treatedTBMedication', 'treatedTBCompletionDate']);
         }

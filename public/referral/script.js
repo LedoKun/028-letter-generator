@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const tabletsDiv = document.createElement('div');
         const tabletsLabel = document.createElement('label');
         tabletsLabel.htmlFor = `artTablets-${idSuffix}`;
-        tabletsLabel.textContent = `จำนวน / Tablets:`;
+        tabletsLabel.textContent = `จำนวนเม็ด / Tablets:`;
         tabletsLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
         const tabletsInput = document.createElement('input');
         tabletsInput.type = 'number';
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const timeDiv = document.createElement('div');
         const timeLabel = document.createElement('label');
         timeLabel.htmlFor = `artTime-${idSuffix}`;
-        timeLabel.textContent = `เวลา / Time (24-hour):`;
+        timeLabel.textContent = `เวลาให้ยา / Administration time (24-hour):`;
         timeLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
         const timeInput = document.createElement('input');
         timeInput.type = 'text';
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const removeBtnDiv = document.createElement('div');
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
-        removeBtn.textContent = 'ลบ';
+        removeBtn.textContent = 'ลบ / Remove';
         removeBtn.classList.add('text-red-400', 'hover:text-red-300', 'text-xs', 'thai-font', 'py-1', 'px-2', 'border', 'border-red-400', 'rounded', 'w-full', 'md:w-auto');
         removeBtn.onclick = function () { itemDiv.remove(); };
         removeBtnDiv.appendChild(removeBtn);
@@ -387,7 +387,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (benzathineSchedule) benzathineSchedule.style.display = 'none';
             if (doxycyclineDuration) doxycyclineDuration.style.display = 'block';
             if (durationText) {
-                durationText.textContent = medValue === 'Doxycycline2Weeks' ? '2 weeks' : '28 days';
+                durationText.textContent = medValue === 'Doxycycline2Weeks'
+                    ? '14 วัน / 14 days'
+                    : '28 วัน / 28 days';
             }
         }
 
@@ -498,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const requiredStaticFields = [
             { id: 'letterDate', name: 'วันที่ / Date' },
             { id: 'patientName', name: 'ชื่อผู้ป่วย / Patient Name' },
-            { id: 'doctorNameThai', name: 'ชื่อแพทย์ (ภาษาไทย) / Doctor\'s Name (Thai)' }
+            { id: 'doctorNameThai', name: 'ชื่อแพทย์ (ภาษาไทย) / Doctor\'s name (Thai)' }
         ];
 
         requiredStaticFields.forEach(fieldInfo => {
@@ -578,7 +580,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (includeSyphilisActiveCheckbox && includeSyphilisActiveCheckbox.checked) {
             const syphilisStartDateInput = document.getElementById('syphilisStartDate');
             if (!syphilisStartDateInput.value.trim()) {
-                missingFieldsMessages.push("วันที่เริ่มการรักษาโรคซิฟิลิส / Syphilis Treatment Start Date");
+                missingFieldsMessages.push("วันที่เริ่มการรักษาซิฟิลิส / Syphilis treatment start date");
                 syphilisStartDateInput.style.borderColor = 'red';
                 isValid = false;
             } else if (syphilisStartDateInput.value.length < 10 || !window.Common.parseDate(syphilisStartDateInput.value, window.Common.getEraFromForm('referralForm'))) {
@@ -599,14 +601,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 // For validation, let's require it if the checkbox is checked AND the user intends to provide a date.
                 // This logic might need refinement based on how strictly "last pickup date" is enforced.
                 // For now, if checked and empty, mark as error.
-                missingFieldsMessages.push("ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ / Last medicine pick up on");
+                missingFieldsMessages.push("วันที่รับยาครั้งล่าสุด / Last medication pickup date");
                 lastMedicinePickupDateInput.style.borderColor = 'red';
                 isValid = false;
             } else if (lastMedicinePickupDateInput.value.trim()) {
                 const era = window.Common.getEraFromForm('referralForm');
                 const ok = !!window.Common.parseDate(lastMedicinePickupDateInput.value, era);
                 if (!ok) {
-                    missingFieldsMessages.push(`ผู้ป่วยรับยาครั้งสุดท้ายเมื่อ (รูปแบบไม่ถูกต้อง / Invalid format: ${lastMedicinePickupDateInput.value})`);
+                    missingFieldsMessages.push(`วันที่รับยาครั้งล่าสุด (รูปแบบไม่ถูกต้อง / Invalid format: ${lastMedicinePickupDateInput.value})`);
                     lastMedicinePickupDateInput.style.borderColor = 'red';
                     isValid = false;
                 } else {
@@ -623,9 +625,9 @@ document.addEventListener('DOMContentLoaded', function () {
             durationInvalid: 'ระยะเวลาตั้งแต่เริ่มมีอาการของโรคฝีดาษวานร (กรอกเป็นจำนวนเต็มมากกว่า 0 / Enter a whole number greater than 0)',
             symptomRequired: 'อาการสำคัญของโรคฝีดาษวานรอย่างน้อย 1 รายการ / At least one presenting symptom',
             symptomOtherRequired: 'รายละเอียดอาการอื่น ๆ ของโรคฝีดาษวานร / Other mpox symptom details',
-            riskRequired: 'ข้อมูลความเสี่ยงที่ผู้ป่วยให้ประวัติอย่างน้อย 1 รายการ / At least one patient-reported risk-factor answer',
-            riskConflict: 'ไม่สามารถเลือก “ผู้ป่วยไม่รายงานข้อมูลความเสี่ยงข้างต้น” ร่วมกับรายการอื่น / “None reported” cannot be selected with another risk factor',
-            riskOtherRequired: 'รายละเอียดข้อมูลความเสี่ยงอื่น ๆ / Other patient-reported risk-factor details'
+            riskRequired: 'ข้อมูลความเสี่ยงตามที่ผู้ป่วยให้ประวัติอย่างน้อย 1 รายการ / At least one patient-reported risk factor',
+            riskConflict: 'ไม่สามารถเลือก “ผู้ป่วยไม่ให้ประวัติความเสี่ยงตามรายการข้างต้น” ร่วมกับรายการอื่น / “None reported” cannot be selected with another risk factor',
+            riskOtherRequired: 'รายละเอียดข้อมูลความเสี่ยงอื่น ๆ / Other patient-reported risk factor details'
         };
         [
             'mpoxSymptomDurationDays',

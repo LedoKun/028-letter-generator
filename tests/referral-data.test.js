@@ -181,6 +181,8 @@ test('collects every selected referral section and normalizes CE dates to BE', (
     assert.deepEqual(data.mpoxRiskFactors, ['intimateContact', 'sexualPartners', 'other']);
     assert.equal(data.mpoxSymptomOtherText, 'คลื่นไส้');
     assert.equal(data.mpoxRiskOtherText, 'สัมผัสผู้ป่วยระหว่างเดินทาง');
+    assert.deepEqual(data.treatedTBSiteValues, ['Pulmonary']);
+    assert.equal(data.treatedTBSitesOther, 'Lymph nodes');
     assert.equal(data.treatedTBSites, 'Pulmonary, Lymph nodes');
     assert.equal(data.completedTPTMedicationText, '3HR');
     assert.equal(data.ongoingTPTMedicationText, '3HP');
@@ -219,6 +221,8 @@ test('omits values belonging to unchecked sections', () => {
     assert.equal(data.mpoxSymptomOtherText, undefined);
     assert.equal(data.mpoxRiskOtherText, undefined);
     assert.equal(data.treatedHCVMedication, undefined);
+    assert.equal(data.treatedTBSiteValues, undefined);
+    assert.equal(data.treatedTBSitesOther, undefined);
     assert.equal(data.treatedTBSites, undefined);
     assert.equal(data.completedTPTMedicationText, undefined);
     assert.equal(data.ongoingTPTMedicationText, undefined);

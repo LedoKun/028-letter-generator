@@ -58,8 +58,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const requiredFields = [
             { id: 'letterDate', name: 'วันที่ / Date' },
-            { id: 'documentTitle', name: 'หัวข้อเอกสาร / Document Title' },
-            { id: 'letterBody', name: 'เนื้อหาจดหมาย / Letter Body' }
+            { id: 'documentTitle', name: 'หัวเอกสาร / Document heading' },
+            { id: 'letterBody', name: 'เนื้อหาหนังสือ / Letter body' }
         ];
 
         requiredFields.forEach(fieldInfo => {
