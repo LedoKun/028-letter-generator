@@ -78,6 +78,7 @@ function fullElements() {
         additionalNotes: field('ติดตามผลตามดุลยพินิจ'),
         includeRetroviral: field('', true),
         includeSyphilisActive: field('', true),
+        includeSuspectedMpox: field('', true),
         includeHBV: field('', true),
         includeHCVActive: field('', true),
         includeTreatedSyphilis: field('', true),
@@ -108,6 +109,28 @@ function fullElements() {
         syphilisDose1Date: { textContent: '06/06/2026' },
         syphilisDose2Date: { textContent: '13/06/2026' },
         syphilisDose3Date: { textContent: '20/06/2026' },
+        mpoxSymptomDurationDays: field('4'),
+        mpoxSymptomRashLesions: field('', true),
+        mpoxSymptomFeverChills: field('', true),
+        mpoxSymptomLymphadenopathy: field('', false),
+        mpoxSymptomHeadache: field('', false),
+        mpoxSymptomMyalgiaBackPain: field('', false),
+        mpoxSymptomFatigue: field('', false),
+        mpoxSymptomRespiratory: field('', false),
+        mpoxSymptomProctitis: field('', true),
+        mpoxSymptomDysuria: field('', false),
+        mpoxSymptomOther: field('', true),
+        mpoxSymptomOtherText: field('คลื่นไส้'),
+        mpoxRiskDirectContact: field('', false),
+        mpoxRiskIntimateContact: field('', true),
+        mpoxRiskSexualPartners: field('', true),
+        mpoxRiskHouseholdCloseContact: field('', false),
+        mpoxRiskContaminatedItems: field('', false),
+        mpoxRiskOccupational: field('', false),
+        mpoxRiskAnimal: field('', false),
+        mpoxRiskNoneKnown: field('', false),
+        mpoxRiskOther: field('', true),
+        mpoxRiskOtherText: field('สัมผัสผู้ป่วยระหว่างเดินทาง'),
         treatedHCVMedication: field('SOF/VEL'),
         treatedHCVCompletionDate: field('07/07/2024'),
         treatedTBSitesSelect: select('', '', ['Pulmonary', 'Other']),
@@ -153,6 +176,11 @@ test('collects every selected referral section and normalizes CE dates to BE', (
         { medication: 'DTG (50mg)', value: 'DTG50', tablets: '1', time: '' }
     ]);
     assert.equal(data.tmxSmpTablets, '2');
+    assert.equal(data.mpoxSymptomDurationDays, '4');
+    assert.deepEqual(data.mpoxSymptoms, ['rashLesions', 'feverChills', 'proctitis', 'other']);
+    assert.deepEqual(data.mpoxRiskFactors, ['intimateContact', 'sexualPartners', 'other']);
+    assert.equal(data.mpoxSymptomOtherText, 'คลื่นไส้');
+    assert.equal(data.mpoxRiskOtherText, 'สัมผัสผู้ป่วยระหว่างเดินทาง');
     assert.equal(data.treatedTBSites, 'Pulmonary, Lymph nodes');
     assert.equal(data.completedTPTMedicationText, '3HR');
     assert.equal(data.ongoingTPTMedicationText, '3HP');
@@ -164,6 +192,7 @@ test('omits values belonging to unchecked sections', () => {
     [
         'includeRetroviral',
         'includeSyphilisActive',
+        'includeSuspectedMpox',
         'includeTreatedHCV',
         'includeTreatedTB',
         'includeCompletedTPT',
@@ -184,6 +213,11 @@ test('omits values belonging to unchecked sections', () => {
     assert.equal(data.napId, undefined);
     assert.equal(data.artMedications, undefined);
     assert.equal(data.syphilisStartDate, undefined);
+    assert.equal(data.mpoxSymptomDurationDays, undefined);
+    assert.equal(data.mpoxSymptoms, undefined);
+    assert.equal(data.mpoxRiskFactors, undefined);
+    assert.equal(data.mpoxSymptomOtherText, undefined);
+    assert.equal(data.mpoxRiskOtherText, undefined);
     assert.equal(data.treatedHCVMedication, undefined);
     assert.equal(data.treatedTBSites, undefined);
     assert.equal(data.completedTPTMedicationText, undefined);
@@ -191,4 +225,36 @@ test('omits values belonging to unchecked sections', () => {
     assert.equal(data.otherMedicalHistory, undefined);
     assert.equal(data.lastMedicinePickupDate, undefined);
     assert.equal(data.attachmentOtherText, undefined);
+});
+
+test('validates required Mpox fields and conditional other details', () => {
+    const errors = ReferralData.validateMpox({
+        includeSuspectedMpox: true,
+        mpoxSymptomDurationDays: '0',
+        mpoxSymptoms: ['other'],
+        mpoxRiskFactors: ['noneKnown', 'other']
+    });
+
+    assert.deepEqual(errors, [
+        { fieldId: 'mpoxSymptomDurationDays', code: 'durationInvalid' },
+        { fieldId: 'mpoxSymptomOtherText', code: 'symptomOtherRequired' },
+        { fieldId: 'mpoxRiskFactorsGroup', code: 'riskConflict' },
+        { fieldId: 'mpoxRiskOtherText', code: 'riskOtherRequired' }
+    ]);
+});
+
+test('accepts a complete Mpox section and ignores validation when it is not selected', () => {
+    assert.deepEqual(ReferralData.validateMpox({
+        includeSuspectedMpox: true,
+        mpoxSymptomDurationDays: '1',
+        mpoxSymptoms: ['rashLesions'],
+        mpoxRiskFactors: ['noneKnown']
+    }), []);
+
+    assert.deepEqual(ReferralData.validateMpox({
+        includeSuspectedMpox: false,
+        mpoxSymptomDurationDays: '',
+        mpoxSymptoms: [],
+        mpoxRiskFactors: []
+    }), []);
 });

@@ -62,6 +62,12 @@ function fullReferralData() {
         syphilisDose2Date: '13/06/2569',
         syphilisDose3Date: '20/06/2569',
         syphilisNotes: 'ติดตาม RPR',
+        includeSuspectedMpox: true,
+        mpoxSymptomDurationDays: '4',
+        mpoxSymptoms: ['rashLesions', 'feverChills', 'proctitis', 'other'],
+        mpoxSymptomOtherText: 'คลื่นไส้',
+        mpoxRiskFactors: ['intimateContact', 'sexualPartners', 'other'],
+        mpoxRiskOtherText: 'สัมผัสผู้ป่วยระหว่างเดินทาง',
         includeHBV: true,
         includeHCVActive: true,
         includeTreatedSyphilis: true,
@@ -103,6 +109,17 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.match(output, /Retroviral infection/);
     assert.match(output, /ผลตรวจ HIV VL ล่าสุด \/ Latest HIV VL/);
     assert.match(output, /HBV co-infection/);
+    assert.match(output, /สงสัยโรคฝีดาษวานร \/ Suspected mpox/);
+    assert.match(output, /เริ่มมีอาการ 4 วันก่อนส่งต่อ/);
+    assert.match(output, /ผื่น ตุ่ม หรือแผลบริเวณผิวหนังหรือเยื่อบุ/);
+    assert.match(output, /ปวดบริเวณทวารหนักหรือมีอาการเข้าได้กับ proctitis/);
+    assert.match(output, /อาการอื่น ๆ: คลื่นไส้/);
+    assert.match(output, /ผู้ป่วยให้ประวัติว่ามีเพศสัมพันธ์กับผู้ที่สงสัยว่าเป็น mpox/);
+    assert.match(output, /มีเพศสัมพันธ์กับคู่นอนหลายราย/);
+    assert.match(output, /The patient reported sexual intercourse with a suspected mpox case/);
+    assert.match(output, /สัมผัสผู้ป่วยระหว่างเดินทาง/);
+    assert.doesNotMatch(output, /epidemiologic exposure/i);
+    assert.doesNotMatch(output, /21 days before symptom onset/i);
     assert.match(output, /Untreated HCV co-infection/);
     assert.match(output, /Treated syphilis/);
     assert.match(output, /Treated HCV/);
@@ -136,6 +153,10 @@ test('excludes translation-like Thai wording and unselected stale values', () =>
         patientName: 'Minimal Patient',
         includeRetroviral: false,
         napId: 'stale',
+        includeSuspectedMpox: false,
+        mpoxSymptomDurationDays: '7',
+        mpoxSymptoms: ['rashLesions'],
+        mpoxRiskFactors: ['directContact'],
         includeHBV: false,
         includeHCVActive: false,
         includeTreatedSyphilis: false,
@@ -158,6 +179,27 @@ test('excludes translation-like Thai wording and unselected stale values', () =>
     assert.doesNotMatch(output, /จ่ายยา \/ supplied for/);
     assert.doesNotMatch(output, /stale/);
     assert.doesNotMatch(output, /Retroviral infection/);
+    assert.doesNotMatch(output, /Suspected mpox/);
     assert.doesNotMatch(output, /Clinical Summary/);
     assert.match(output, /หากต้องการข้อมูลเพิ่มเติม สามารถติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรีได้/);
+});
+
+test('renders the concise no-known-exposure Mpox wording', () => {
+    const data = {
+        letterType: 'referralForCare',
+        letterDate: '16/07/2569',
+        patientName: 'Mpox Patient',
+        includeSuspectedMpox: true,
+        mpoxSymptomDurationDays: '1',
+        mpoxSymptoms: ['rashLesions'],
+        mpoxRiskFactors: ['noneKnown'],
+        doctorNameThai: 'นพ. ทดสอบ ระบบ'
+    };
+    const output = paragraphTexts(buildReferral(data)).join('\n');
+
+    assert.match(output, /เริ่มมีอาการ 1 วันก่อนส่งต่อ/);
+    assert.match(output, /Symptom onset: 1 day before referral/);
+    assert.match(output, /ผู้ป่วยไม่รายงานข้อมูลความเสี่ยงข้างต้น/);
+    assert.match(output, /The patient did not report any of the listed risk factors/);
+    assert.doesNotMatch(output, /epidemiologic exposure/i);
 });

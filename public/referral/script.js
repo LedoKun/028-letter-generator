@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeNapIdInput();
     initializePassportInput();
     setupConditionalSections();
+    setupMpoxOptions();
     setupTreatedTBSitesLogic();
     setupTPTMedicationLogic();
     setupLastMedicinePickupToggle();
@@ -132,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const toggles = [
             { checkboxId: 'includeRetroviral', detailsId: 'retroviralDetails' },
             { checkboxId: 'includeSyphilisActive', detailsId: 'syphilisActiveDetails', callback: calculateSyphilisSchedule },
+            { checkboxId: 'includeSuspectedMpox', detailsId: 'suspectedMpoxDetails', callback: updateMpoxNestedControls },
             { checkboxId: 'includeTreatedHCV', detailsId: 'treatedHCVDetails' },
             { checkboxId: 'includeTreatedTB', detailsId: 'treatedTBDetails' },
             { checkboxId: 'includeCompletedTPT', detailsId: 'completedTPTDetails' },
@@ -183,6 +185,58 @@ document.addEventListener('DOMContentLoaded', function () {
         if (syphilisMedicationSelect) {
             syphilisMedicationSelect.addEventListener('change', calculateSyphilisSchedule);
         }
+    }
+
+    function updateMpoxNestedControls() {
+        const parentCheckbox = document.getElementById('includeSuspectedMpox');
+        if (!parentCheckbox) return;
+
+        [
+            { checkboxId: 'mpoxSymptomOther', inputId: 'mpoxSymptomOtherText' },
+            { checkboxId: 'mpoxRiskOther', inputId: 'mpoxRiskOtherText' }
+        ].forEach(({ checkboxId, inputId }) => {
+            const checkbox = document.getElementById(checkboxId);
+            const input = document.getElementById(inputId);
+            if (!checkbox || !input) return;
+            const active = parentCheckbox.checked && checkbox.checked;
+            input.style.display = active ? 'block' : 'none';
+            input.disabled = !active;
+        });
+    }
+
+    function setupMpoxOptions() {
+        const parentCheckbox = document.getElementById('includeSuspectedMpox');
+        const symptomOther = document.getElementById('mpoxSymptomOther');
+        const riskOptions = window.ReferralData.MPOX_RISK_OPTIONS
+            .map(option => document.getElementById(option.id))
+            .filter(Boolean);
+        const noKnownRisk = document.getElementById('mpoxRiskNoneKnown');
+        if (!parentCheckbox || !noKnownRisk) return;
+
+        if (symptomOther) symptomOther.addEventListener('change', updateMpoxNestedControls);
+        riskOptions.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                if (checkbox === noKnownRisk && checkbox.checked) {
+                    riskOptions.forEach(option => {
+                        if (option !== noKnownRisk) option.checked = false;
+                    });
+                } else if (checkbox.checked) {
+                    noKnownRisk.checked = false;
+                }
+                document.getElementById('mpoxRiskFactorsGroup').style.borderColor = '';
+                updateMpoxNestedControls();
+            });
+        });
+        window.ReferralData.MPOX_SYMPTOM_OPTIONS.forEach(option => {
+            const checkbox = document.getElementById(option.id);
+            if (checkbox) {
+                checkbox.addEventListener('change', () => {
+                    document.getElementById('mpoxSymptomsGroup').style.borderColor = '';
+                });
+            }
+        });
+        parentCheckbox.addEventListener('change', updateMpoxNestedControls);
+        updateMpoxNestedControls();
     }
 
     function createArtMedicationInputs(idSuffix) {
@@ -563,15 +617,45 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        const data = window.ReferralData.collect(form, window.Common);
+        const mpoxValidationMessages = {
+            durationRequired: 'ระยะเวลาตั้งแต่เริ่มมีอาการของโรคฝีดาษวานร / Duration since mpox symptom onset',
+            durationInvalid: 'ระยะเวลาตั้งแต่เริ่มมีอาการของโรคฝีดาษวานร (กรอกเป็นจำนวนเต็มมากกว่า 0 / Enter a whole number greater than 0)',
+            symptomRequired: 'อาการสำคัญของโรคฝีดาษวานรอย่างน้อย 1 รายการ / At least one presenting symptom',
+            symptomOtherRequired: 'รายละเอียดอาการอื่น ๆ ของโรคฝีดาษวานร / Other mpox symptom details',
+            riskRequired: 'ข้อมูลความเสี่ยงที่ผู้ป่วยให้ประวัติอย่างน้อย 1 รายการ / At least one patient-reported risk-factor answer',
+            riskConflict: 'ไม่สามารถเลือก “ผู้ป่วยไม่รายงานข้อมูลความเสี่ยงข้างต้น” ร่วมกับรายการอื่น / “None reported” cannot be selected with another risk factor',
+            riskOtherRequired: 'รายละเอียดข้อมูลความเสี่ยงอื่น ๆ / Other patient-reported risk-factor details'
+        };
+        [
+            'mpoxSymptomDurationDays',
+            'mpoxSymptomsGroup',
+            'mpoxSymptomOtherText',
+            'mpoxRiskFactorsGroup',
+            'mpoxRiskOtherText'
+        ].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.borderColor = '';
+        });
+        window.ReferralData.validateMpox(data).forEach(error => {
+            missingFieldsMessages.push(mpoxValidationMessages[error.code] || error.code);
+            const element = document.getElementById(error.fieldId);
+            if (element) element.style.borderColor = 'red';
+            isValid = false;
+        });
 
         if (!isValid) {
             alert(`กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วนและถูกต้อง:\n- ${missingFieldsMessages.join('\n- ')}`);
             const firstInvalidField = Array.from(document.querySelectorAll('[style*="border-color: red"]'))[0];
-            if (firstInvalidField) firstInvalidField.focus();
+            if (firstInvalidField) {
+                const focusTarget = firstInvalidField.matches('input, select, textarea, button')
+                    ? firstInvalidField
+                    : firstInvalidField.querySelector('input, select, textarea, button');
+                if (focusTarget) focusTarget.focus();
+            }
             return;
         }
 
-        const data = window.ReferralData.collect(form, window.Common);
         try {
             await window.PdfGenerator.generateAndPrint({
                 type: 'Referral-Letter',

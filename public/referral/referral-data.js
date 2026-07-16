@@ -6,6 +6,7 @@
     const CHECKBOX_IDS = [
         'includeRetroviral',
         'includeSyphilisActive',
+        'includeSuspectedMpox',
         'includeHBV',
         'includeHCVActive',
         'includeTreatedSyphilis',
@@ -19,6 +20,31 @@
         'attachmentLabResults',
         'attachmentOther',
         'includeTmxSmp'
+    ];
+
+    const MPOX_SYMPTOM_OPTIONS = [
+        { id: 'mpoxSymptomRashLesions', value: 'rashLesions' },
+        { id: 'mpoxSymptomFeverChills', value: 'feverChills' },
+        { id: 'mpoxSymptomLymphadenopathy', value: 'lymphadenopathy' },
+        { id: 'mpoxSymptomHeadache', value: 'headache' },
+        { id: 'mpoxSymptomMyalgiaBackPain', value: 'myalgiaBackPain' },
+        { id: 'mpoxSymptomFatigue', value: 'fatigue' },
+        { id: 'mpoxSymptomRespiratory', value: 'respiratory' },
+        { id: 'mpoxSymptomProctitis', value: 'proctitis' },
+        { id: 'mpoxSymptomDysuria', value: 'dysuria' },
+        { id: 'mpoxSymptomOther', value: 'other' }
+    ];
+
+    const MPOX_RISK_OPTIONS = [
+        { id: 'mpoxRiskDirectContact', value: 'directContact' },
+        { id: 'mpoxRiskIntimateContact', value: 'intimateContact' },
+        { id: 'mpoxRiskSexualPartners', value: 'sexualPartners' },
+        { id: 'mpoxRiskHouseholdCloseContact', value: 'householdCloseContact' },
+        { id: 'mpoxRiskContaminatedItems', value: 'contaminatedItems' },
+        { id: 'mpoxRiskOccupational', value: 'occupational' },
+        { id: 'mpoxRiskAnimal', value: 'animal' },
+        { id: 'mpoxRiskNoneKnown', value: 'noneKnown' },
+        { id: 'mpoxRiskOther', value: 'other' }
     ];
 
     const BASE_VALUE_IDS = [
@@ -64,6 +90,15 @@
             const value = getValue(form, id);
             if (value) data[id] = value;
         });
+    }
+
+    function collectCheckedValues(form, options) {
+        return options
+            .filter(option => {
+                const element = getElement(form, option.id);
+                return !!(element && element.checked);
+            })
+            .map(option => option.value);
     }
 
     function collectArtMedications(form) {
@@ -172,6 +207,18 @@
             }
         }
 
+        if (data.includeSuspectedMpox) {
+            copyValues(data, form, ['mpoxSymptomDurationDays']);
+            data.mpoxSymptoms = collectCheckedValues(form, MPOX_SYMPTOM_OPTIONS);
+            data.mpoxRiskFactors = collectCheckedValues(form, MPOX_RISK_OPTIONS);
+            if (data.mpoxSymptoms.includes('other')) {
+                copyValues(data, form, ['mpoxSymptomOtherText']);
+            }
+            if (data.mpoxRiskFactors.includes('other')) {
+                copyValues(data, form, ['mpoxRiskOtherText']);
+            }
+        }
+
         if (data.includeTreatedHCV) {
             copyValues(data, form, ['treatedHCVMedication', 'treatedHCVCompletionDate']);
         }
@@ -209,8 +256,43 @@
         return data;
     }
 
+    function validateMpox(data) {
+        if (!data || !data.includeSuspectedMpox) return [];
+
+        const errors = [];
+        const duration = String(data.mpoxSymptomDurationDays || '').trim();
+        const symptoms = Array.isArray(data.mpoxSymptoms) ? data.mpoxSymptoms : [];
+        const riskFactors = Array.isArray(data.mpoxRiskFactors) ? data.mpoxRiskFactors : [];
+
+        if (!duration) {
+            errors.push({ fieldId: 'mpoxSymptomDurationDays', code: 'durationRequired' });
+        } else if (!/^[1-9]\d*$/.test(duration)) {
+            errors.push({ fieldId: 'mpoxSymptomDurationDays', code: 'durationInvalid' });
+        }
+        if (!symptoms.length) {
+            errors.push({ fieldId: 'mpoxSymptomsGroup', code: 'symptomRequired' });
+        }
+        if (symptoms.includes('other') && !String(data.mpoxSymptomOtherText || '').trim()) {
+            errors.push({ fieldId: 'mpoxSymptomOtherText', code: 'symptomOtherRequired' });
+        }
+        if (!riskFactors.length) {
+            errors.push({ fieldId: 'mpoxRiskFactorsGroup', code: 'riskRequired' });
+        }
+        if (riskFactors.includes('noneKnown') && riskFactors.length > 1) {
+            errors.push({ fieldId: 'mpoxRiskFactorsGroup', code: 'riskConflict' });
+        }
+        if (riskFactors.includes('other') && !String(data.mpoxRiskOtherText || '').trim()) {
+            errors.push({ fieldId: 'mpoxRiskOtherText', code: 'riskOtherRequired' });
+        }
+
+        return errors;
+    }
+
     return {
         CHECKBOX_IDS,
-        collect
+        MPOX_SYMPTOM_OPTIONS,
+        MPOX_RISK_OPTIONS,
+        collect,
+        validateMpox
     };
 });

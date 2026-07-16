@@ -11,6 +11,62 @@
 
     const MEMO_HEADING = 'บันทึกข้อความ';
     const DEFAULT_RECIPIENT = 'เจ้าหน้าที่ผู้เกี่ยวข้อง';
+    const MPOX_SYMPTOM_LABELS = {
+        rashLesions: {
+            thai: 'ผื่น ตุ่ม หรือแผลบริเวณผิวหนังหรือเยื่อบุ',
+            english: 'skin or mucosal lesions'
+        },
+        feverChills: { thai: 'ไข้หรือหนาวสั่น', english: 'fever or chills' },
+        lymphadenopathy: { thai: 'ต่อมน้ำเหลืองโต', english: 'lymphadenopathy' },
+        headache: { thai: 'ปวดศีรษะ', english: 'headache' },
+        myalgiaBackPain: { thai: 'ปวดกล้ามเนื้อหรือปวดหลัง', english: 'myalgia or back pain' },
+        fatigue: { thai: 'อ่อนเพลีย', english: 'fatigue' },
+        respiratory: {
+            thai: 'เจ็บคอ คัดจมูก หรือไอ',
+            english: 'sore throat, nasal congestion, or cough'
+        },
+        proctitis: {
+            thai: 'ปวดบริเวณทวารหนักหรือมีอาการเข้าได้กับ proctitis',
+            english: 'rectal pain or proctitis'
+        },
+        dysuria: { thai: 'ปัสสาวะแสบขัด', english: 'dysuria' },
+        other: { thai: 'อาการอื่น ๆ', english: 'other symptoms' }
+    };
+    const MPOX_RISK_LABELS = {
+        directContact: {
+            thai: 'สัมผัสใกล้ชิดกับผู้ที่สงสัยว่าเป็น mpox',
+            english: 'close contact with a suspected mpox case'
+        },
+        intimateContact: {
+            thai: 'มีเพศสัมพันธ์กับผู้ที่สงสัยว่าเป็น mpox',
+            english: 'sexual intercourse with a suspected mpox case'
+        },
+        sexualPartners: {
+            thai: 'มีเพศสัมพันธ์กับคู่นอนหลายราย',
+            english: 'sexual intercourse with multiple partners'
+        },
+        householdCloseContact: {
+            thai: 'อาศัยอยู่ร่วมกับผู้ที่สงสัยว่าเป็น mpox',
+            english: 'living with a suspected mpox case'
+        },
+        contaminatedItems: {
+            thai: 'ใช้เสื้อผ้า เครื่องนอน ผ้าเช็ดตัว หรือของใช้ส่วนตัวร่วมกับผู้ที่สงสัยว่าเป็น mpox',
+            english: 'sharing personal items with a suspected mpox case'
+        },
+        occupational: {
+            thai: 'อาจสัมผัสผู้ที่สงสัยว่าเป็น mpox จากการปฏิบัติงาน',
+            english: 'possible work-related contact with a suspected mpox case'
+        },
+        animal: {
+            thai: 'สัมผัสสัตว์ ซากสัตว์ หรือผลิตภัณฑ์จากสัตว์',
+            english: 'contact with animals, carcasses, or animal products'
+        },
+        noneKnown: {
+            thai: 'ไม่รายงานข้อมูลความเสี่ยงข้างต้น',
+            english: 'none of the listed risk factors reported'
+        },
+        other: { thai: 'ข้อมูลความเสี่ยงอื่น ๆ', english: 'other risk factors' }
+    };
 
     function withoutTrailingPercent(value) {
         return trim(value).replace(/\s*%+\s*$/, '');
@@ -262,6 +318,33 @@
         return null;
     }
 
+    function joinClinicalList(items, language) {
+        if (!items.length) return '';
+        if (items.length === 1) return items[0];
+        if (items.length === 2) {
+            return language === 'thai'
+                ? `${items[0]} และ ${items[1]}`
+                : `${items[0]} and ${items[1]}`;
+        }
+        const finalSeparator = language === 'thai' ? ' และ ' : ', and ';
+        return `${items.slice(0, -1).join(', ')}${finalSeparator}${items[items.length - 1]}`;
+    }
+
+    function mpoxOptionText(values, labels, language, otherText) {
+        if (!Array.isArray(values)) return '';
+        const items = values
+            .map(value => {
+                const label = labels[value];
+                if (!label) return '';
+                if (value === 'other' && trim(otherText)) {
+                    return `${label[language]}: ${trim(otherText)}`;
+                }
+                return label[language];
+            })
+            .filter(Boolean);
+        return joinClinicalList(items, language);
+    }
+
     function buildReferral(data) {
         const H = h();
         const content = [];
@@ -332,6 +415,54 @@
             }
             if (trim(data.syphilisNotes)) nested.push(H.listItem([H.bold('หมายเหตุทางการแพทย์ / Clinical notes: '), H.highlight(trim(data.syphilisNotes))]));
             historyItems.push(H.listItem(H.bold('Active syphilis'), nested));
+        }
+        if (yes(data.includeSuspectedMpox)) {
+            const nested = [];
+            const duration = trim(data.mpoxSymptomDurationDays);
+            if (duration) {
+                nested.push(H.listItem([
+                    H.bold('เริ่มมีอาการ '),
+                    H.highlight(duration),
+                    ' วันก่อนส่งต่อ',
+                    '\n',
+                    H.bold('Symptom onset: '),
+                    H.highlight(duration),
+                    duration === '1' ? ' day before referral' : ' days before referral'
+                ]));
+            }
+            const symptomsThai = mpoxOptionText(data.mpoxSymptoms, MPOX_SYMPTOM_LABELS, 'thai', data.mpoxSymptomOtherText);
+            const symptomsEnglish = mpoxOptionText(data.mpoxSymptoms, MPOX_SYMPTOM_LABELS, 'english', data.mpoxSymptomOtherText);
+            if (symptomsThai || symptomsEnglish) {
+                nested.push(H.listItem([
+                    H.bold('อาการสำคัญ: '),
+                    H.highlight(symptomsThai),
+                    '\n',
+                    H.bold('Presenting symptoms: '),
+                    H.highlight(symptomsEnglish)
+                ]));
+            }
+            const riskFactors = Array.isArray(data.mpoxRiskFactors) ? data.mpoxRiskFactors : [];
+            if (riskFactors.includes('noneKnown')) {
+                nested.push(H.listItem([
+                    'ผู้ป่วยไม่รายงานข้อมูลความเสี่ยงข้างต้น',
+                    '\n',
+                    'The patient did not report any of the listed risk factors.'
+                ]));
+            } else {
+                const riskThai = mpoxOptionText(riskFactors, MPOX_RISK_LABELS, 'thai', data.mpoxRiskOtherText);
+                const riskEnglish = mpoxOptionText(riskFactors, MPOX_RISK_LABELS, 'english', data.mpoxRiskOtherText);
+                if (riskThai || riskEnglish) {
+                    nested.push(H.listItem([
+                        H.bold('ผู้ป่วยให้ประวัติว่า'),
+                        H.highlight(riskThai),
+                        '\n',
+                        H.bold('The patient reported '),
+                        H.highlight(riskEnglish),
+                        '.'
+                    ]));
+                }
+            }
+            historyItems.push(H.listItem(H.bold('สงสัยโรคฝีดาษวานร / Suspected mpox'), nested));
         }
         if (yes(data.includeHBV)) historyItems.push(H.listItem(H.bold('HBV co-infection')));
         if (yes(data.includeHCVActive)) historyItems.push(H.listItem(H.bold('Untreated HCV co-infection')));

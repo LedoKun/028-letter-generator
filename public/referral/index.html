@@ -348,6 +348,184 @@
                     </div>
                 </div>
 
+                <div class="mt-4 p-3 border border-gray-700 rounded-md">
+                    <div class="flex items-center">
+                        <input id="includeSuspectedMpox" name="includeSuspectedMpox" type="checkbox"
+                            class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
+                        <label for="includeSuspectedMpox"
+                            class="ml-2 block text-md font-medium thai-font">สงสัยโรคฝีดาษวานร / Suspected
+                            mpox</label>
+                    </div>
+                    <div id="suspectedMpoxDetails"
+                        class="ml-2 space-y-4 hidden border-l-2 border-indigo-500 pl-4 pt-2">
+                        <div>
+                            <label for="mpoxSymptomDurationDays"
+                                class="block text-xs font-medium thai-font">ระยะเวลาตั้งแต่เริ่มมีอาการ / Duration
+                                since symptom onset (days) <span class="required-asterisk">*</span></label>
+                            <input type="number" id="mpoxSymptomDurationDays" name="mpoxSymptomDurationDays" min="1"
+                                step="1" inputmode="numeric"
+                                class="mt-1 block w-36 rounded-md shadow-sm py-1.5 px-2 text-sm">
+                        </div>
+
+                        <div id="mpoxSymptomsGroup" class="space-y-2 p-2 border border-transparent rounded-md">
+                            <p class="text-sm font-semibold thai-font">อาการสำคัญ / Presenting symptoms <span
+                                    class="required-asterisk">*</span></p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomRashLesions" name="mpoxSymptomRashLesions" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomRashLesions" class="ml-2 text-sm thai-font">ผื่น ตุ่ม
+                                        หรือแผลบริเวณผิวหนังหรือเยื่อบุ / Skin or mucosal lesions</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomFeverChills" name="mpoxSymptomFeverChills" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomFeverChills" class="ml-2 text-sm thai-font">ไข้หรือหนาวสั่น
+                                        / Fever or chills</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomLymphadenopathy" name="mpoxSymptomLymphadenopathy"
+                                        type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomLymphadenopathy"
+                                        class="ml-2 text-sm thai-font">ต่อมน้ำเหลืองโต / Lymphadenopathy</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomHeadache" name="mpoxSymptomHeadache" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomHeadache" class="ml-2 text-sm thai-font">ปวดศีรษะ /
+                                        Headache</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomMyalgiaBackPain" name="mpoxSymptomMyalgiaBackPain"
+                                        type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomMyalgiaBackPain"
+                                        class="ml-2 text-sm thai-font">ปวดกล้ามเนื้อหรือปวดหลัง / Myalgia or back
+                                        pain</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomFatigue" name="mpoxSymptomFatigue" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomFatigue" class="ml-2 text-sm thai-font">อ่อนเพลีย /
+                                        Fatigue</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomRespiratory" name="mpoxSymptomRespiratory" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomRespiratory" class="ml-2 text-sm thai-font">เจ็บคอ คัดจมูก
+                                        หรือไอ / Sore throat, nasal congestion, or cough</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomProctitis" name="mpoxSymptomProctitis" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomProctitis" class="ml-2 text-sm thai-font">ปวดบริเวณทวารหนัก
+                                        หรือมีอาการเข้าได้กับ proctitis / Rectal pain or proctitis</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxSymptomDysuria" name="mpoxSymptomDysuria" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxSymptomDysuria" class="ml-2 text-sm thai-font">ปัสสาวะแสบขัด /
+                                        Dysuria</label>
+                                </div>
+                                <div>
+                                    <div class="flex items-start">
+                                        <input id="mpoxSymptomOther" name="mpoxSymptomOther" type="checkbox"
+                                            class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                        <label for="mpoxSymptomOther" class="ml-2 text-sm thai-font">อาการอื่น ๆ /
+                                            Other symptom(s)</label>
+                                    </div>
+                                    <input type="text" id="mpoxSymptomOtherText" name="mpoxSymptomOtherText"
+                                        placeholder="ระบุอาการ / Specify symptom(s)"
+                                        class="hidden mt-2 ml-6 block rounded-md shadow-sm py-1.5 px-2 text-sm"
+                                        style="width: calc(100% - 1.5rem);">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="mpoxRiskFactorsGroup" class="space-y-2 p-2 border border-transparent rounded-md">
+                            <p class="text-sm font-semibold thai-font">ข้อมูลความเสี่ยงที่ผู้ป่วยให้ประวัติ /
+                                Patient-reported risk factors
+                                <span class="required-asterisk">*</span>
+                            </p>
+                            <div class="space-y-2">
+                                <div class="flex items-start">
+                                    <input id="mpoxRiskDirectContact" name="mpoxRiskDirectContact" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxRiskDirectContact"
+                                        class="ml-2 text-sm thai-font">สัมผัสใกล้ชิดกับผู้ที่สงสัยว่าเป็น mpox /
+                                        Close contact with a suspected mpox case</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxRiskIntimateContact" name="mpoxRiskIntimateContact" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxRiskIntimateContact"
+                                        class="ml-2 text-sm thai-font">มีเพศสัมพันธ์กับผู้ที่สงสัยว่าเป็น mpox /
+                                        Sexual intercourse with a suspected mpox case</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxRiskSexualPartners" name="mpoxRiskSexualPartners" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxRiskSexualPartners"
+                                        class="ml-2 text-sm thai-font">มีเพศสัมพันธ์กับคู่นอนหลายราย / Sexual
+                                        intercourse with multiple partners</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxRiskHouseholdCloseContact" name="mpoxRiskHouseholdCloseContact"
+                                        type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxRiskHouseholdCloseContact"
+                                        class="ml-2 text-sm thai-font">อาศัยอยู่ร่วมกับผู้ที่สงสัยว่าเป็น mpox /
+                                        Living with a suspected mpox case</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxRiskContaminatedItems" name="mpoxRiskContaminatedItems"
+                                        type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxRiskContaminatedItems"
+                                        class="ml-2 text-sm thai-font">ใช้เสื้อผ้า เครื่องนอน ผ้าเช็ดตัว
+                                        หรือของใช้ส่วนตัวร่วมกับผู้ที่สงสัยว่าเป็น mpox / Sharing personal items
+                                        with a suspected mpox case</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxRiskOccupational" name="mpoxRiskOccupational" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxRiskOccupational"
+                                        class="ml-2 text-sm thai-font">อาจสัมผัสผู้ที่สงสัยว่าเป็น mpox จากการปฏิบัติงาน
+                                        / Possible work-related contact with a suspected mpox case</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxRiskAnimal" name="mpoxRiskAnimal" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxRiskAnimal" class="ml-2 text-sm thai-font">สัมผัสสัตว์ ซากสัตว์
+                                        หรือผลิตภัณฑ์จากสัตว์ / Contact with animals, carcasses, or animal
+                                        products</label>
+                                </div>
+                                <div class="flex items-start">
+                                    <input id="mpoxRiskNoneKnown" name="mpoxRiskNoneKnown" type="checkbox"
+                                        class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                    <label for="mpoxRiskNoneKnown"
+                                        class="ml-2 text-sm thai-font">ผู้ป่วยไม่รายงานข้อมูลความเสี่ยงข้างต้น /
+                                        None of the listed risk factors reported</label>
+                                </div>
+                                <div>
+                                    <div class="flex items-start">
+                                        <input id="mpoxRiskOther" name="mpoxRiskOther" type="checkbox"
+                                            class="mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                        <label for="mpoxRiskOther"
+                                            class="ml-2 text-sm thai-font">ข้อมูลความเสี่ยงอื่น ๆ / Other risk
+                                            factor(s)</label>
+                                    </div>
+                                    <input type="text" id="mpoxRiskOtherText" name="mpoxRiskOtherText"
+                                        placeholder="ระบุข้อมูลความเสี่ยง / Specify risk factor(s)"
+                                        class="hidden mt-2 ml-6 block rounded-md shadow-sm py-1.5 px-2 text-sm"
+                                        style="width: calc(100% - 1.5rem);">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div
                         class="flex items-center p-2 border border-gray-700 rounded-md hover:border-indigo-500 transition-colors">
