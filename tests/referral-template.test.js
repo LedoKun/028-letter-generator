@@ -107,8 +107,7 @@ test('renders all selected conditions with concise clinical wording', () => {
     const output = paragraphs.join('\n');
 
     assert.match(output, /Retroviral infection/);
-    assert.match(output, /ผลตรวจ HIV VL ล่าสุด: <20 copies\/mL/);
-    assert.match(output, /Latest HIV VL: <20 copies\/mL/);
+    assert.match(output, /ผลตรวจ HIV VL ล่าสุด \/ Latest HIV VL: <20 copies\/mL/);
     assert.match(output, /ซิฟิลิสที่อยู่ระหว่างการรักษา \/ Active syphilis/);
     assert.match(output, /การติดเชื้อ HBV ร่วม \/ HBV co-infection/);
     assert.match(output, /สงสัยโรคฝีดาษวานร \/ Suspected mpox/);
@@ -128,8 +127,7 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.match(output, /ประวัติวัณโรคที่รักษาครบแล้ว \/ Treated TB/);
     assert.match(output, /ได้รับ TPT ครบแล้ว \/ Completed TPT/);
     assert.match(output, /อยู่ระหว่างรับ TPT \/ Ongoing TPT/);
-    assert.match(output, /เดือน\/ปีที่เริ่ม TPT: 09\/2565/);
-    assert.match(output, /TPT start month: 09\/2022/);
+    assert.match(output, /เดือน\/ปีที่เริ่ม TPT \/ TPT start month: 09\/2565 \(09\/2022\)/);
     assert.match(output, /ตำแหน่งของโรค: ปอด และ ต่อมน้ำเหลือง/);
     assert.match(output, /Disease site: pulmonary and lymph nodes/);
     assert.match(output, /Treatment record/);
@@ -140,16 +138,21 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.doesNotMatch(output, /1%%/);
 });
 
-test('keeps Thai and English referral prose on separate lines', () => {
+test('keeps Thai and English referral prose in compact shared paragraphs', () => {
     const paragraphs = paragraphTexts(buildReferral(fullReferralData()));
 
     assert.ok(paragraphs.includes('เรียนเจ้าหน้าที่ผู้เกี่ยวข้อง'));
-    assert.ok(paragraphs.includes('เรื่อง ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ'));
-    assert.ok(paragraphs.includes('Re: Referral for continued care'));
-    assert.ok(paragraphs.includes('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี ขอส่งผู้ป่วยรายนี้เพื่อรับการรักษาต่อ พร้อมรายละเอียดการรักษาโดยสรุปดังนี้'));
-    assert.ok(paragraphs.includes('We are referring this patient for continued care. The relevant clinical details are provided below.'));
-    assert.ok(paragraphs.includes('จึงขอส่งผู้ป่วยรายนี้เพื่อพิจารณารับไว้รักษาในโรงพยาบาลของท่าน'));
-    assert.ok(paragraphs.includes('Hospital admission is requested for further management.'));
+    assert.ok(paragraphs.includes('วันที่ / Date: 16/07/2569 (16/07/2026)'));
+    assert.ok(paragraphs.includes('เรื่อง ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ / Re: Referral for continued care'));
+    assert.ok(paragraphs.includes('ชื่อผู้ป่วย (Patient name): ผู้ป่วย ทดสอบ'));
+    assert.ok(paragraphs.includes('เลขประจำตัวประชาชน / National ID: 1-2345-67890-12-3    เลขที่หนังสือเดินทาง / Passport no.: AB1234'));
+    assert.ok(paragraphs.includes('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี ขอส่งผู้ป่วยรายนี้เพื่อรับการรักษาต่อ พร้อมรายละเอียดการรักษาโดยสรุปดังนี้ / We are referring this patient for continued care. The relevant clinical details are provided below.'));
+    assert.ok(paragraphs.includes('จึงขอส่งผู้ป่วยรายนี้เพื่อพิจารณารับไว้รักษาในโรงพยาบาลของท่าน / Hospital admission is requested for further management.'));
+    assert.ok(paragraphs.some(text => text.includes('เริ่มมีอาการ 4 วันก่อนส่งต่อ / Symptom onset: 4 days before referral')));
+    assert.ok(paragraphs.some(text => text.includes('อาการสำคัญ:') && text.includes('/ Presenting symptoms:')));
+    assert.ok(paragraphs.some(text => text.includes('ผู้ป่วยให้ประวัติว่า') && text.includes('/ The patient reported')));
+    assert.ok(paragraphs.includes('ขอแสดงความนับถือ / Respectfully,'));
+    assert.ok(paragraphs.length < 65, `expected a compact referral, got ${paragraphs.length} text rows`);
 });
 
 test('excludes translation-like Thai wording and unselected stale values', () => {

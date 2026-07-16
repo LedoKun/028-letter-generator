@@ -55,7 +55,7 @@ test('free-form title and recipient remain editable', () => {
 });
 
 test('medication certificate uses concise paired Thai and English wording', () => {
-    const output = paragraphTexts(buildMedicationCertificate({
+    const paragraphs = paragraphTexts(buildMedicationCertificate({
         letterDate: '16/07/2026',
         salutation: 'MR.',
         patientName: 'JOHN DOE',
@@ -67,10 +67,12 @@ test('medication certificate uses concise paired Thai and English wording', () =
         doctorNameEnglish: 'TEST DOCTOR',
         medicalLicense: '12345',
         additionalNotes: 'For personal use'
-    })).join('\n');
+    }));
+    const output = paragraphs.join('\n');
 
-    assert.match(output, /ขอรับรองว่า MR\. JOHN DOE สัญชาติ THAI/);
-    assert.match(output, /This is to certify that MR\. JOHN DOE, a THAI national/);
+    assert.ok(paragraphs.includes('วันที่ / Date: 16/07/2569 (16/07/2026)'));
+    assert.ok(paragraphs.includes('ชื่อ-นามสกุล / Full name: MR. JOHN DOE    สัญชาติ / Nationality: THAI'));
+    assert.ok(paragraphs.includes('วันเกิด / Date of birth: 01/01/2533 (01/01/1990)    เลขที่หนังสือเดินทาง / Passport no.: AB1234'));
     assert.match(output, /ผู้ป่วยจำเป็นต้องนำยารายการต่อไปนี้ติดตัวเพื่อใช้ในการรักษาระหว่างการเดินทาง/);
     assert.match(output, /The patient is required to carry the following medications for personal use during travel/);
     assert.match(output, /รายการยาปัจจุบัน \/ Current Medications/);
@@ -102,9 +104,8 @@ test('medical certificate uses formal paired clinical sentences', () => {
         medicalLicense: '12345'
     })).join('\n');
 
-    assert.match(output, /ผู้ป่วยเข้ารับการตรวจรักษาเมื่อวันที่ 16\/07\/2569/);
-    assert.match(output, /The patient was examined on 16\/07\/2026/);
-    assert.match(output, /ได้รับการวินิจฉัยว่า Acute gastroenteritis/);
+    assert.match(output, /ผู้ป่วยเข้ารับการตรวจรักษาเมื่อวันที่ 16\/07\/2569 และได้รับการวินิจฉัยว่า Acute gastroenteritis/);
+    assert.match(output, /The patient was examined on 16\/07\/2026; diagnosis: Acute gastroenteritis/);
     assert.match(output, /มีความเห็นว่าควรพักรักษาตัวตั้งแต่วันที่/);
     assert.match(output, /Medical leave is advised from/);
     assert.match(output, /ผู้ป่วยได้รับการรักษาซิฟิลิสเมื่อวันที่/);
