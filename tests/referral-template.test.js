@@ -213,6 +213,7 @@ test('renders the concise no-known-exposure Mpox wording', () => {
     assert.match(output, /เริ่มมีอาการ 1 วันก่อนส่งต่อ/);
     assert.match(output, /Symptom onset: 1 day before referral/);
     assert.match(output, /ผู้ป่วยไม่ให้ประวัติความเสี่ยง/);
-    assert.match(output, /The patient did not report any of the listed risk factors/);
+    assert.match(output, /The patient did not report any risk factors/);
+    assert.doesNotMatch(output, /listed risk factors|รายการข้างต้น/i);
     assert.doesNotMatch(output, /epidemiologic exposure/i);
 });

@@ -62,8 +62,8 @@
             english: 'contact with animals, carcasses, or animal products'
         },
         noneKnown: {
-            thai: 'ไม่ให้ประวัติความเสี่ยงตามรายการข้างต้น',
-            english: 'none of the listed risk factors reported'
+            thai: 'ไม่ให้ประวัติความเสี่ยง',
+            english: 'no risk factors reported'
         },
         other: { thai: 'ข้อมูลความเสี่ยงอื่น ๆ', english: 'other risk factors' }
     };
@@ -681,8 +681,8 @@
             if (riskFactors.includes('noneKnown')) {
                 nested.push(pairedDetail(
                     H,
-                    'ผู้ป่วยไม่ให้ประวัติความเสี่ยงตามรายการข้างต้น',
-                    'The patient did not report any of the listed risk factors.'
+                    'ผู้ป่วยไม่ให้ประวัติความเสี่ยง',
+                    'The patient did not report any risk factors.'
                 ));
             } else {
                 const riskThai = mpoxOptionText(riskFactors, MPOX_RISK_LABELS, 'thai', data.mpoxRiskOtherText);
