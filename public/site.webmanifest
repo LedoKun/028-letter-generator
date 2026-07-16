@@ -1,6 +1,10 @@
 {
+    "id": "/",
     "name": "Clinical Letter Generators",
-    "short_name": "Clinical Letter Generators",
+    "short_name": "Clinic Letters",
+    "description": "Offline-capable clinical letter generators for Public Health Center 28 Krung Thon Buri.",
+    "start_url": "/",
+    "scope": "/",
     "icons": [
         {
             "src": "/media/favicon/android-chrome-192x192.png",
@@ -13,7 +17,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "theme_color": "#111827",
+    "background_color": "#111827",
     "display": "standalone"
 }

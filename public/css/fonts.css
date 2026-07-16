@@ -1,0 +1,31 @@
+@font-face {
+    font-family: 'Noto Sans';
+    src: url('/vendor/fonts/NotoSans-Regular.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans';
+    src: url('/vendor/fonts/NotoSans-Bold.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans Thai Looped';
+    src: url('/vendor/fonts/NotoSansThai-Regular.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans Thai Looped';
+    src: url('/vendor/fonts/NotoSansThai-Bold.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
