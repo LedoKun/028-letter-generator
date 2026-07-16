@@ -13,3 +13,9 @@ test('PDF body typography stays compact', () => {
     assert.match(source, /lineHeight:\s*1\.05/);
     assert.match(source, /margin:\s*\[0,\s*0,\s*0,\s*0\.75\]/);
 });
+
+test('PDF footer typography stays compact', () => {
+    assert.match(source, /fontSize:\s*7,\s*\n\s*lineHeight:\s*0\.85/);
+    assert.match(source, /margin:\s*\[0,\s*1,\s*0,\s*1\]/);
+    assert.match(source, /paddingTop:\s*\(\)\s*=>\s*1/);
+});

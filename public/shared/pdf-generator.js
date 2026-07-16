@@ -248,13 +248,13 @@
                     widths: ['*'],
                     body: [[{
                         stack: [
-                            bold(`เอกสารฉบับนี้จะสมบูรณ์เมื่อมีตราประทับเท่านั้น / Valid only with an official stamp.\nพิมพ์เมื่อ / Printed on: ${printedDate} (DD/MM/YYYY) · หน้า / Page: ${currentPage} of ${pageCount}`, { margin: [0, 2, 0, 3] }),
-                            text('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี 124/16 ถนนกรุงธนบุรี แขวงบางลำภูล่าง เขตคลองสาน กรุงเทพฯ 10600', { margin: [0, 0, 0, 1] }),
-                            text('Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong San, Bangkok 10600, Thailand', { margin: [0, 0, 0, 1] }),
-                            text('โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com', { margin: [0, 0, 0, 1] })
+                            bold(`เอกสารฉบับนี้จะสมบูรณ์เมื่อมีตราประทับเท่านั้น / Valid only with an official stamp.\nพิมพ์เมื่อ / Printed on: ${printedDate} (DD/MM/YYYY) · หน้า / Page: ${currentPage} of ${pageCount}`, { margin: [0, 1, 0, 1] }),
+                            text('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี 124/16 ถนนกรุงธนบุรี แขวงบางลำภูล่าง เขตคลองสาน กรุงเทพฯ 10600', { margin: [0, 0, 0, 0] }),
+                            text('Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong San, Bangkok 10600, Thailand', { margin: [0, 0, 0, 0] }),
+                            text('โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com', { margin: [0, 0, 0, 0] })
                         ],
                         fontSize: 7,
-                        lineHeight: 1
+                        lineHeight: 0.85
                     }]]
                 },
                 layout: {
@@ -263,7 +263,7 @@
                     hLineColor: () => '#777',
                     paddingLeft: () => 0,
                     paddingRight: () => 0,
-                    paddingTop: () => 2,
+                    paddingTop: () => 1,
                     paddingBottom: () => 0
                 }
             };

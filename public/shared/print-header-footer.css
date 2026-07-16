@@ -72,11 +72,11 @@
 .page-footer-running-container {
     position: running(pageFooterRunning);
     font-size: 8pt;
-    line-height: 1.25;
+    line-height: 1;
     text-align: left;
     width: 100%;
     border-top: 0.5px solid #999;
-    padding-top: 4mm;
+    padding-top: 2mm;
     padding-bottom: 0;
     font-family: 'Noto Sans', 'Noto Sans Thai Looped', sans-serif;
     box-sizing: border-box;
@@ -84,11 +84,11 @@
 
 .page-footer-running-container * {
     font-size: 8pt;
-    line-height: 1.25;
+    line-height: 1;
 }
 
 .page-footer-running-container>div {
-    margin-bottom: 1mm;
+    margin-bottom: 0;
 }
 
 .footer-address-english {
@@ -97,7 +97,7 @@
 
 .footer-page-number-container {
     font-size: 8pt;
-    line-height: 1.25;
+    line-height: 1;
 }
 
 .footer-page-number-container .page-info-label {
