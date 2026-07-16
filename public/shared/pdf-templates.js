@@ -80,11 +80,14 @@
         return trim(value).replace(/\s*%+\s*$/, '');
     }
 
-    function memoRecipient(H, recipient, highlight = false) {
+    function memoRecipient(H, recipient) {
         const value = trim(recipient) || DEFAULT_RECIPIENT;
-        return highlight
-            ? H.para(['เรียน', H.highlight(value)])
-            : H.para(`เรียน${value}`);
+        const isDefaultRecipient = value === DEFAULT_RECIPIENT;
+        return H.para([
+            H.bold('เรียน '),
+            value,
+            isDefaultRecipient ? ' / To whom it may concern,' : ''
+        ]);
     }
 
     function signatureBlock({ thaiName, englishName, license, alignRight = false, medicalOfficer = false }) {
@@ -95,7 +98,7 @@
             if (nameParts.length) nameParts.push(' / ');
             nameParts.push(H.highlight(trim(englishName).toUpperCase()));
         }
-        const stack = [H.para('ขอแสดงความนับถือ / Respectfully,', { margin: [0, 12, 0, 18] })];
+        const stack = [H.para('ขอแสดงความนับถือ / Respectfully,', { margin: [0, 6, 0, 10] })];
         if (nameParts.length) {
             stack.push(H.para(['(', ...nameParts, ')'], { alignment: alignRight ? 'right' : 'left' }));
             if (medicalOfficer) stack.push(H.para('แพทย์ / Medical Officer', { alignment: alignRight ? 'right' : 'left' }));
@@ -104,12 +107,12 @@
             stack.push(H.para([H.bold('เลขที่ใบประกอบวิชาชีพ / Medical License No.: '), H.highlight(trim(license))], { alignment: alignRight ? 'right' : 'left' }));
         }
         stack.push(H.para('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri', { alignment: alignRight ? 'right' : 'left' }));
-        return { stack, margin: [0, 6, 0, 0] };
+        return { stack, margin: [0, 4, 0, 0] };
     }
 
     function buildFreeForm(data) {
         const H = h();
-        const content = [H.title(trim(data.documentTitle) || MEMO_HEADING, 14)];
+        const content = [H.title(trim(data.documentTitle) || MEMO_HEADING, 13)];
         const letterDate = trim(data.letterDate);
         if (letterDate) {
             const converted = data._yearEra === 'BE' ? H.convertBEtoCE(letterDate) : H.convertCEtoBE(letterDate);
@@ -121,11 +124,11 @@
                 converted ? ')' : ''
             ], { alignment: 'right' }));
         }
-        content.push(memoRecipient(H, data.addressee, true));
+        content.push(memoRecipient(H, data.addressee));
         content.push({
             text: H.text(trim(data.letterBody)).text,
             preserveLeadingSpaces: true,
-            margin: [0, 8, 0, 10],
+            margin: [0, 5, 0, 7],
             alignment: 'justify'
         });
         content.push(signatureBlock({
@@ -152,7 +155,7 @@
             : [H.text('ไม่ได้ระบุรายการยา / None specified')];
 
         const content = [
-            H.title(MEMO_HEADING, 14)
+            H.title(MEMO_HEADING, 13)
         ];
         content.push(separateCeDateLines(
             H,
@@ -191,9 +194,9 @@
             'The patient is required to carry the following medications for personal use during travel.'
         ));
         content.push(H.sectionTitle('รายการยาปัจจุบัน / Current Medications'));
-        content.push({ ul: meds.map(item => H.listItem(item)), margin: [14, 2, 0, 8] });
+        content.push({ ul: meds.map(item => H.listItem(item)), margin: [12, 1, 0, 5] });
         if (trim(data.additionalNotes)) {
-            content.push(H.para([H.bold('หมายเหตุเพิ่มเติม / Additional notes: '), H.highlight(trim(data.additionalNotes))], { margin: [0, 8, 0, 0] }));
+            content.push(H.para([H.bold('หมายเหตุเพิ่มเติม / Additional notes: '), H.highlight(trim(data.additionalNotes))], { margin: [0, 5, 0, 0] }));
         }
         content.push(signatureBlock({
             englishName: trim(data.doctorNameEnglish) || 'DOCTOR NAME N/A',
@@ -206,7 +209,7 @@
 
     function buildMedicalCertificate(data) {
         const H = h();
-        const content = [H.title(MEMO_HEADING, 14)];
+        const content = [H.title(MEMO_HEADING, 13)];
         if (trim(data.letterDate)) {
             content.push(separateCeDateLines(H, 'วันที่', 'Date', trim(data.letterDate), { alignment: 'right' }));
         }
@@ -262,7 +265,7 @@
             );
         }
         if (identifiers.length) {
-            content.push(H.para(identifiers, { margin: [12, 0, 0, 4] }));
+            content.push(H.para(identifiers, { margin: [12, 0, 0, 2] }));
         }
 
         if (yes(data.includeConsultationDiagnosis)) {
@@ -309,7 +312,7 @@
                 ]
             ));
             if (trim(data.advisedRestNotes)) {
-                content.push(H.para([H.bold('หมายเหตุทางการแพทย์ / Clinical notes: '), H.highlight(trim(data.advisedRestNotes))], { margin: [12, 0, 0, 4] }));
+                content.push(H.para([H.bold('หมายเหตุ / Notes: '), H.highlight(trim(data.advisedRestNotes))], { margin: [12, 0, 0, 2] }));
             }
         }
         if (yes(data.includeSyphilisTreatment) && trim(data.syphilisTreatmentDate)) {
@@ -320,7 +323,7 @@
                 ['The patient received syphilis treatment on ', H.highlight(dateCE), '.']
             ));
             if (trim(data.syphilisNotes)) {
-                content.push(H.para([H.bold('หมายเหตุทางการแพทย์ / Clinical notes: '), H.highlight(trim(data.syphilisNotes))], { margin: [12, 0, 0, 4] }));
+                content.push(H.para([H.bold('หมายเหตุ / Notes: '), H.highlight(trim(data.syphilisNotes))], { margin: [12, 0, 0, 2] }));
             }
         }
         if (yes(data.includeTBTreatment) && trim(data.tbTreatmentCompletionDate)) {
@@ -331,7 +334,7 @@
                 ['The patient completed TB treatment on ', H.highlight(dateCE), '.']
             ));
             if (trim(data.tbNotes)) {
-                content.push(H.para([H.bold('หมายเหตุทางการแพทย์ / Clinical notes: '), H.highlight(trim(data.tbNotes))], { margin: [12, 0, 0, 4] }));
+                content.push(H.para([H.bold('หมายเหตุ / Notes: '), H.highlight(trim(data.tbNotes))], { margin: [12, 0, 0, 2] }));
             }
         }
         if (yes(data.includeDoctorComment) && trim(data.doctorComment)) {
@@ -347,7 +350,7 @@
         return content;
     }
 
-    function tptSection(thaiTitle, englishTitle, medicationText, otherMedication, startDate, notes) {
+    function tptSection(title, medicationText, otherMedication, startDate, notes) {
         const H = h();
         let med = trim(medicationText);
         if (med.toLowerCase() === 'other' && trim(otherMedication)) med = trim(otherMedication);
@@ -361,8 +364,8 @@
         if (trim(startDate)) {
             nested.push(pairedDateDetail(H, 'เดือน/ปีที่เริ่ม TPT', 'TPT start month', trim(startDate), true));
         }
-        if (trim(notes)) nested.push(H.listItem([H.bold('หมายเหตุทางการแพทย์ / Clinical notes: '), H.highlight(trim(notes))]));
-        return H.listItem(H.bold(`${thaiTitle} / ${englishTitle}`), nested);
+        if (trim(notes)) nested.push(H.listItem([H.bold('หมายเหตุ / Notes: '), H.highlight(trim(notes))]));
+        return H.listItem(H.bold(title), nested);
     }
 
     function artMedicationItem(art) {
@@ -441,14 +444,14 @@
                 thai.push(' พร้อมยาสำหรับใช้ต่อเนื่องอีก ', H.highlight(duration), ' วัน');
                 english.push('; ', H.highlight(duration), '-day supply');
             }
-            return separateLanguageLines(H, thai, english, { margin: [0, 4, 0, 0] });
+            return separateLanguageLines(H, thai, english, { margin: [0, 2, 0, 0] });
         }
         if (duration) {
             return separateLanguageLines(
                 H,
                 ['มียาสำหรับใช้ต่อเนื่องอีก ', H.highlight(duration), ' วัน'],
                 [H.highlight(duration), '-day medication supply'],
-                { margin: [0, 4, 0, 0] }
+                { margin: [0, 2, 0, 0] }
             );
         }
         return null;
@@ -499,7 +502,7 @@
         const content = [];
         const letterType = data.letterType || 'summaryOfHistory';
         const letterDateBE = trim(data.letterDate);
-        content.push(H.title(MEMO_HEADING, 14));
+        content.push(H.title(MEMO_HEADING, 13));
         if (letterDateBE) {
             const letterDateCE = H.convertBEtoCE(letterDateBE);
             content.push(H.para([
@@ -521,11 +524,11 @@
                 H,
                 'ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี ขอส่งผู้ป่วยรายนี้เพื่อรับการรักษาต่อ พร้อมรายละเอียดการรักษาโดยสรุปดังนี้',
                 'We are referring this patient for continued care. The relevant clinical details are provided below.',
-                { margin: [18, 0, 0, 4] }
+                { margin: [14, 0, 0, 2] }
             ));
         }
         content.push(H.para([
-            H.bold('ชื่อผู้ป่วย (Patient name): '),
+            H.bold('ชื่อผู้ป่วย / Patient name: '),
             H.highlight(trim(data.patientName))
         ]));
         if (trim(data.dob)) {
@@ -634,7 +637,7 @@
                     tablets === '1' ? ' เม็ด (tablet) วันละ 1 ครั้ง / once daily' : ' เม็ด (tablets) วันละ 1 ครั้ง / once daily'
                 ]));
             }
-            if (trim(data.retroviralNotes)) nested.push(H.listItem([H.bold('หมายเหตุทางการแพทย์ / Clinical notes: '), H.highlight(trim(data.retroviralNotes))]));
+            if (trim(data.retroviralNotes)) nested.push(H.listItem([H.bold('หมายเหตุ / Notes: '), H.highlight(trim(data.retroviralNotes))]));
             historyItems.push(H.listItem(H.bold('Retroviral infection'), nested));
         }
         if (yes(data.includeSyphilisActive) && trim(data.syphilisStartDate)) {
@@ -652,7 +655,7 @@
                     pairedDateDetail(H, 'เข็มที่ 3', 'Dose 3', trim(data.syphilisDose3Date))
                 ]));
             }
-            if (trim(data.syphilisNotes)) nested.push(H.listItem([H.bold('หมายเหตุทางการแพทย์ / Clinical notes: '), H.highlight(trim(data.syphilisNotes))]));
+            if (trim(data.syphilisNotes)) nested.push(H.listItem([H.bold('หมายเหตุ / Notes: '), H.highlight(trim(data.syphilisNotes))]));
             historyItems.push(H.listItem(H.bold('ซิฟิลิสที่อยู่ระหว่างการรักษา / Active syphilis'), nested));
         }
         if (yes(data.includeSuspectedMpox)) {
@@ -750,7 +753,6 @@
         }
         if (yes(data.includeCompletedTPT)) {
             historyItems.push(tptSection(
-                'ได้รับ TPT ครบแล้ว',
                 'Completed TPT',
                 data.completedTPTMedicationText,
                 data.completedTPTMedicationOther,
@@ -760,7 +762,6 @@
         }
         if (yes(data.includeOngoingTPT)) {
             historyItems.push(tptSection(
-                'อยู่ระหว่างรับ TPT',
                 'Ongoing TPT',
                 data.ongoingTPTMedicationText,
                 data.ongoingTPTMedicationOther,
@@ -772,7 +773,7 @@
 
         if (historyItems.length) {
             content.push(H.sectionTitle('สรุปประวัติการรักษา / Medical Summary'));
-            content.push({ ul: historyItems, margin: [12, 0, 0, 6] });
+            content.push({ ul: historyItems, margin: [10, 0, 0, 4] });
         }
         if (yes(data.includeLastMedicinePickup)) {
             const pickupLines = medicinePickupLines(data);
@@ -783,7 +784,7 @@
         if (yes(data.attachmentOther)) attachments.push(trim(data.attachmentOtherText) ? ['เอกสารอื่น / Other: ', H.highlight(trim(data.attachmentOtherText))] : 'เอกสารอื่น / Other documents');
         if (attachments.length) {
             content.push(H.sectionTitle('เอกสารแนบ / Attachments'));
-            content.push({ ul: attachments.map(item => H.listItem(item)), margin: [12, 0, 0, 6] });
+            content.push({ ul: attachments.map(item => H.listItem(item)), margin: [10, 0, 0, 4] });
         }
         if (yes(data.includeReferralForAdmission)) {
             content.push(separateLanguageLines(
@@ -796,7 +797,7 @@
             H,
             'หากต้องการข้อมูลเพิ่มเติม สามารถติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรีได้',
             'For further information, contact Public Health Center 28 Krung Thon Buri.',
-            { margin: [0, 8, 0, 0] }
+            { margin: [0, 5, 0, 0] }
         ));
         content.push(signatureBlock({
             thaiName: data.doctorNameThai,
@@ -804,7 +805,7 @@
             license: data.medicalLicense
         }));
         if (trim(data.additionalNotes)) {
-            content.push(H.para([H.bold('หมายเหตุเพิ่มเติม / Additional Notes: '), H.highlight(trim(data.additionalNotes))], { margin: [0, 8, 0, 0] }));
+            content.push(H.para([H.bold('หมายเหตุเพิ่มเติม / Additional Notes: '), H.highlight(trim(data.additionalNotes))], { margin: [0, 5, 0, 0] }));
         }
         return content;
     }

@@ -626,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
             symptomRequired: 'อาการสำคัญของโรคฝีดาษวานรอย่างน้อย 1 รายการ / At least one presenting symptom',
             symptomOtherRequired: 'รายละเอียดอาการอื่น ๆ ของโรคฝีดาษวานร / Other mpox symptom details',
             riskRequired: 'ข้อมูลความเสี่ยงตามที่ผู้ป่วยให้ประวัติอย่างน้อย 1 รายการ / At least one patient-reported risk factor',
-            riskConflict: 'ไม่สามารถเลือก “ผู้ป่วยไม่ให้ประวัติความเสี่ยงตามรายการข้างต้น” ร่วมกับรายการอื่น / “None reported” cannot be selected with another risk factor',
+            riskConflict: 'ไม่สามารถเลือก “ผู้ป่วยไม่ให้ประวัติความเสี่ยง” ร่วมกับรายการอื่น / “None reported” cannot be selected with another risk factor',
             riskOtherRequired: 'รายละเอียดข้อมูลความเสี่ยงอื่น ๆ / Other patient-reported risk factor details'
         };
         [

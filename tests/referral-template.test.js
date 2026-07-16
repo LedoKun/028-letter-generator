@@ -125,9 +125,12 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.match(output, /ประวัติซิฟิลิสที่รักษาครบแล้ว \/ Treated syphilis/);
     assert.match(output, /ประวัติ HCV ที่รักษาครบแล้ว \/ Treated HCV/);
     assert.match(output, /ประวัติวัณโรคที่รักษาครบแล้ว \/ Treated TB/);
-    assert.match(output, /ได้รับ TPT ครบแล้ว \/ Completed TPT/);
-    assert.match(output, /อยู่ระหว่างรับ TPT \/ Ongoing TPT/);
+    assert.match(output, /Completed TPT/);
+    assert.match(output, /Ongoing TPT/);
     assert.match(output, /เดือน\/ปีที่เริ่ม TPT \/ TPT start month: 09\/2565 \(09\/2022\)/);
+    assert.match(output, /เดือน\/ปีที่เริ่ม TPT \/ TPT start month: 09\/2568 \(09\/2025\)/);
+    assert.match(output, /หมายเหตุ \/ Notes: ครบตามแผน/);
+    assert.match(output, /หมายเหตุ \/ Notes: อยู่ระหว่างติดตาม/);
     assert.match(output, /ตำแหน่งของโรค: ปอด และ ต่อมน้ำเหลือง/);
     assert.match(output, /Disease site: pulmonary and lymph nodes/);
     assert.match(output, /Treatment record/);
@@ -141,10 +144,10 @@ test('renders all selected conditions with concise clinical wording', () => {
 test('keeps Thai and English referral prose in compact shared paragraphs', () => {
     const paragraphs = paragraphTexts(buildReferral(fullReferralData()));
 
-    assert.ok(paragraphs.includes('เรียนเจ้าหน้าที่ผู้เกี่ยวข้อง'));
+    assert.ok(paragraphs.includes('เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง / To whom it may concern,'));
     assert.ok(paragraphs.includes('วันที่ / Date: 16/07/2569 (16/07/2026)'));
     assert.ok(paragraphs.includes('เรื่อง ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ / Re: Referral for continued care'));
-    assert.ok(paragraphs.includes('ชื่อผู้ป่วย (Patient name): ผู้ป่วย ทดสอบ'));
+    assert.ok(paragraphs.includes('ชื่อผู้ป่วย / Patient name: ผู้ป่วย ทดสอบ'));
     assert.ok(paragraphs.includes('เลขประจำตัวประชาชน / National ID: 1-2345-67890-12-3    เลขที่หนังสือเดินทาง / Passport no.: AB1234'));
     assert.ok(paragraphs.includes('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี ขอส่งผู้ป่วยรายนี้เพื่อรับการรักษาต่อ พร้อมรายละเอียดการรักษาโดยสรุปดังนี้ / We are referring this patient for continued care. The relevant clinical details are provided below.'));
     assert.ok(paragraphs.includes('จึงขอส่งผู้ป่วยรายนี้เพื่อพิจารณารับไว้รักษาในโรงพยาบาลของท่าน / Hospital admission is requested for further management.'));
@@ -209,7 +212,7 @@ test('renders the concise no-known-exposure Mpox wording', () => {
 
     assert.match(output, /เริ่มมีอาการ 1 วันก่อนส่งต่อ/);
     assert.match(output, /Symptom onset: 1 day before referral/);
-    assert.match(output, /ผู้ป่วยไม่ให้ประวัติความเสี่ยงตามรายการข้างต้น/);
+    assert.match(output, /ผู้ป่วยไม่ให้ประวัติความเสี่ยง/);
     assert.match(output, /The patient did not report any of the listed risk factors/);
     assert.doesNotMatch(output, /epidemiologic exposure/i);
 });

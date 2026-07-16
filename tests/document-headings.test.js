@@ -38,7 +38,12 @@ test('all generated documents use the memo heading and recipient', () => {
 
     documents.forEach(content => {
         assert.equal(textValue(content[0].text), 'บันทึกข้อความ');
-        assert.ok(paragraphTexts(content).includes('เรียนเจ้าหน้าที่ผู้เกี่ยวข้อง'));
+        assert.ok(paragraphTexts(content).includes('เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง / To whom it may concern,'));
+        const recipient = content.find(node => node && node.text
+            && textValue(node.text) === 'เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง / To whom it may concern,');
+        assert.equal(recipient.text[0].bold, true);
+        assert.equal(textValue(recipient.text[0]), 'เรียน ');
+        assert.notEqual(recipient.text[1].bold, true);
     });
 });
 
@@ -51,7 +56,8 @@ test('free-form title and recipient remain editable', () => {
     const paragraphs = paragraphTexts(content);
 
     assert.equal(textValue(content[0].text), 'CUSTOM MEMO');
-    assert.ok(paragraphs.includes('เรียนผู้รับหนังสือ'));
+    assert.ok(paragraphs.includes('เรียน ผู้รับหนังสือ'));
+    assert.doesNotMatch(paragraphs.join('\n'), /To whom it may concern/);
 });
 
 test('medication certificate uses concise paired Thai and English wording', () => {

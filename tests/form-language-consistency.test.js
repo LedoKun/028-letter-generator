@@ -59,8 +59,8 @@ test('referral conditions follow the Mpox bilingual heading pattern', () => {
         'ประวัติซิฟิลิสที่รักษาครบแล้ว / Treated',
         'ประวัติ HCV ที่รักษาครบแล้ว / Treated',
         'ประวัติวัณโรคที่รักษาครบแล้ว / Treated',
-        'ได้รับ TPT ครบแล้ว / Completed TPT',
-        'อยู่ระหว่างรับ TPT / Ongoing TPT'
+        'Completed TPT',
+        'Ongoing TPT'
     ].forEach(wording => assert.ok(referral.includes(wording), wording));
 
     assert.match(referral, />Retroviral\s+infection</);

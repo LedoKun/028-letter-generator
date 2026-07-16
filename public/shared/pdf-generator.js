@@ -131,7 +131,7 @@
     }
 
     function line(parts, options = {}) {
-        return Object.assign({ text: normalizeTextParts(parts), margin: [0, 0, 0, 2] }, options);
+        return Object.assign({ text: normalizeTextParts(parts), margin: [0, 0, 0, 0.75] }, options);
     }
 
     function para(parts, options = {}) {
@@ -154,8 +154,8 @@
         return {
             text: splitTextRuns(value, { bold: true }),
             bold: true,
-            fontSize: 10,
-            margin: [0, 6, 0, 2]
+            fontSize: 9,
+            margin: [0, 4, 0, 1]
         };
     }
 
@@ -202,7 +202,7 @@
         return {
             stack: [
                 Array.isArray(parts) ? { text: normalizeTextParts(parts) } : (parts && typeof parts === 'object' ? parts : { text: normalizeTextParts(String(parts || '')) }),
-                { ul: nested, margin: [10, 1, 0, 0] }
+                { ul: nested, margin: [8, 0, 0, 0] }
             ]
         };
     }
@@ -287,12 +287,12 @@
             },
             defaultStyle: {
                 font: THAI_FONT,
-                fontSize: 9.5,
-                lineHeight: 1.2
+                fontSize: 8.5,
+                lineHeight: 1.05
             },
             styles: {
                 english: { font: EN_FONT },
-                small: { fontSize: 8 }
+                small: { fontSize: 7.5 }
             },
             content
         };
