@@ -28,11 +28,10 @@ function paragraphTexts(node, result = []) {
     return result;
 }
 
-test('all generated documents use the memo heading and recipient', () => {
+test('non-medical-certificate documents use the memo heading and recipient', () => {
     const documents = [
         buildFreeForm({ letterDate: '16/07/2569', letterBody: 'เนื้อหา' }),
         buildMedicationCertificate({ patientName: 'Patient' }),
-        buildMedicalCertificate({}),
         buildReferral({ patientName: 'Patient' })
     ];
 
@@ -45,6 +44,14 @@ test('all generated documents use the memo heading and recipient', () => {
         assert.equal(textValue(recipient.text[0]), 'เรียน ');
         assert.notEqual(recipient.text[1].bold, true);
     });
+});
+
+test('medical certificate uses only the English and Thai certificate headings', () => {
+    const content = buildMedicalCertificate({});
+
+    assert.equal(textValue(content[0].text), 'Medical Certificate\nใบรับรองแพทย์');
+    assert.doesNotMatch(textValue(content[0].text), /บันทึกข้อความ/);
+    assert.ok(paragraphTexts(content).includes('เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง / To whom it may concern,'));
 });
 
 test('free-form title and recipient remain editable', () => {

@@ -103,14 +103,15 @@ function fullReferralData() {
 }
 
 test('renders all selected conditions with concise clinical wording', () => {
-    const paragraphs = paragraphTexts(buildReferral(fullReferralData()));
+    const content = buildReferral(fullReferralData());
+    const paragraphs = paragraphTexts(content);
     const output = paragraphs.join('\n');
 
     assert.match(output, /Retroviral infection/);
     assert.match(output, /ผลตรวจ HIV VL ล่าสุด \/ Latest HIV VL: <20 copies\/mL/);
-    assert.match(output, /ซิฟิลิสที่อยู่ระหว่างการรักษา \/ Active syphilis/);
-    assert.match(output, /การติดเชื้อ HBV ร่วม \/ HBV co-infection/);
-    assert.match(output, /สงสัยโรคฝีดาษวานร \/ Suspected mpox/);
+    assert.match(output, /Active Syphilis/);
+    assert.match(output, /HBV Co-Infection/);
+    assert.match(output, /Suspected Mpox/);
     assert.match(output, /เริ่มมีอาการ 4 วัน/);
     assert.match(output, /ผื่น ตุ่ม หรือแผลบริเวณผิวหนังหรือเยื่อบุ/);
     assert.match(output, /ปวดบริเวณทวารหนักหรือมีอาการเข้าได้กับ proctitis/);
@@ -121,10 +122,10 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.match(output, /สัมผัสผู้ป่วยระหว่างเดินทาง/);
     assert.doesNotMatch(output, /epidemiologic exposure/i);
     assert.doesNotMatch(output, /21 days before symptom onset/i);
-    assert.match(output, /การติดเชื้อ HCV ร่วม \(ยังไม่ได้รับการรักษา\) \/ Untreated HCV co-infection/);
-    assert.match(output, /ประวัติซิฟิลิสที่รักษาครบแล้ว \/ Treated syphilis/);
-    assert.match(output, /ประวัติ HCV ที่รักษาครบแล้ว \/ Treated HCV/);
-    assert.match(output, /ประวัติวัณโรคที่รักษาครบแล้ว \/ Treated TB/);
+    assert.match(output, /HCV Co-Infection/);
+    assert.match(output, /Treated Syphilis/);
+    assert.match(output, /Treated HCV/);
+    assert.match(output, /Treated TB/);
     assert.match(output, /Completed TPT/);
     assert.match(output, /Ongoing TPT/);
     assert.match(output, /เดือน\/ปีที่เริ่ม TPT \/ TPT start month: 09\/2565 \(09\/2022\)/);
@@ -139,6 +140,32 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.match(output, /60-day supply/);
     assert.doesNotMatch(output, /HIV infection/i);
     assert.doesNotMatch(output, /1%%/);
+    const expectedDiagnosisHeadings = [
+        'Retroviral infection',
+        'Active Syphilis',
+        'Suspected Mpox',
+        'HBV Co-Infection',
+        'HCV Co-Infection',
+        'Treated Syphilis',
+        'Treated HCV',
+        'Treated TB',
+        'Completed TPT',
+        'Ongoing TPT',
+        'Other Medical History'
+    ];
+    const medicalSummary = content.find(node => node && Array.isArray(node.ul));
+    const diagnosisHeadings = medicalSummary.ul.map(item => {
+        const heading = item.stack ? item.stack[0] : item;
+        return textValue(heading.text);
+    });
+    expectedDiagnosisHeadings.forEach((expected, index) => {
+        assert.ok(diagnosisHeadings[index].startsWith(expected), expected);
+        assert.doesNotMatch(
+            diagnosisHeadings[index].slice(0, expected.length),
+            /[\u0E00-\u0E7F]/,
+            `${expected} heading must not contain Thai text`
+        );
+    });
 });
 
 test('keeps Thai and English referral prose in compact shared paragraphs', () => {

@@ -49,20 +49,29 @@ test('medical leave fields read as one fluent Thai clinical statement', () => {
     assert.doesNotMatch(medicalCertificate, /วันที่เริ่มพัก\s+\/|วันที่สิ้นสุดการพัก\s+\//);
 });
 
-test('referral conditions follow the Mpox bilingual heading pattern', () => {
+test('referral diagnosis labels are English only', () => {
     const referral = read('referral/index.html');
-    [
-        'ซิฟิลิสที่อยู่ระหว่างการรักษา / Active',
-        'สงสัยโรคฝีดาษวานร / Suspected',
-        'การติดเชื้อ HBV ร่วม /',
-        'การติดเชื้อ HCV ร่วม',
-        'ประวัติซิฟิลิสที่รักษาครบแล้ว / Treated',
-        'ประวัติ HCV ที่รักษาครบแล้ว / Treated',
-        'ประวัติวัณโรคที่รักษาครบแล้ว / Treated',
-        'Completed TPT',
-        'Ongoing TPT'
-    ].forEach(wording => assert.ok(referral.includes(wording), wording));
+    const expectedLabels = {
+        includeRetroviral: 'Retroviral infection',
+        includeSyphilisActive: 'Active Syphilis',
+        includeSuspectedMpox: 'Suspected Mpox',
+        includeHBV: 'HBV Co-Infection',
+        includeHCVActive: 'HCV Co-Infection',
+        includeTreatedSyphilis: 'Treated Syphilis',
+        includeTreatedHCV: 'Treated HCV',
+        includeTreatedTB: 'Treated TB',
+        includeCompletedTPT: 'Completed TPT',
+        includeOngoingTPT: 'Ongoing TPT',
+        includeOtherHistory: 'Other Medical History'
+    };
 
-    assert.match(referral, />Retroviral\s+infection</);
+    Object.entries(expectedLabels).forEach(([id, expectedLabel]) => {
+        const match = referral.match(new RegExp(`<label[^>]+for="${id}"[^>]*>([\\s\\S]*?)<\\/label>`));
+        assert.ok(match, `missing label for ${id}`);
+        const label = match[1].replace(/\s+/g, ' ').trim();
+        assert.equal(label, expectedLabel);
+        assert.doesNotMatch(label, /[\u0E00-\u0E7F]/, `${id} must not contain Thai text`);
+    });
+
     assert.doesNotMatch(referral, /HIV infection/i);
 });

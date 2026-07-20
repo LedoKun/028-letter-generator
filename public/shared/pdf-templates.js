@@ -10,6 +10,7 @@
     }
 
     const MEMO_HEADING = 'บันทึกข้อความ';
+    const MEDICAL_CERTIFICATE_HEADING = 'Medical Certificate\nใบรับรองแพทย์';
     const DEFAULT_RECIPIENT = 'เจ้าหน้าที่ผู้เกี่ยวข้อง';
     const MPOX_SYMPTOM_LABELS = {
         rashLesions: {
@@ -209,7 +210,7 @@
 
     function buildMedicalCertificate(data) {
         const H = h();
-        const content = [H.title(MEMO_HEADING, 13)];
+        const content = [H.title(MEDICAL_CERTIFICATE_HEADING, 13)];
         if (trim(data.letterDate)) {
             content.push(separateCeDateLines(H, 'วันที่', 'Date', trim(data.letterDate), { alignment: 'right' }));
         }
@@ -656,7 +657,7 @@
                 ]));
             }
             if (trim(data.syphilisNotes)) nested.push(H.listItem([H.bold('หมายเหตุ / Notes: '), H.highlight(trim(data.syphilisNotes))]));
-            historyItems.push(H.listItem(H.bold('ซิฟิลิสที่อยู่ระหว่างการรักษา / Active syphilis'), nested));
+            historyItems.push(H.listItem(H.bold('Active Syphilis'), nested));
         }
         if (yes(data.includeSuspectedMpox)) {
             const nested = [];
@@ -695,16 +696,16 @@
                     ));
                 }
             }
-            historyItems.push(H.listItem(H.bold('สงสัยโรคฝีดาษวานร / Suspected mpox'), nested));
+            historyItems.push(H.listItem(H.bold('Suspected Mpox'), nested));
         }
         if (yes(data.includeHBV)) {
-            historyItems.push(H.listItem(H.bold('การติดเชื้อ HBV ร่วม / HBV co-infection')));
+            historyItems.push(H.listItem(H.bold('HBV Co-Infection')));
         }
         if (yes(data.includeHCVActive)) {
-            historyItems.push(H.listItem(H.bold('การติดเชื้อ HCV ร่วม (ยังไม่ได้รับการรักษา) / Untreated HCV co-infection')));
+            historyItems.push(H.listItem(H.bold('HCV Co-Infection')));
         }
         if (yes(data.includeTreatedSyphilis)) {
-            historyItems.push(H.listItem(H.bold('ประวัติซิฟิลิสที่รักษาครบแล้ว / Treated syphilis')));
+            historyItems.push(H.listItem(H.bold('Treated Syphilis')));
         }
         if (yes(data.includeTreatedHCV)) {
             const nested = [];
@@ -722,7 +723,7 @@
                     trim(data.treatedHCVCompletionDate)
                 ));
             }
-            historyItems.push(H.listItem(H.bold('ประวัติ HCV ที่รักษาครบแล้ว / Treated HCV'), nested));
+            historyItems.push(H.listItem(H.bold('Treated HCV'), nested));
         }
         if (yes(data.includeTreatedTB)) {
             const nested = [];
@@ -749,7 +750,7 @@
                     trim(data.treatedTBCompletionDate)
                 ));
             }
-            historyItems.push(H.listItem(H.bold('ประวัติวัณโรคที่รักษาครบแล้ว / Treated TB'), nested));
+            historyItems.push(H.listItem(H.bold('Treated TB'), nested));
         }
         if (yes(data.includeCompletedTPT)) {
             historyItems.push(tptSection(
@@ -769,7 +770,7 @@
                 data.ongoingTPTNotes
             ));
         }
-        if (yes(data.includeOtherHistory) && trim(data.otherMedicalHistory)) historyItems.push(H.listItem([H.bold('ประวัติการรักษาอื่น ๆ / Other medical history: '), H.highlight(trim(data.otherMedicalHistory))]));
+        if (yes(data.includeOtherHistory) && trim(data.otherMedicalHistory)) historyItems.push(H.listItem([H.bold('Other Medical History: '), H.highlight(trim(data.otherMedicalHistory))]));
 
         if (historyItems.length) {
             content.push(H.sectionTitle('สรุปประวัติการรักษา / Medical Summary'));
