@@ -9,8 +9,8 @@
         return !!value;
     }
 
-    const MEMO_HEADING = 'บันทึกข้อความ';
-    const MEDICAL_CERTIFICATE_HEADING = 'Medical Certificate\nใบรับรองแพทย์';
+    const MEMO_HEADING = 'บันทึกข้อความ / Medical Notes';
+    const MEDICAL_CERTIFICATE_HEADING = 'ใบรับรองแพทย์ / Medical Certificate';
     const DEFAULT_RECIPIENT = 'เจ้าหน้าที่ผู้เกี่ยวข้อง';
     const MPOX_SYMPTOM_LABELS = {
         rashLesions: {
@@ -91,7 +91,7 @@
         ]);
     }
 
-    function signatureBlock({ thaiName, englishName, license, alignRight = false, medicalOfficer = false }) {
+    function signatureBlock({ thaiName, englishName, license, medicalOfficer = false }) {
         const H = h();
         const nameParts = [];
         if (trim(thaiName)) nameParts.push(H.highlight(trim(thaiName)));
@@ -99,15 +99,15 @@
             if (nameParts.length) nameParts.push(' / ');
             nameParts.push(H.highlight(trim(englishName).toUpperCase()));
         }
-        const stack = [H.para('ขอแสดงความนับถือ / Respectfully,', { margin: [0, 6, 0, 10] })];
+        const stack = [H.para('ขอแสดงความนับถือ / Respectfully,', { margin: [0, 6, 0, 10], alignment: 'left' })];
         if (nameParts.length) {
-            stack.push(H.para(['(', ...nameParts, ')'], { alignment: alignRight ? 'right' : 'left' }));
-            if (medicalOfficer) stack.push(H.para('แพทย์ / Medical Officer', { alignment: alignRight ? 'right' : 'left' }));
+            stack.push(H.para(['(', ...nameParts, ')'], { alignment: 'left' }));
+            if (medicalOfficer) stack.push(H.para('แพทย์ / Medical Officer', { alignment: 'left' }));
         }
         if (trim(license)) {
-            stack.push(H.para([H.bold('เลขที่ใบประกอบวิชาชีพ / Medical License No.: '), H.highlight(trim(license))], { alignment: alignRight ? 'right' : 'left' }));
+            stack.push(H.para([H.bold('เลขที่ใบประกอบวิชาชีพ / Medical License No.: '), H.highlight(trim(license))], { alignment: 'left' }));
         }
-        stack.push(H.para('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri', { alignment: alignRight ? 'right' : 'left' }));
+        stack.push(H.para('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี / Public Health Center 28 Krung Thon Buri', { alignment: 'left' }));
         return { stack, margin: [0, 4, 0, 0] };
     }
 
@@ -202,7 +202,6 @@
         content.push(signatureBlock({
             englishName: trim(data.doctorNameEnglish) || 'DOCTOR NAME N/A',
             license: trim(data.medicalLicense) || 'N/A',
-            alignRight: true,
             medicalOfficer: true
         }));
         return content;
@@ -345,7 +344,6 @@
             thaiName: data.doctorNameThai,
             englishName: data.doctorNameEnglish,
             license: data.medicalLicense,
-            alignRight: true,
             medicalOfficer: true
         }));
         return content;

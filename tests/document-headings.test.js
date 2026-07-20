@@ -36,7 +36,7 @@ test('non-medical-certificate documents use the memo heading and recipient', () 
     ];
 
     documents.forEach(content => {
-        assert.equal(textValue(content[0].text), 'บันทึกข้อความ');
+        assert.equal(textValue(content[0].text), 'บันทึกข้อความ / Medical Notes');
         assert.ok(paragraphTexts(content).includes('เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง / To whom it may concern,'));
         const recipient = content.find(node => node && node.text
             && textValue(node.text) === 'เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง / To whom it may concern,');
@@ -46,12 +46,33 @@ test('non-medical-certificate documents use the memo heading and recipient', () 
     });
 });
 
-test('medical certificate uses only the English and Thai certificate headings', () => {
+test('medical certificate uses the paired Thai and English certificate heading', () => {
     const content = buildMedicalCertificate({});
 
-    assert.equal(textValue(content[0].text), 'Medical Certificate\nใบรับรองแพทย์');
+    assert.equal(textValue(content[0].text), 'ใบรับรองแพทย์ / Medical Certificate');
     assert.doesNotMatch(textValue(content[0].text), /บันทึกข้อความ/);
     assert.ok(paragraphTexts(content).includes('เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง / To whom it may concern,'));
+});
+
+test('medical certificate and medication note signatures are left aligned', () => {
+    const documents = [
+        buildMedicalCertificate({
+            doctorNameThai: 'นพ. ทดสอบ ระบบ',
+            doctorNameEnglish: 'TEST DOCTOR',
+            medicalLicense: '12345'
+        }),
+        buildMedicationCertificate({
+            doctorNameEnglish: 'TEST DOCTOR',
+            medicalLicense: '12345'
+        })
+    ];
+
+    documents.forEach(content => {
+        const signature = content.find(node => node && Array.isArray(node.stack)
+            && textValue(node.stack[0].text) === 'ขอแสดงความนับถือ / Respectfully,');
+        assert.ok(signature);
+        signature.stack.forEach(line => assert.equal(line.alignment, 'left'));
+    });
 });
 
 test('free-form title and recipient remain editable', () => {

@@ -36,7 +36,7 @@ test('optional sections describe clinical content rather than implementation act
     const forms = formPaths.map(read).join('\n');
 
     assert.doesNotMatch(forms, />[^<]*Include\s/i);
-    assert.doesNotMatch(forms, /Medical Notes|Doctor's Notes|Treatment finished|Other\(s\)|ถ้ามี \/ optional/i);
+    assert.doesNotMatch(forms, /Doctor's Notes|Treatment finished|Other\(s\)|ถ้ามี \/ optional/i);
     assert.doesNotMatch(forms, /ผู้ป่วยได้มารับการปรึกษา|ผู้ป่วยได้ทำการ|บันทึกแพทย์|ระบุการ/);
 });
 
