@@ -48,13 +48,12 @@
     ];
 
     const BASE_VALUE_IDS = [
+        'language',
         'letterDate',
-        'yearEra',
         'patientName',
         'dob',
         'nationalId',
         'passportNumber',
-        'letterType',
         'doctorNameThai',
         'doctorNameEnglish',
         'medicalLicense',
@@ -118,6 +117,30 @@
             .filter(Boolean);
     }
 
+    function collectOtherMedications(form) {
+        return Array.from(form.querySelectorAll('#otherMedicationsContainer .medication-item'))
+            .map(item => {
+                const name = item.querySelector('input[id^="otherMedName-"]');
+                const strength = item.querySelector('input[id^="otherMedStrength-"]');
+                const schedule = item.querySelector('select[id^="otherMedSchedule-"]');
+                const qty = item.querySelector('input[id^="otherMedQty-"]');
+                if (!name || !name.value.trim()) return null;
+                return {
+                    name: String(name.value).trim(),
+                    strength: strength ? String(strength.value).trim() : '',
+                    schedule: schedule ? String(schedule.value).trim() : '',
+                    quantity: qty ? String(qty.value).trim() : ''
+                };
+            })
+            .filter(Boolean);
+    }
+
+    function getSelectedValues(form, id) {
+        const element = getElement(form, id);
+        if (!element || !element.options) return [];
+        return Array.from(element.selectedOptions).map(option => option.value);
+    }
+
     function collectTpt(data, form, prefix) {
         const selectId = `${prefix}TPTMedication`;
         const otherId = `${prefix}TPTMedicationOther`;
@@ -131,9 +154,14 @@
         copyValues(data, form, [`${prefix}TPTStartDate`, `${prefix}TPTNotes`]);
     }
 
-    function normalizeDates(data, common, era) {
+    function normalizeDates(data, common) {
+        const detectEra = value => (common.detectEraFromValue
+            ? common.detectEraFromValue(value)
+            : (parseInt(String(value || '').split('/').pop(), 10) >= 2300 ? common.ERA_BE : common.ERA_CE));
         const toBE = value => value
-            ? common.convertDateString(value, era, common.ERA_BE)
+            ? (common.convertDateToEra
+                ? common.convertDateToEra(value, common.ERA_BE)
+                : common.convertDateString(value, detectEra(value), common.ERA_BE))
             : '';
         const partialToBE = value => {
             if (!value) return '';
@@ -142,7 +170,7 @@
             if (!match) return value;
             const year = parseInt(match[2], 10);
             if (Number.isNaN(year)) return value;
-            return era === common.ERA_CE ? `${match[1]}/${year + 543}` : value;
+            return detectEra(value) === common.ERA_CE ? `${match[1]}/${year + 543}` : value;
         };
 
         [
@@ -193,6 +221,7 @@
             if (data.includeTmxSmp) copyValues(data, form, ['tmxSmpTablets']);
         } else {
             data.includeTmxSmp = false;
+            data.includeLastMedicinePickup = false;
         }
 
         if (data.includeSyphilisActive) {
@@ -248,12 +277,14 @@
         }
         if (data.attachmentOther) copyValues(data, form, ['attachmentOtherText']);
 
+        data.referralIntents = getSelectedValues(form, 'referralIntent');
+        copyValues(data, form, ['referralIntentCustom']);
+        data.otherMedications = collectOtherMedications(form);
+
         data.doctorNameEnglish = String(data.doctorNameEnglish || '').toUpperCase();
         data.passportNumber = String(data.passportNumber || '').toUpperCase();
 
-        const era = common.getEraFromForm(form);
-        normalizeDates(data, common, era);
-        data._yearEra = era;
+        normalizeDates(data, common);
         return data;
     }
 

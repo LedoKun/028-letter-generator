@@ -200,7 +200,6 @@ test('omits values belonging to unchecked sections', () => {
         'includeCompletedTPT',
         'includeOngoingTPT',
         'includeOtherHistory',
-        'includeLastMedicinePickup',
         'attachmentOther'
     ].forEach(id => {
         elements[id].checked = false;
@@ -212,6 +211,7 @@ test('omits values belonging to unchecked sections', () => {
     );
 
     assert.equal(data.includeTmxSmp, false);
+    assert.equal(data.includeLastMedicinePickup, false);
     assert.equal(data.napId, undefined);
     assert.equal(data.artMedications, undefined);
     assert.equal(data.syphilisStartDate, undefined);

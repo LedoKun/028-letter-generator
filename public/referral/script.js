@@ -39,8 +39,29 @@ document.addEventListener('DOMContentLoaded', function () {
     window.Common.loadDoctorInfo('doctorNameThai', 'doctorNameEnglish', 'medicalLicense');
     initializeArtMedications();
     initializeTmxSmpCheckbox();
-    window.Common.handleFormSubmitOnEnter('referralForm', previewLetter);
-    document.getElementById('previewButton').addEventListener('click', previewLetter);
+    initializeOtherMedications();
+    window.Common.handleFormSubmitOnEnter('referralForm', saveLetter);
+    document.getElementById('printButton').addEventListener('click', printLetter);
+    document.getElementById('saveButton').addEventListener('click', saveLetter);
+    window.Common.renderDocTabs('referral');
+    window.Common.setupLanguageToggle('referralForm');
+    window.Common.syncPatientFields({
+        patientName: 'patientName',
+        dob: 'dob',
+        nationalId: 'nationalId',
+        passportNumber: 'passportNumber'
+    });
+    window.Common.setupClearFormButtons('referralForm');
+    window.Common.setupPdfPreview({
+        formId: 'referralForm',
+        collectData: collectReferralData,
+        buildPayload: data => ({
+            type: 'Referral-Letter',
+            patientName: data.patientName,
+            language: data.language,
+            content: window.PdfTemplates.buildReferral(data)
+        })
+    });
 
     window.Common.autoFocusPatientName();
 
@@ -56,43 +77,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function initializeDateInputs() {
-        const form = document.getElementById('referralForm');
-        const getEra = () => window.Common.getEraFromForm(form);
         document.querySelectorAll('.date-input').forEach(input => {
-            window.Common.attachDateAutoFormat(input, getEra);
-            input.placeholder = 'DD/MM/YYYY';
+            window.Common.attachSmartDate(input);
         });
         document.querySelectorAll('.month-year-input').forEach(input => {
-            window.Common.attachMonthYearAutoFormat(input, getEra);
+            window.Common.attachMonthYearAutoFormat(input, () => window.Common.detectEraFromValue(input.value));
+            window.Common.attachEraBadge(input);
         });
         const letterDateInput = document.getElementById('letterDate');
-        window.Common.setTodayIfEmpty(letterDateInput, getEra());
-        const eraSelect = document.getElementById('yearEra');
-        if (eraSelect) {
-            const onEraChange = () => {
-                const newEra = getEra();
-                window.Common.updateDateLabelsForEra(form, newEra);
-                document.querySelectorAll('.date-input').forEach(inp => {
-                    const v = inp.value;
-                    if (v && v.length === 10) {
-                        const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
-                        const converted = window.Common.convertDateString(v, fromEra, newEra);
-                        if (converted) inp.value = converted;
-                    }
-                });
-                document.querySelectorAll('.month-year-input').forEach(inp => {
-                    const v = inp.value;
-                    if (v && v.length === 7) {
-                        const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
-                        const converted = window.Common.convertMonthYearString(v, fromEra, newEra);
-                        if (converted) inp.value = converted;
-                    }
-                });
-                calculateSyphilisSchedule();
-            };
-            eraSelect.addEventListener('change', onEraChange);
-            window.Common.updateDateLabelsForEra(form, getEra());
-        }
+        window.Common.setTodayIfEmpty(letterDateInput, window.Common.ERA_CE);
     }
 
 
@@ -296,10 +289,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.textContent = 'ลบ / Remove';
-        removeBtn.classList.add('text-red-400', 'hover:text-red-300', 'text-xs', 'thai-font', 'py-1', 'px-2', 'border', 'border-red-400', 'rounded', 'w-full', 'md:w-auto');
+        removeBtn.classList.add('btn-danger', 'thai-font');
         removeBtn.onclick = function () { itemDiv.remove(); };
         removeBtnDiv.appendChild(removeBtn);
-
 
         itemDiv.appendChild(medDiv);
         itemDiv.appendChild(tabletsDiv);
@@ -356,6 +348,98 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+    function createOtherMedicationInputs(idSuffix) {
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('medication-item', 'grid', 'grid-cols-1', 'md:grid-cols-5', 'gap-2', 'items-end');
+        itemDiv.id = `otherMedItem-${idSuffix}`;
+
+        const nameDiv = document.createElement('div');
+        const nameLabel = document.createElement('label');
+        nameLabel.htmlFor = `otherMedName-${idSuffix}`;
+        nameLabel.textContent = 'ชื่อยา / Medication Name:';
+        nameLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.id = `otherMedName-${idSuffix}`;
+        nameInput.name = `otherMedName-${idSuffix}`;
+        nameInput.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm');
+        nameDiv.appendChild(nameLabel);
+        nameDiv.appendChild(nameInput);
+
+        const strengthDiv = document.createElement('div');
+        const strengthLabel = document.createElement('label');
+        strengthLabel.htmlFor = `otherMedStrength-${idSuffix}`;
+        strengthLabel.textContent = 'ความแรง / Strength (e.g., mg):';
+        strengthLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
+        const strengthInput = document.createElement('input');
+        strengthInput.type = 'text';
+        strengthInput.id = `otherMedStrength-${idSuffix}`;
+        strengthInput.name = `otherMedStrength-${idSuffix}`;
+        strengthInput.placeholder = 'e.g., 400 mg';
+        strengthInput.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm');
+        strengthDiv.appendChild(strengthLabel);
+        strengthDiv.appendChild(strengthInput);
+
+        const scheduleDiv = document.createElement('div');
+        const scheduleLabel = document.createElement('label');
+        scheduleLabel.htmlFor = `otherMedSchedule-${idSuffix}`;
+        scheduleLabel.textContent = 'วิธีรับประทาน / Schedule:';
+        scheduleLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
+        const scheduleSelect = document.createElement('select');
+        scheduleSelect.id = `otherMedSchedule-${idSuffix}`;
+        scheduleSelect.name = `otherMedSchedule-${idSuffix}`;
+        ['', 'OD', 'BID', 'TID', 'QID', 'PRN'].forEach(val => {
+            const option = document.createElement('option');
+            option.value = val;
+            option.textContent = val || 'เลือก / Select';
+            scheduleSelect.appendChild(option);
+        });
+        scheduleSelect.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm');
+        scheduleDiv.appendChild(scheduleLabel);
+        scheduleDiv.appendChild(scheduleSelect);
+
+        const qtyDiv = document.createElement('div');
+        const qtyLabel = document.createElement('label');
+        qtyLabel.htmlFor = `otherMedQty-${idSuffix}`;
+        qtyLabel.textContent = 'จำนวน (เม็ด/ขวด/หน่วย) / Quantity (tablets/bottles/units):';
+        qtyLabel.classList.add('block', 'text-xs', 'font-medium', 'thai-font');
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.id = `otherMedQty-${idSuffix}`;
+        qtyInput.name = `otherMedQty-${idSuffix}`;
+        qtyInput.placeholder = 'เช่น 28 / e.g., 28';
+        qtyInput.min = '0';
+        qtyInput.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'shadow-sm', 'py-1.5', 'px-2', 'text-sm');
+        qtyDiv.appendChild(qtyLabel);
+        qtyDiv.appendChild(qtyInput);
+
+        const removeBtnDiv = document.createElement('div');
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = 'ลบ / Remove';
+        removeBtn.classList.add('btn-danger', 'thai-font');
+        removeBtn.onclick = function () { itemDiv.remove(); };
+        removeBtnDiv.appendChild(removeBtn);
+
+        itemDiv.appendChild(nameDiv);
+        itemDiv.appendChild(strengthDiv);
+        itemDiv.appendChild(scheduleDiv);
+        itemDiv.appendChild(qtyDiv);
+        itemDiv.appendChild(removeBtnDiv);
+        return itemDiv;
+    }
+
+    function initializeOtherMedications() {
+        const addButton = document.getElementById('addOtherMedication');
+        if (addButton) {
+            addButton.addEventListener('click', function () {
+                const container = document.getElementById('otherMedicationsContainer');
+                if (container) container.appendChild(createOtherMedicationInputs(Date.now()));
+            });
+        }
+    }
+
+
     function calculateSyphilisSchedule() {
         const startDateInput = document.getElementById('syphilisStartDate');
         const dose1DateEl = document.getElementById('syphilisDose1Date');
@@ -393,27 +477,28 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        const startDate = window.Common.parseDate(startDateInput.value, window.Common.getEraFromForm('referralForm'));
+        const era = window.Common.detectEraFromValue(startDateInput.value);
+        const startDate = window.Common.parseDate(startDateInput.value, era);
 
         if (!startDate) {
             dose1DateEl.textContent = 'N/A';
             dose2DateEl.textContent = 'N/A';
             dose3DateEl.textContent = 'N/A';
             if (startDateInput.value.length > 0 && startDateInput.value.length < 10) startDateInput.style.borderColor = 'red';
-            else if (startDateInput.value.length === 10 && !window.Common.parseDate(startDateInput.value, window.Common.getEraFromForm('referralForm'))) startDateInput.style.borderColor = 'red';
+            else if (startDateInput.value.length === 10 && !window.Common.parseDate(startDateInput.value, era)) startDateInput.style.borderColor = 'red';
             else startDateInput.style.borderColor = '';
             return;
         }
         startDateInput.style.borderColor = '';
 
         if (medValue === 'Benzathine') {
-            dose1DateEl.textContent = window.Common.formatDate(new Date(startDate), window.Common.getEraFromForm('referralForm'));
+            dose1DateEl.textContent = window.Common.formatDate(new Date(startDate), era);
             const dose2Date = new Date(startDate);
             dose2Date.setDate(startDate.getDate() + 7);
-            dose2DateEl.textContent = window.Common.formatDate(dose2Date, window.Common.getEraFromForm('referralForm'));
+            dose2DateEl.textContent = window.Common.formatDate(dose2Date, era);
             const dose3Date = new Date(startDate);
             dose3Date.setDate(startDate.getDate() + 14);
-            dose3DateEl.textContent = window.Common.formatDate(dose3Date, window.Common.getEraFromForm('referralForm'));
+            dose3DateEl.textContent = window.Common.formatDate(dose3Date, era);
         }
     }
 
@@ -467,15 +552,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const detailsDiv = document.getElementById('lastMedicinePickupDetails');
         const dateInput = document.getElementById('lastMedicinePickupDate');
         const durationInput = document.getElementById('medicineDuration');
+        const retroviralCheckbox = document.getElementById('includeRetroviral');
 
-        if (checkbox && detailsDiv && dateInput && durationInput) {
-            const toggleFields = (isChecked) => {
-                detailsDiv.style.opacity = isChecked ? '1' : '0.5';
-                dateInput.disabled = !isChecked;
-                durationInput.disabled = !isChecked;
-                if (isChecked) {
+        if (checkbox && detailsDiv && dateInput && durationInput && retroviralCheckbox) {
+            const toggleFields = () => {
+                const active = retroviralCheckbox.checked && checkbox.checked;
+                checkbox.disabled = !retroviralCheckbox.checked;
+                detailsDiv.style.opacity = active ? '1' : '0.5';
+                dateInput.disabled = !active;
+                durationInput.disabled = !active;
+                if (active) {
                     if (!dateInput.value) {
-                        dateInput.value = window.Common.formatDate(new Date(), window.Common.ERA_BE);
+                        dateInput.value = window.Common.formatDate(new Date(), window.Common.ERA_CE);
                     }
                     // durationInput already defaults to 60 from HTML
                 } else {
@@ -483,24 +571,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             };
             checkbox.addEventListener('change', function () {
-                toggleFields(this.checked);
-                if (this.checked) dateInput.focus();
+                toggleFields();
+                if (retroviralCheckbox.checked && this.checked) dateInput.focus();
             });
-            toggleFields(checkbox.checked); // Initial state
+            retroviralCheckbox.addEventListener('change', toggleFields);
+            toggleFields();
         }
     }
 
 
 
-    async function previewLetter() {
+    function collectReferralData() {
         const form = document.getElementById('referralForm');
+        const language = document.getElementById('language')?.value || 'th';
         let isValid = true;
-        let missingFieldsMessages = [];
+        const missingFieldsMessages = [];
 
         const requiredStaticFields = [
             { id: 'letterDate', name: 'วันที่ / Date' },
             { id: 'patientName', name: 'ชื่อผู้ป่วย / Patient Name' },
-            { id: 'doctorNameThai', name: 'ชื่อแพทย์ (ภาษาไทย) / Doctor\'s name (Thai)' }
+            { id: language === 'th' ? 'doctorNameThai' : 'doctorNameEnglish', name: language === 'th' ? 'ชื่อแพทย์' : 'Doctor\'s name' }
         ];
 
         requiredStaticFields.forEach(fieldInfo => {
@@ -512,8 +602,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (element) {
                 element.style.borderColor = '';
                 if (element.classList.contains('date-input') && element.value.length > 0) {
-                    const era = window.Common.getEraFromForm('referralForm');
-                    const ok = !!window.Common.parseDate(element.value, era);
+                    const ok = !!window.Common.parseDateAuto(element.value);
                     if (!ok) {
                         missingFieldsMessages.push(`${fieldInfo.name} (รูปแบบไม่ถูกต้อง / Invalid format: ${element.value})`);
                         element.style.borderColor = 'red';
@@ -528,8 +617,7 @@ document.addEventListener('DOMContentLoaded', function () {
         optionalDateFields.forEach(id => {
             const el = document.getElementById(id);
             if (el && el.value.trim()) {
-                const era = window.Common.getEraFromForm('referralForm');
-                const ok = !!window.Common.parseDate(el.value, era);
+                const ok = !!window.Common.parseDateAuto(el.value);
                 if (!ok) {
                     missingFieldsMessages.push(`${el.labels[0] ? el.labels[0].textContent.split(' (')[0].split(' /')[0].trim() : id} (รูปแบบไม่ถูกต้อง / Invalid format: ${el.value})`);
                     el.style.borderColor = 'red';
@@ -550,8 +638,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             const value = el.value.trim();
-            const era = window.Common.getEraFromForm('referralForm');
-            if (!window.Common.parseMonthYear(value, era)) {
+            if (!window.Common.parseMonthYearAuto(value)) {
                 missingFieldsMessages.push(`${el.labels[0] ? el.labels[0].textContent.split(' /')[0].trim() : id} (รูปแบบไม่ถูกต้อง / Invalid format: ${value})`);
                 el.style.borderColor = 'red';
                 isValid = false;
@@ -583,7 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 missingFieldsMessages.push("วันที่เริ่มการรักษาซิฟิลิส / Syphilis treatment start date");
                 syphilisStartDateInput.style.borderColor = 'red';
                 isValid = false;
-            } else if (syphilisStartDateInput.value.length < 10 || !window.Common.parseDate(syphilisStartDateInput.value, window.Common.getEraFromForm('referralForm'))) {
+            } else if (syphilisStartDateInput.value.length < 10 || !window.Common.parseDateAuto(syphilisStartDateInput.value)) {
                 missingFieldsMessages.push(`วันที่เริ่มการรักษาโรคซิฟิลิส (รูปแบบไม่ถูกต้อง / Invalid format: ${syphilisStartDateInput.value})`);
                 syphilisStartDateInput.style.borderColor = 'red';
                 isValid = false;
@@ -594,19 +681,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const includeLastMedicinePickupCheckbox = document.getElementById('includeLastMedicinePickup');
         const lastMedicinePickupDateInput = document.getElementById('lastMedicinePickupDate');
-        if (includeLastMedicinePickupCheckbox && includeLastMedicinePickupCheckbox.checked) {
-            if (!lastMedicinePickupDateInput.value.trim()) { // Only require date if checkbox is checked AND no duration is specified as an alternative.
-                // If only duration is filled, date is not strictly required.
-                // The print template handles showing duration only if date is missing.
-                // For validation, let's require it if the checkbox is checked AND the user intends to provide a date.
-                // This logic might need refinement based on how strictly "last pickup date" is enforced.
-                // For now, if checked and empty, mark as error.
+        const includeRetroviralCheckbox = document.getElementById('includeRetroviral');
+        if (includeRetroviralCheckbox?.checked && includeLastMedicinePickupCheckbox?.checked) {
+            if (!lastMedicinePickupDateInput.value.trim()) {
                 missingFieldsMessages.push("วันที่รับยาครั้งล่าสุด / Last medication pickup date");
                 lastMedicinePickupDateInput.style.borderColor = 'red';
                 isValid = false;
             } else if (lastMedicinePickupDateInput.value.trim()) {
-                const era = window.Common.getEraFromForm('referralForm');
-                const ok = !!window.Common.parseDate(lastMedicinePickupDateInput.value, era);
+                const ok = !!window.Common.parseDateAuto(lastMedicinePickupDateInput.value);
                 if (!ok) {
                     missingFieldsMessages.push(`วันที่รับยาครั้งล่าสุด (รูปแบบไม่ถูกต้อง / Invalid format: ${lastMedicinePickupDateInput.value})`);
                     lastMedicinePickupDateInput.style.borderColor = 'red';
@@ -646,6 +728,11 @@ document.addEventListener('DOMContentLoaded', function () {
             isValid = false;
         });
 
+        return { data, isValid, missingFieldsMessages };
+    }
+
+    function referralPayload() {
+        const { data, isValid, missingFieldsMessages } = collectReferralData();
         if (!isValid) {
             alert(`กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วนและถูกต้อง:\n- ${missingFieldsMessages.join('\n- ')}`);
             const firstInvalidField = Array.from(document.querySelectorAll('[style*="border-color: red"]'))[0];
@@ -655,18 +742,36 @@ document.addEventListener('DOMContentLoaded', function () {
                     : firstInvalidField.querySelector('input, select, textarea, button');
                 if (focusTarget) focusTarget.focus();
             }
-            return;
+            return null;
         }
+        return {
+            type: 'Referral-Letter',
+            patientName: data.patientName,
+            language: data.language,
+            content: window.PdfTemplates.buildReferral(data)
+        };
+    }
 
+    async function saveLetter() {
+        const payload = referralPayload();
+        if (!payload) return;
         try {
-            await window.PdfGenerator.generateAndPrint({
-                type: 'Referral-Letter',
-                patientName: data.patientName,
-                content: window.PdfTemplates.buildReferral(data)
-            });
+            await window.PdfGenerator.save(payload);
         } catch (error) {
             console.error('Error generating referral letter PDF:', error);
             alert('Unable to generate PDF. Please check the console for details.');
         }
     }
+
+    async function printLetter() {
+        const payload = referralPayload();
+        if (!payload) return;
+        try {
+            await window.PdfGenerator.print(payload);
+        } catch (error) {
+            console.error('Error printing referral letter PDF:', error);
+            alert('Unable to print PDF. Please check the console for details.');
+        }
+    }
+
 });

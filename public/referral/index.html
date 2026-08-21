@@ -119,13 +119,15 @@
 
 <body class="p-6 sm:p-8">
 
-    <div class="container mx-auto max-w-3xl">
+    <div class="container mx-auto max-w-7xl">
         <header class="mb-8 text-center">
             <h1 class="text-3xl font-bold thai-font text-white">สร้างหนังสือส่งตัวผู้ป่วย</h1>
             <p class="text-xl text-gray-400">Patient Referral Letter Generator</p>
         </header>
 
-        <form id="referralForm" class="space-y-6">
+        <div class="workspace">
+            <div class="form-pane">
+                <form id="referralForm" class="space-y-6">
 
             <fieldset class="border p-4 rounded-md shadow-sm">
                 <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลทั่วไป / General Information
@@ -137,17 +139,9 @@
                         <input type="text" id="letterDate" name="letterDate" placeholder="DD/MM/YYYY" required
                             class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
-                    <div>
-                        <label for="yearEra" class="block text-sm font-medium thai-font">รูปแบบปี / Year format</label>
-                        <select id="yearEra" name="yearEra"
-                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                            <option value="BE" selected>พ.ศ. (BE)</option>
-                            <option value="CE">ค.ศ. (CE)</option>
-                        </select>
-                    </div>
                     <div class="md:col-span-2">
                         <label for="patientName" class="block text-sm font-medium thai-font">ชื่อผู้ป่วย / Patient Name
-                            (Thai/English) <span class="required-asterisk">*</span></label>
+                            <span class="required-asterisk">*</span></label>
                         <input type="text" id="patientName" name="patientName" required autofocus
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
@@ -164,7 +158,7 @@
                     </div>
                     <div>
                         <label for="passportNumber" class="block text-sm font-medium thai-font">เลขที่หนังสือเดินทาง /
-                            Passport Number</label>
+                            Passport no.</label>
                         <input type="text" id="passportNumber" name="passportNumber"
                             class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
@@ -172,20 +166,29 @@
             </fieldset>
 
             <fieldset class="border p-4 rounded-md shadow-sm">
-                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รูปแบบหนังสือ / Letter Format
-                </legend>
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">จุดประสงค์การส่งต่อ / Referral Purpose</legend>
                 <div class="mt-2 space-y-2">
                     <div>
-                        <input type="radio" id="letterTypeSummary" name="letterType" value="summaryOfHistory"
-                            class="h-4 w-4 text-indigo-500 focus:ring-indigo-400" checked>
-                        <label for="letterTypeSummary" class="ml-2 thai-font">สรุปประวัติการรักษา / Medical
-                            Summary</label>
+                        <label for="referralIntent" class="block text-sm font-medium thai-font">เลือกจุดประสงค์ (เลือกได้มากกว่า 1 รายการ) / Select one or more referral purposes</label>
+                        <select id="referralIntent" name="referralIntent" multiple
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
+                            <option value="continuedCare" selected>ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ / Referral for Continued Care</option>
+                            <option value="specializedCare">การดูแลรักษาเฉพาะทาง / Specialized care and management</option>
+                            <option value="diagnosticEvaluation">การตรวจวินิจฉัยเพิ่มเติม / Further diagnostic evaluation</option>
+                            <option value="hivCareTreatment">การดูแลรักษาการติดเชื้อ HIV / HIV care and treatment</option>
+                            <option value="syphilisCareTreatment">การรักษาซิฟิลิส / Syphilis treatment</option>
+                            <option value="mpoxCareTreatment">การดูแลรักษา mpox / Mpox care and treatment</option>
+                            <option value="hbvCareTreatment">การดูแลรักษาการติดเชื้อ HBV / HBV care and treatment</option>
+                            <option value="hcvCareTreatment">การดูแลรักษาการติดเชื้อ HCV / HCV care and treatment</option>
+                            <option value="tbCareTreatment">การรักษาวัณโรค / TB treatment</option>
+                            <option value="tptCareTreatment">การให้ยาป้องกันวัณโรค (TPT) / Tuberculosis preventive treatment (TPT)</option>
+                        </select>
                     </div>
                     <div>
-                        <input type="radio" id="letterTypeReferral" name="letterType" value="referralForCare"
-                            class="h-4 w-4 text-indigo-500 focus:ring-indigo-400">
-                        <label for="letterTypeReferral" class="ml-2 thai-font">ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ
-                            / Referral for Continued Care</label>
+                        <label for="referralIntentCustom" class="block text-sm font-medium thai-font">จุดประสงค์อื่น / Other referral purpose</label>
+                        <input type="text" id="referralIntentCustom" name="referralIntentCustom"
+                            placeholder="เช่น การดูแลรักษา mpox / e.g., Mpox care and treatment"
+                            class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
                     </div>
                 </div>
             </fieldset>
@@ -276,7 +279,7 @@
                             <p class="text-xs thai-font">สูตรยา ART ปัจจุบัน / Current ART regimen</p>
                         </div>
                         <button type="button" id="addArtMedication"
-                            class="text-indigo-400 hover:text-indigo-300 text-sm thai-font py-1">+ เพิ่มยา ART / Add ART
+                            class="btn-secondary thai-font">+ เพิ่มยา ART / Add ART
                             Medication</button>
 
                         <div class="mt-3 space-y-2">
@@ -289,6 +292,34 @@
                                     <input type="number" id="tmxSmpTablets" name="tmxSmpTablets" placeholder="จำนวน"
                                         min="0" class="ml-2 w-24 rounded-md shadow-sm py-1 px-1.5 text-sm">
                                     <span class="ml-1 text-sm thai-font">tablet(s) OD</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 space-y-2 border-t border-gray-700 pt-3">
+                            <div class="flex items-center">
+                                <input id="includeLastMedicinePickup" name="includeLastMedicinePickup" type="checkbox" checked
+                                    class="h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400">
+                                <label for="includeLastMedicinePickup" class="ml-2 text-sm font-medium thai-font">
+                                    ข้อมูลการรับยาครั้งล่าสุด / Last medication pickup
+                                </label>
+                            </div>
+                            <div id="lastMedicinePickupDetails" class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-6">
+                                <div>
+                                    <label for="lastMedicinePickupDate" class="block text-xs font-medium thai-font">
+                                        รับยาครั้งล่าสุดเมื่อวันที่ / Last medication pickup
+                                        <span class="required-asterisk">*</span>
+                                    </label>
+                                    <input type="text" id="lastMedicinePickupDate" name="lastMedicinePickupDate"
+                                        placeholder="DD/MM/YYYY"
+                                        class="date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
+                                </div>
+                                <div>
+                                    <label for="medicineDuration" class="block text-xs font-medium thai-font">
+                                        ยาที่ได้รับเพียงพอสำหรับ (วัน) / Medication supplied for (days)
+                                    </label>
+                                    <input type="number" id="medicineDuration" name="medicineDuration"
+                                        placeholder="เช่น 180" min="0" value="60"
+                                        class="mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm">
                                 </div>
                             </div>
                         </div>
@@ -725,35 +756,21 @@
                 </div>
             </fieldset>
 
+            <fieldset class="border p-4 rounded-md shadow-sm">
+                <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">รายการยาอื่น ๆ / Other Medications</legend>
+                <div class="mt-4 space-y-3">
+                    <p class="text-xs thai-font text-gray-400">เพิ่มยาที่ไม่ใช่สูตร ART (เช่น ยาป้องกัน OI, ยารักษา TB, ยารักษาซิฟิลิส) / Add non-ARV medications (OI prophylaxis, TB meds, Syphilis regimens, etc.)</p>
+                    <div id="otherMedicationsContainer" class="space-y-3"></div>
+                    <button type="button" id="addOtherMedication"
+                        class="btn-secondary thai-font">+ เพิ่มรายการยา / Add Medication</button>
+                </div>
+            </fieldset>
+
             <fieldset id="additionalInfoFieldset" class="border p-4 rounded-md shadow-sm">
                 <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลเพิ่มเติม / Additional
                     Information</legend>
 
         <div class="mt-4 space-y-4">
-            <div class="flex items-center">
-                <input id="includeLastMedicinePickup" name="includeLastMedicinePickup" type="checkbox" checked
-                    class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
-                <label for="includeLastMedicinePickup" class="ml-2 text-sm font-medium thai-font">
-                    ข้อมูลการรับยาครั้งล่าสุด / Last medication pickup
-                </label>
-            </div>
-
-            <div id="lastMedicinePickupDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-7">
-                <div>
-                    <label for="lastMedicinePickupDate" class="block text-sm font-medium thai-font">วันที่รับยาครั้งล่าสุด
-                        / Last pickup date <span class="required-asterisk">*</span></label>
-                    <input type="text" id="lastMedicinePickupDate" name="lastMedicinePickupDate"
-                        placeholder="DD/MM/YYYY"
-                        class="date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                </div>
-                <div>
-                    <label for="medicineDuration" class="block text-sm font-medium thai-font">จำนวนวันที่ได้รับยา /
-                        Days supplied</label>
-                    <input type="number" id="medicineDuration" name="medicineDuration" placeholder="เช่น 180" min="0"
-                        value="60" class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
-                </div>
-            </div>
-
             <div class="flex items-center pt-2">
                 <input id="includeReferralForAdmission" name="includeReferralForAdmission" type="checkbox"
                     class="h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400">
@@ -792,16 +809,16 @@
         <legend class="text-lg font-semibold px-2 thai-font text-indigo-400">ข้อมูลแพทย์ / Doctor Information
         </legend>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-            <div>
-                <label for="doctorNameThai" class="block text-sm font-medium thai-font">ชื่อแพทย์ (ภาษาไทย) /
-                    Doctor's name (Thai) <span class="required-asterisk">*</span></label>
+            <div data-language-field="th">
+                <label for="doctorNameThai" class="block text-sm font-medium thai-font">ชื่อแพทย์ / Doctor's name
+                    <span class="required-asterisk">*</span></label>
                 <input type="text" id="doctorNameThai" name="doctorNameThai" required
                     class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm">
             </div>
-            <div>
-                <label for="doctorNameEnglish" class="block text-sm font-medium thai-font">ชื่อแพทย์ (ภาษาอังกฤษ) /
-                    Doctor's name (English)</label>
-                <input type="text" id="doctorNameEnglish" name="doctorNameEnglish"
+            <div data-language-field="en">
+                <label for="doctorNameEnglish" class="block text-sm font-medium thai-font">ชื่อแพทย์ / Doctor's name
+                    <span class="required-asterisk">*</span></label>
+                <input type="text" id="doctorNameEnglish" name="doctorNameEnglish" required
                     class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
                     style="text-transform: uppercase;">
             </div>
@@ -823,18 +840,25 @@
         </div>
     </fieldset>
 
-    <div class="pt-5">
-        <div class="flex justify-end space-x-3"> <a href="../index.html"
-                class="inline-flex justify-center py-2.5 px-6 border border-gray-600 hover:border-gray-500 shadow-sm text-base font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
-                กลับ / Back
-            </a>
-            <button type="button" id="previewButton"
-                class="inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 thai-font transition-colors">
-                ดูตัวอย่างและพิมพ์ / Preview & Print
-            </button>
+                <div class="pt-5 flex justify-end">
+                    <a href="../index.html" class="btn-secondary thai-font">กลับ / Back</a>
+                </div>
+            </form>
         </div>
+        <aside class="preview-pane">
+            <div class="preview-toolbar">
+                <h2 class="preview-title thai-font">ตัวอย่างเอกสาร / Live Preview</h2>
+                <div class="flex space-x-3">
+                    <button type="button" id="printButton" class="btn-primary thai-font">พิมพ์ / Print</button>
+                    <button type="button" id="saveButton" class="btn-primary thai-font">บันทึก / Save</button>
+                </div>
+            </div>
+            <div class="preview-frame-wrap">
+                <iframe id="previewFrame" class="preview-frame" title="PDF Preview"></iframe>
+                <div id="previewStatus" class="preview-empty thai-font">กรอกข้อมูลที่จำเป็นให้ครบถ้วนเพื่อดูตัวอย่าง / Complete required fields to preview</div>
+            </div>
+        </aside>
     </div>
-    </form>
     </div>
 
     <footer class="text-center text-gray-500 mt-12 sm:mt-16 pb-8">

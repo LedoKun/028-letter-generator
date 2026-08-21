@@ -4,12 +4,33 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeSalutationField();
     initializeNationalIdInput();
     window.Common.loadDoctorInfo('doctorNameThai', 'doctorNameEnglish', 'medicalLicense');
-    setupOptionalSections(); // This function will be modified
+    setupOptionalSections();
     setupAdvisedRestCalculation();
     window.Common.autoFocusPatientName();
 
-    document.getElementById('previewButton').addEventListener('click', previewMedicalCertificate);
-    window.Common.handleFormSubmitOnEnter('medicalCertificateForm', previewMedicalCertificate);
+    document.getElementById('printButton').addEventListener('click', printMedicalCertificate);
+    document.getElementById('saveButton').addEventListener('click', saveMedicalCertificate);
+    window.Common.handleFormSubmitOnEnter('medicalCertificateForm', saveMedicalCertificate);
+    window.Common.renderDocTabs('medical');
+    window.Common.setupLanguageToggle('medicalCertificateForm');
+    window.Common.syncPatientFields({
+        patientName: 'patientName',
+        age: 'patientAge',
+        sex: 'patientGender',
+        nationalId: 'nationalIdNumber',
+        passportNumber: 'passportNumber'
+    });
+    window.Common.setupClearFormButtons('medicalCertificateForm');
+    window.Common.setupPdfPreview({
+        formId: 'medicalCertificateForm',
+        collectData: collectMedicalCertificateData,
+        buildPayload: data => ({
+            type: 'Medical-Certificate',
+            patientName: data.patientName,
+            language: data.language,
+            content: window.PdfTemplates.buildMedicalCertificate(data)
+        })
+    });
 
     const doctorNameEnglishCertInput = document.getElementById('doctorNameEnglish');
     if (doctorNameEnglishCertInput) {
@@ -22,33 +43,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function initializeDateInputs() {
-        const form = document.getElementById('medicalCertificateForm');
-        const getEra = () => window.Common.getEraFromForm(form);
         document.querySelectorAll('.date-input').forEach(input => {
-            window.Common.attachDateAutoFormat(input, getEra);
-            input.placeholder = 'DD/MM/YYYY';
+            window.Common.attachSmartDate(input);
         });
         const letterDateInput = document.getElementById('letterDate');
-        window.Common.setTodayIfEmpty(letterDateInput, getEra());
-
-        const eraSelect = document.getElementById('yearEra');
-        if (eraSelect) {
-            const onEraChange = () => {
-                const newEra = getEra();
-                window.Common.updateDateLabelsForEra(form, newEra);
-                document.querySelectorAll('.date-input').forEach(inp => {
-                    const v = inp.value;
-                    if (v && v.length === 10) {
-                        const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
-                        const converted = window.Common.convertDateString(v, fromEra, newEra);
-                        if (converted) inp.value = converted;
-                    }
-                });
-                calculateRestDays();
-            };
-            eraSelect.addEventListener('change', onEraChange);
-            window.Common.updateDateLabelsForEra(form, getEra());
-        }
+        window.Common.setTodayIfEmpty(letterDateInput, window.Common.ERA_CE);
     }
 
     function initializeSalutationField() {
@@ -112,8 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (isChecked && section.dateToDefault) {
                         const dateField = document.getElementById(section.dateToDefault);
                         if (dateField && dateField.value === '') {
-                            const era = window.Common.getEraFromForm('medicalCertificateForm');
-                            dateField.value = window.Common.formatDate(new Date(), era);
+                            dateField.value = window.Common.formatDate(new Date(), window.Common.ERA_CE);
                             // Trigger blur to format/validate
                             dateField.dispatchEvent(new Event('blur'));
                         }
@@ -149,9 +147,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
 
-        const eraNow = window.Common.getEraFromForm('medicalCertificateForm');
-        const startDate = window.Common.parseDate(startDateInput.value, eraNow);
-        const endDate = window.Common.parseDate(endDateInput.value, eraNow);
+        const startDate = window.Common.parseDateAuto(startDateInput.value);
+        const endDate = window.Common.parseDateAuto(endDateInput.value);
 
         let validStart = true;
         let validEnd = true;
@@ -202,11 +199,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    async function previewMedicalCertificate() {
+    function collectMedicalCertificateData() {
         const form = document.getElementById('medicalCertificateForm');
         const data = {};
         let isValid = true;
-        let missingFieldsMessages = [];
+        const missingFieldsMessages = [];
 
         const requiredFields = [
             { id: 'letterDate', name: 'วันที่ออกเอกสาร / Certificate date' },
@@ -222,8 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (element) {
                 element.style.borderColor = '';
                 if (element.classList.contains('date-input') && element.value.length > 0) {
-                    const era = window.Common.getEraFromForm('medicalCertificateForm');
-                    const valid = !!window.Common.parseDate(element.value, era);
+                    const valid = !!window.Common.parseDateAuto(element.value);
                     if (!valid) {
                         missingFieldsMessages.push(`${fieldInfo.name} (รูปแบบไม่ถูกต้อง / Invalid format: ${element.value})`);
                         element.style.borderColor = 'red';
@@ -245,7 +241,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-
         const optionalDateSections = [
             { checkboxId: 'includeConsultationDiagnosis', dateFieldId: 'consultationDate', name: 'วันที่เข้ารับการตรวจรักษา / Examination date' },
             { checkboxId: 'includeAdvisedRest', dateFieldId: 'restStartDate', name: 'วันที่เริ่มพักรักษาตัว / Medical leave start date' },
@@ -258,8 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const checkbox = document.getElementById(sec.checkboxId);
             const dateField = document.getElementById(sec.dateFieldId);
             if (checkbox && checkbox.checked && dateField && dateField.value.trim()) {
-                const era = window.Common.getEraFromForm('medicalCertificateForm');
-                const valid = !!window.Common.parseDate(dateField.value, era);
+                const valid = !!window.Common.parseDateAuto(dateField.value);
                 if (!valid) {
                     missingFieldsMessages.push(`${sec.name} (รูปแบบไม่ถูกต้อง / Invalid format: ${dateField.value})`);
                     dateField.style.borderColor = 'red';
@@ -276,9 +270,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (includeRestCheckbox && includeRestCheckbox.checked) {
             const restStartDateInput = document.getElementById('restStartDate');
             const restEndDateInput = document.getElementById('restEndDate');
-            const era = window.Common.getEraFromForm('medicalCertificateForm');
-            const restStartDate = window.Common.parseDate(restStartDateInput.value, era);
-            const restEndDate = window.Common.parseDate(restEndDateInput.value, era);
+            const restStartDate = window.Common.parseDateAuto(restStartDateInput.value);
+            const restEndDate = window.Common.parseDateAuto(restEndDateInput.value);
 
             if (restStartDate && restEndDate && restEndDate < restStartDate) {
                 missingFieldsMessages.push('วันที่สิ้นสุดการพักรักษาตัวต้องตรงกับหรืออยู่หลังวันที่เริ่มพักรักษาตัว / Medical leave end date must be on or after the start date');
@@ -293,83 +286,103 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        if (isValid) {
+            new FormData(form).forEach((value, key) => {
+                const element = form.elements[key];
+                if (element && element.type === 'checkbox') {
+                    data[key] = element.checked;
+                } else if (element && key !== 'passportIdNumber') {
+                    if (typeof value === 'string') {
+                        data[key] = value.trim();
+                    } else {
+                        data[key] = value;
+                    }
+                }
+            });
 
+            data.passportNumber = document.getElementById('passportNumber').value.trim();
+            data.nationalIdNumber = document.getElementById('nationalIdNumber').value.trim();
+
+            const salutationElement = form.elements['patientSalutation'];
+            const selectedSalutationOption = salutationElement.options[salutationElement.selectedIndex];
+
+            if (data.patientSalutation === 'OTHER') {
+                data.patientSalutation = data.otherPatientSalutation;
+                data.patientSalutationEnglish = data.otherPatientSalutation;
+            } else if (data.patientSalutation === 'NONE') {
+                data.patientSalutation = '';
+                data.patientSalutationEnglish = '';
+            } else {
+                data.patientSalutation = salutationElement.value;
+                data.patientSalutationEnglish = selectedSalutationOption.dataset.english || '';
+            }
+
+            const genderElement = form.elements['patientGender'];
+            const selectedGenderOption = genderElement.options[genderElement.selectedIndex];
+            if (data.patientGender === 'NONE') {
+                data.patientGender = '';
+                data.patientGenderEnglish = '';
+            } else {
+                data.patientGender = genderElement.value;
+                data.patientGenderEnglish = selectedGenderOption.dataset.english || '';
+            }
+
+            data.advisedRestNotes = document.getElementById('advisedRestNotes')?.value || '';
+            data.syphilisNotes = document.getElementById('syphilisNotes')?.value || '';
+            data.tbNotes = document.getElementById('tbNotes')?.value || '';
+
+            data.doctorNameEnglish = (data.doctorNameEnglish || '').toUpperCase();
+
+            const toCE = (v) => v ? window.Common.convertDateToEra(v, window.Common.ERA_CE) : '';
+            data.letterDate = toCE(data.letterDate);
+            if (data.includeConsultationDiagnosis) data.consultationDate = toCE(data.consultationDate);
+            if (data.includeAdvisedRest) {
+                data.restStartDate = toCE(data.restStartDate);
+                data.restEndDate = toCE(data.restEndDate);
+            }
+            if (data.includeSyphilisTreatment) data.syphilisTreatmentDate = toCE(data.syphilisTreatmentDate);
+            if (data.includeTBTreatment) data.tbTreatmentCompletionDate = toCE(data.tbTreatmentCompletionDate);
+        }
+
+        return { data, isValid, missingFieldsMessages };
+    }
+
+    function medicalCertificatePayload() {
+        const { data, isValid, missingFieldsMessages } = collectMedicalCertificateData();
         if (!isValid) {
             alert(`กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วนและถูกต้อง:\n- ${missingFieldsMessages.join('\n- ')}`);
             const firstInvalidField = Array.from(document.querySelectorAll('[style*="border-color: red"]'))[0];
             if (firstInvalidField) firstInvalidField.focus();
-            return;
+            return null;
         }
+        return {
+            type: 'Medical-Certificate',
+            patientName: data.patientName,
+            language: data.language,
+            content: window.PdfTemplates.buildMedicalCertificate(data)
+        };
+    }
 
-        new FormData(form).forEach((value, key) => {
-            const element = form.elements[key];
-            if (element && element.type === 'checkbox') {
-                data[key] = element.checked;
-            } else if (element && key !== 'passportIdNumber') {
-                if (typeof value === 'string') {
-                    data[key] = value.trim();
-                } else {
-                    data[key] = value;
-                }
-            }
-        });
-
-        data.passportNumber = document.getElementById('passportNumber').value.trim();
-        data.nationalIdNumber = document.getElementById('nationalIdNumber').value.trim();
-
-        const salutationElement = form.elements['patientSalutation'];
-        const selectedSalutationOption = salutationElement.options[salutationElement.selectedIndex];
-
-        if (data.patientSalutation === 'OTHER') {
-            data.patientSalutation = data.otherPatientSalutation;
-            data.patientSalutationEnglish = data.otherPatientSalutation;
-        } else if (data.patientSalutation === 'NONE') {
-            data.patientSalutation = '';
-            data.patientSalutationEnglish = '';
-        } else {
-            data.patientSalutation = salutationElement.value;
-            data.patientSalutationEnglish = selectedSalutationOption.dataset.english || '';
-        }
-
-        const genderElement = form.elements['patientGender'];
-        const selectedGenderOption = genderElement.options[genderElement.selectedIndex];
-        if (data.patientGender === 'NONE') {
-            data.patientGender = '';
-            data.patientGenderEnglish = '';
-        } else {
-            data.patientGender = genderElement.value;
-            data.patientGenderEnglish = selectedGenderOption.dataset.english || '';
-        }
-
-        // Collect notes for disease sections if present
-        data.advisedRestNotes = document.getElementById('advisedRestNotes')?.value || '';
-        data.syphilisNotes = document.getElementById('syphilisNotes')?.value || '';
-        data.tbNotes = document.getElementById('tbNotes')?.value || '';
-
-        data.doctorNameEnglish = data.doctorNameEnglish.toUpperCase();
-
-        // Normalize dates to CE for certificates; keep track of selected era
-        const era = window.Common.getEraFromForm('medicalCertificateForm');
-        const toCE = (v) => v ? window.Common.convertDateString(v, era, window.Common.ERA_CE) : '';
-        data.letterDate = toCE(data.letterDate);
-        if (data.includeConsultationDiagnosis) data.consultationDate = toCE(data.consultationDate);
-        if (data.includeAdvisedRest) {
-            data.restStartDate = toCE(data.restStartDate);
-            data.restEndDate = toCE(data.restEndDate);
-        }
-        if (data.includeSyphilisTreatment) data.syphilisTreatmentDate = toCE(data.syphilisTreatmentDate);
-        if (data.includeTBTreatment) data.tbTreatmentCompletionDate = toCE(data.tbTreatmentCompletionDate);
-        data._yearEra = era;
-
+    async function saveMedicalCertificate() {
+        const payload = medicalCertificatePayload();
+        if (!payload) return;
         try {
-            await window.PdfGenerator.generateAndPrint({
-                type: 'Medical-Certificate',
-                patientName: data.patientName,
-                content: window.PdfTemplates.buildMedicalCertificate(data)
-            });
+            await window.PdfGenerator.save(payload);
         } catch (error) {
             console.error('Error generating medical certificate PDF:', error);
             alert('Unable to generate PDF. Please check the console for details.');
         }
     }
+
+    async function printMedicalCertificate() {
+        const payload = medicalCertificatePayload();
+        if (!payload) return;
+        try {
+            await window.PdfGenerator.print(payload);
+        } catch (error) {
+            console.error('Error printing medical certificate PDF:', error);
+            alert('Unable to print PDF. Please check the console for details.');
+        }
+    }
+
 });

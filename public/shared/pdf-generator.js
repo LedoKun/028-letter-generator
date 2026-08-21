@@ -7,7 +7,7 @@
     const MM = 72 / 25.4;
 
     let logoDataUrlPromise = null;
-    let fontsRegistered = false;
+    let fontsReadyPromise = null;
 
     function mm(value) {
         return value * MM;
@@ -70,14 +70,14 @@
     }
 
     function registerFonts() {
-        if (fontsRegistered) return;
+        if (fontsReadyPromise) return fontsReadyPromise;
         if (!window.pdfMake || typeof window.pdfMake.addFonts !== 'function') {
             throw new Error('pdfmake is not loaded.');
         }
         if (typeof window.pdfMake.setUrlAccessPolicy === 'function') {
             window.pdfMake.setUrlAccessPolicy((url) => new URL(url).origin === window.location.origin);
         }
-        window.pdfMake.addFonts({
+        const fonts = {
             [THAI_FONT]: {
                 normal: toAbsoluteUrl('/vendor/fonts/NotoSansThai-Regular.ttf'),
                 bold: toAbsoluteUrl('/vendor/fonts/NotoSansThai-Bold.ttf'),
@@ -90,8 +90,18 @@
                 italics: toAbsoluteUrl('/vendor/fonts/NotoSans-Regular.ttf'),
                 bolditalics: toAbsoluteUrl('/vendor/fonts/NotoSans-Bold.ttf')
             }
+        };
+        window.pdfMake.addFonts(fonts);
+        const urls = [...new Set(Object.values(fonts).flatMap(font => Object.values(font)))];
+        fontsReadyPromise = Promise.all(urls.map(async url => {
+            const response = await fetch(url, { cache: 'force-cache' });
+            if (!response.ok) throw new Error(`Failed to load PDF font ${url}: ${response.status}`);
+            await response.arrayBuffer();
+        })).catch(error => {
+            fontsReadyPromise = null;
+            throw error;
         });
-        fontsRegistered = true;
+        return fontsReadyPromise;
     }
 
     function blobToDataUrl(blob) {
@@ -110,7 +120,12 @@
     }
 
     function getLogoDataUrl() {
-        if (!logoDataUrlPromise) logoDataUrlPromise = fetchDataUrl(LOGO_URL);
+        if (!logoDataUrlPromise) {
+            logoDataUrlPromise = fetchDataUrl(LOGO_URL).catch(error => {
+                logoDataUrlPromise = null;
+                throw error;
+            });
+        }
         return logoDataUrlPromise;
     }
 
@@ -160,26 +175,23 @@
     }
 
     function convertBEtoCE(beDate) {
-        if (!beDate || typeof beDate !== 'string' || !beDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) return '';
-        const parts = beDate.split('/');
-        const year = parseInt(parts[2], 10);
-        return Number.isNaN(year) ? '' : `${parts[0]}/${parts[1]}/${year - 543}`;
+        if (!beDate || typeof beDate !== 'string') return '';
+        const match = beDate.match(/^(\d{2}\/(?:\d{2}\/)?)(\d{4})$/);
+        if (!match) return '';
+        const year = parseInt(match[2], 10);
+        return Number.isNaN(year) ? '' : `${match[1]}${year - 543}`;
     }
 
     function convertCEtoBE(ceDate) {
-        if (!ceDate || typeof ceDate !== 'string' || !ceDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) return '';
-        const parts = ceDate.split('/');
-        const year = parseInt(parts[2], 10);
-        return Number.isNaN(year) ? '' : `${parts[0]}/${parts[1]}/${year + 543}`;
+        if (!ceDate || typeof ceDate !== 'string') return '';
+        const match = ceDate.match(/^(\d{2}\/(?:\d{2}\/)?)(\d{4})$/);
+        if (!match) return '';
+        const year = parseInt(match[2], 10);
+        return Number.isNaN(year) ? '' : `${match[1]}${year + 543}`;
     }
 
     function convertPartialBEtoCE(value) {
-        if (!value || typeof value !== 'string') return '';
-        if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) return convertBEtoCE(value);
-        const match = value.match(/^(\d{2})\/(\d{4})$/);
-        if (!match) return '';
-        const year = parseInt(match[2], 10);
-        return Number.isNaN(year) ? '' : `${match[1]}/${year - 543}`;
+        return convertBEtoCE(value);
     }
 
     function highlightedDatePair(beDate) {
@@ -270,7 +282,7 @@
         };
     }
 
-    function buildDocDefinition({ type, content, logoDataUrl, generatedAt }) {
+    function buildDocDefinition({ type, content, logoDataUrl, generatedAt, language }) {
         return {
             pageSize: 'A4',
             pageMargins: [mm(15), mm(34), mm(15), mm(30)],
@@ -309,26 +321,59 @@
         setTimeout(() => URL.revokeObjectURL(url), 30000);
     }
 
-    async function generateAndPrint({ type, patientName, content }) {
-        registerFonts();
-        const generatedAt = new Date();
-        const logoDataUrl = await getLogoDataUrl();
-        const filename = `${formatIsoDateTime(generatedAt)}-${sanitizeFilenamePart(type, 'Document')}-${sanitizeFilenamePart(patientName, 'Patient')}.pdf`;
-        const docDefinition = buildDocDefinition({ type, content, logoDataUrl, generatedAt });
-        const pdf = window.pdfMake.createPdf(docDefinition);
-        const blob = await pdf.getBlob();
-        downloadBlob(blob, filename);
-        setTimeout(() => {
-            try {
-                pdf.print();
-            } catch (error) {
-                console.warn('Unable to trigger PDF print dialog:', error);
-            }
-        }, 250);
-    }
+function buildFilename(type, patientName, generatedAt) {
+    return `${formatIsoDateTime(generatedAt)}-${sanitizeFilenamePart(type, 'Document')}-${sanitizeFilenamePart(patientName, 'Patient')}.pdf`;
+  }
 
-    window.PdfGenerator = {
-        generateAndPrint,
+  async function buildPdf({ type, patientName, content, generatedAt, language }) {
+    await registerFonts();
+    const logoDataUrl = await getLogoDataUrl();
+    const docDefinition = buildDocDefinition({ type, content, logoDataUrl, generatedAt, language });
+    return window.pdfMake.createPdf(docDefinition);
+  }
+
+  async function generateDataUrl({ type, patientName, content, language }) {
+    const pdf = await buildPdf({ type, patientName, content, language, generatedAt: new Date() });
+    return pdf.getDataUrl();
+  }
+
+  async function generateBlob(payload) {
+    const pdf = await buildPdf(Object.assign({}, payload, { generatedAt: new Date() }));
+    return pdf.getBlob();
+  }
+
+  async function save({ type, patientName, content, language }) {
+    const generatedAt = new Date();
+    const pdf = await buildPdf({ type, patientName, content, language, generatedAt });
+    const blob = await pdf.getBlob();
+    downloadBlob(blob, buildFilename(type, patientName, generatedAt));
+  }
+
+  async function print({ type, patientName, content, language }) {
+    const pdf = await buildPdf({ type, patientName, content, language, generatedAt: new Date() });
+    pdf.print();
+  }
+
+  async function generateAndPrint({ type, patientName, content, language }) {
+    const generatedAt = new Date();
+    const pdf = await buildPdf({ type, patientName, content, language, generatedAt });
+    const blob = await pdf.getBlob();
+    downloadBlob(blob, buildFilename(type, patientName, generatedAt));
+    setTimeout(() => {
+      try {
+        pdf.print();
+      } catch (error) {
+        console.warn('Unable to trigger PDF print dialog:', error);
+      }
+    }, 250);
+  }
+
+  window.PdfGenerator = {
+    generateAndPrint,
+    save,
+    print,
+    generateDataUrl,
+    generateBlob,
         helpers: {
             bold,
             convertBEtoCE,

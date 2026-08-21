@@ -30,6 +30,18 @@ function paragraphTexts(node, result = []) {
     return result;
 }
 
+function flatten(node, out = []) {
+    if (Array.isArray(node)) {
+        node.forEach(item => flatten(item, out));
+        return out;
+    }
+    if (node === null || typeof node !== 'object') return out;
+    out.push(node);
+    if (node.stack) flatten(node.stack, out);
+    if (node.ul) flatten(node.ul, out);
+    return out;
+}
+
 function fullReferralData() {
     return {
         letterType: 'referralForCare',
@@ -108,15 +120,16 @@ test('renders all selected conditions with concise clinical wording', () => {
     const output = paragraphs.join('\n');
 
     assert.match(output, /Retroviral infection/);
-    assert.match(output, /ผลตรวจ HIV VL ล่าสุด \/ Latest HIV VL: <20 copies\/mL/);
+    assert.match(output, /ผลตรวจ HIV VL ล่าสุดเท่ากับ <20 copies\/mL ตรวจเมื่อวันที่ 05\/05\/2569/);
+    assert.match(output, /The latest HIV VL was <20 copies\/mL, measured on 05\/05\/2026\./);
     assert.match(output, /Active Syphilis/);
     assert.match(output, /HBV Co-Infection/);
     assert.match(output, /Suspected Mpox/);
-    assert.match(output, /เริ่มมีอาการ 4 วัน/);
+    assert.match(output, /ผู้ป่วยเริ่มมีอาการมาแล้ว 4 วัน/);
     assert.match(output, /ผื่น ตุ่ม หรือแผลบริเวณผิวหนังหรือเยื่อบุ/);
     assert.match(output, /ปวดบริเวณทวารหนักหรือมีอาการเข้าได้กับ proctitis/);
     assert.match(output, /อาการอื่น ๆ: คลื่นไส้/);
-    assert.match(output, /ผู้ป่วยให้ประวัติว่ามีเพศสัมพันธ์กับผู้ที่สงสัยว่าเป็น mpox/);
+    assert.match(output, /ผู้ป่วยให้ประวัติว่า มีเพศสัมพันธ์กับผู้ที่สงสัยว่าเป็น mpox/);
     assert.match(output, /มีเพศสัมพันธ์กับคู่นอนหลายราย/);
     assert.match(output, /The patient reported sexual intercourse with a suspected mpox case/);
     assert.match(output, /สัมผัสผู้ป่วยระหว่างเดินทาง/);
@@ -128,18 +141,22 @@ test('renders all selected conditions with concise clinical wording', () => {
     assert.match(output, /Treated TB/);
     assert.match(output, /Completed TPT/);
     assert.match(output, /Ongoing TPT/);
-    assert.match(output, /เดือน\/ปีที่เริ่ม TPT \/ TPT start month: 09\/2565 \(09\/2022\)/);
-    assert.match(output, /เดือน\/ปีที่เริ่ม TPT \/ TPT start month: 09\/2568 \(09\/2025\)/);
-    assert.match(output, /หมายเหตุ \/ Notes: ครบตามแผน/);
-    assert.match(output, /หมายเหตุ \/ Notes: อยู่ระหว่างติดตาม/);
+    assert.match(output, /เริ่ม TPT เมื่อเดือน 09\/2565/);
+    assert.match(output, /TPT was started in 09\/2022\./);
+    assert.match(output, /เริ่ม TPT เมื่อเดือน 09\/2568/);
+    assert.match(output, /TPT was started in 09\/2025\./);
+    assert.match(output, /หมายเหตุ: ครบตามแผน/);
+    assert.match(output, /Notes: ครบตามแผน/);
+    assert.match(output, /หมายเหตุ: อยู่ระหว่างติดตาม/);
+    assert.match(output, /Notes: อยู่ระหว่างติดตาม/);
     assert.match(output, /ตำแหน่งของโรค: ปอด และ ต่อมน้ำเหลือง/);
     assert.match(output, /Disease site: pulmonary and lymph nodes/);
     assert.match(output, /Treatment record/);
-    assert.match(output, /ผู้ป่วยรับยาครั้งล่าสุดเมื่อวันที่/);
-    assert.match(output, /พร้อมยาสำหรับใช้ต่อเนื่องอีก 60 วัน/);
-    assert.match(output, /60-day supply/);
+    assert.match(output, /ผู้ป่วยรับยาครั้งล่าสุดเมื่อวันที่ 10\/07\/2569 โดยมียาเพียงพอสำหรับ 60 วัน/);
+    assert.match(output, /The patient last collected medication on 10\/07\/2026, with a 60-day supply\./);
     assert.doesNotMatch(output, /HIV infection/i);
     assert.doesNotMatch(output, /1%%/);
+
     const expectedDiagnosisHeadings = [
         'Retroviral infection',
         'Active Syphilis',
@@ -153,8 +170,12 @@ test('renders all selected conditions with concise clinical wording', () => {
         'Ongoing TPT',
         'Other Medical History'
     ];
-    const medicalSummary = content.find(node => node && Array.isArray(node.ul));
-    const diagnosisHeadings = medicalSummary.ul.map(item => {
+    const flat = flatten(buildReferral(fullReferralData()));
+    const titleIndex = flat.findIndex(node => node && node.text && textValue(node.text) === 'สรุปประวัติการรักษา');
+    assert.ok(titleIndex >= 0, 'Thai medical summary title should exist');
+    const summaryUl = flat.slice(titleIndex).find(node => node && Array.isArray(node.ul));
+    assert.ok(summaryUl, 'Thai medical summary list should exist');
+    const diagnosisHeadings = summaryUl.ul.map(item => {
         const heading = item.stack ? item.stack[0] : item;
         return textValue(heading.text);
     });
@@ -168,21 +189,73 @@ test('renders all selected conditions with concise clinical wording', () => {
     });
 });
 
-test('keeps Thai and English referral prose in compact shared paragraphs', () => {
-    const paragraphs = paragraphTexts(buildReferral(fullReferralData()));
+test('stacks full Thai referral text before full English text', () => {
+    const output = paragraphTexts(buildReferral(fullReferralData())).join('\n');
 
-    assert.ok(paragraphs.includes('เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง / To whom it may concern,'));
-    assert.ok(paragraphs.includes('วันที่ / Date: 16/07/2569 (16/07/2026)'));
-    assert.ok(paragraphs.includes('เรื่อง ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ / Re: Referral for continued care'));
-    assert.ok(paragraphs.includes('ชื่อผู้ป่วย / Patient name: ผู้ป่วย ทดสอบ'));
-    assert.ok(paragraphs.includes('เลขประจำตัวประชาชน / National ID: 1-2345-67890-12-3    เลขที่หนังสือเดินทาง / Passport no.: AB1234'));
-    assert.ok(paragraphs.includes('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี ขอส่งผู้ป่วยรายนี้เพื่อรับการรักษาต่อ พร้อมรายละเอียดการรักษาโดยสรุปดังนี้ / We are referring this patient for continued care. The relevant clinical details are provided below.'));
-    assert.ok(paragraphs.includes('จึงขอส่งผู้ป่วยรายนี้เพื่อพิจารณารับไว้รักษาในโรงพยาบาลของท่าน / Hospital admission is requested for further management.'));
-    assert.ok(paragraphs.some(text => text.includes('เริ่มมีอาการ 4 วัน / Symptom onset: 4 days')));
-    assert.ok(paragraphs.some(text => text.includes('อาการสำคัญ:') && text.includes('/ Presenting symptoms:')));
-    assert.ok(paragraphs.some(text => text.includes('ผู้ป่วยให้ประวัติว่า') && text.includes('/ The patient reported')));
-    assert.ok(paragraphs.includes('ขอแสดงความนับถือ / Respectfully,'));
-    assert.ok(paragraphs.length < 65, `expected a compact referral, got ${paragraphs.length} text rows`);
+    assert.ok(output.indexOf('เรียน เจ้าหน้าที่ผู้เกี่ยวข้อง') < output.indexOf('To Whom It May Concern:'));
+    assert.ok(output.indexOf('เรื่อง ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ') < output.indexOf('Re: Referral for Continued Care'));
+    assert.match(output, /ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี ขอส่งผู้ป่วยรายนี้เพื่อรับการรักษาต่อ พร้อมสรุปข้อมูลการรักษาที่เกี่ยวข้องดังต่อไปนี้/);
+    assert.match(output, /Public Health Center 28 Krung Thon Buri hereby refers this patient for continued care\. The relevant clinical information is summarized below\./);
+    assert.match(output, /ชื่อผู้ป่วย: ผู้ป่วย ทดสอบ/);
+    assert.match(output, /Patient name: ผู้ป่วย ทดสอบ/);
+    assert.match(output, /เลขประจำตัวประชาชน: 1-2345-67890-12-3/);
+    assert.match(output, /จึงเรียนมาเพื่อโปรดพิจารณารับผู้ป่วยรายนี้เข้ารับการรักษาในโรงพยาบาลของท่าน/);
+    assert.match(output, /We would be grateful if you would consider admitting this patient for further hospital care\./);
+    assert.match(output, /ขอแสดงความนับถือ \/ Respectfully,/);
+    assert.match(output, /วันที่ \/ Date: 16\/07\/2569 \(16\/07\/2026\)/);
+});
+
+test('states the primary referral intent explicitly', () => {
+    const output = paragraphTexts(buildReferral({
+        letterType: 'referralForCare',
+        letterDate: '16/07/2569',
+        patientName: 'Mpox Patient',
+        referralIntents: ['specializedCare'],
+        referralIntentCustom: 'MPox care and treatment'
+    })).join('\n');
+
+    assert.match(output, /จึงส่งผู้ป่วยรายนี้เพื่อ การดูแลรักษาเฉพาะทาง และ MPox care and treatment พร้อมสรุปข้อมูลการรักษาที่เกี่ยวข้องดังต่อไปนี้/);
+    assert.match(output, /hereby refers this patient for continued care in relation to specialized care and management and MPox care and treatment\. The relevant clinical information is summarized below\./);
+    assert.match(output, /เรื่อง ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ/);
+    assert.match(output, /Re: Referral for Continued Care/);
+    assert.doesNotMatch(output, /เรื่อง จุดประสงค์การส่งต่อ|Re: Referral purpose/);
+});
+
+test('uses predefined referral intents when no custom intent is given', () => {
+    const output = paragraphTexts(buildReferral({
+        letterType: 'referralForCare',
+        letterDate: '16/07/2569',
+        patientName: 'Patient',
+        referralIntents: ['hcvCareTreatment']
+    })).join('\n');
+
+    assert.match(output, /จึงส่งผู้ป่วยรายนี้เพื่อ การดูแลรักษาการติดเชื้อ HCV/);
+    assert.match(output, /continued care in relation to HCV care and treatment/);
+});
+
+test('renders every specific purpose alongside the default continued-care option', () => {
+    const output = paragraphTexts(buildReferral({
+        letterDate: '16/07/2569',
+        patientName: 'Patient',
+        referralIntents: ['continuedCare', 'diagnosticEvaluation', 'tbCareTreatment']
+    })).join('\n');
+
+    assert.match(output, /จึงส่งผู้ป่วยรายนี้เพื่อ การตรวจวินิจฉัยเพิ่มเติม และ การรักษาวัณโรค/);
+    assert.match(output, /continued care in relation to further diagnostic evaluation and TB treatment/);
+    assert.equal(textValue(buildReferral({ referralIntents: ['tbCareTreatment'] })[1].text), 'บันทึกข้อความ / Referral Letter');
+});
+
+test('uses continued care as the generic default referral purpose', () => {
+    const output = paragraphTexts(buildReferral({
+        patientName: 'Patient',
+        referralIntents: ['continuedCare']
+    })).join('\n');
+
+    assert.match(output, /เรื่อง ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ/);
+    assert.match(output, /Re: Referral for Continued Care/);
+    assert.doesNotMatch(output, /เพื่อรับการรักษาต่อเพื่อ|continued care for [a-z]/);
+    assert.match(output, /ขอส่งผู้ป่วยรายนี้เพื่อรับการรักษาต่อ/);
+    assert.match(output, /hereby refers this patient for continued care/);
 });
 
 test('excludes translation-like Thai wording and unselected stale values', () => {
@@ -220,8 +293,41 @@ test('excludes translation-like Thai wording and unselected stale values', () =>
     assert.doesNotMatch(output, /stale/);
     assert.doesNotMatch(output, /Retroviral infection/);
     assert.doesNotMatch(output, /Suspected mpox/);
-    assert.doesNotMatch(output, /Medical Summary/);
-    assert.match(output, /หากต้องการข้อมูลเพิ่มเติม สามารถติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรีได้/);
+    assert.match(output, /Re: Medical Summary/);
+    assert.match(output, /กรุณาติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรี หากต้องการข้อมูลเพิ่มเติม/);
+    assert.match(output, /Please contact Public Health Center 28 Krung Thon Buri if further information is required\./);
+});
+
+test('keeps medication pickup details inside the HIV section', () => {
+    const content = buildReferral(fullReferralData());
+    const hivSections = flatten(content).filter(node => node && Array.isArray(node.stack)
+        && textValue(node.stack[0]?.text).startsWith('Retroviral infection'));
+    const output = hivSections.map(section => paragraphTexts(section).join('\n')).join('\n');
+
+    assert.match(output, /ผู้ป่วยรับยาครั้งล่าสุดเมื่อวันที่/);
+    assert.match(output, /The patient last collected medication on/);
+});
+
+test('labels other-medication quantities as tablets, bottles, or units', () => {
+    const output = paragraphTexts(buildReferral({
+        patientName: 'Patient',
+        otherMedications: [{ name: 'Fluconazole', strength: '200 mg', schedule: 'OD', quantity: '28' }]
+    })).join('\n');
+
+    assert.match(output, /จำนวน 28 เม็ด\/ขวด\/หน่วย/);
+    assert.match(output, /quantity: 28 tablets\/bottles\/units/);
+    assert.doesNotMatch(output, /Quantity\/Duration|เป็นเวลา 28|for 28/);
+});
+
+test('does not render a duration for the current ART regimen', () => {
+    const output = paragraphTexts(buildReferral({
+        patientName: 'Patient',
+        includeRetroviral: true,
+        artMedications: [{ medication: 'TDF/3TC/DTG', tablets: '1', time: '20:00', days: '90' }]
+    })).join('\n');
+
+    assert.match(output, /TDF\/3TC\/DTG 1 เม็ด เวลา 20:00 น\./);
+    assert.doesNotMatch(output, /90 วัน|for 90 days/);
 });
 
 test('renders the concise no-known-exposure Mpox wording', () => {
@@ -237,8 +343,8 @@ test('renders the concise no-known-exposure Mpox wording', () => {
     };
     const output = paragraphTexts(buildReferral(data)).join('\n');
 
-    assert.match(output, /เริ่มมีอาการ 1 วัน/);
-    assert.match(output, /Symptom onset: 1 day/);
+    assert.match(output, /ผู้ป่วยเริ่มมีอาการมาแล้ว 1 วัน/);
+    assert.match(output, /Symptoms began 1 day ago\./);
     assert.doesNotMatch(output, /before referral|ก่อนส่งต่อ/);
     assert.match(output, /ผู้ป่วยไม่ให้ประวัติความเสี่ยง/);
     assert.match(output, /The patient did not report any risk factors/);

@@ -28,12 +28,31 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeDateInputs();
     initializeSalutationField();
     initializeNationalityField();
-    window.Common.loadDoctorInfo(null, 'doctorNameEnglish', 'medicalLicense');
+    window.Common.loadDoctorInfo('doctorNameThai', 'doctorNameEnglish', 'medicalLicense');
     initializeArtMedications();
     setupConditionalMedicationSection();
-    window.Common.handleFormSubmitOnEnter('certificateForm', previewCertificate);
-    document.getElementById('previewButton').addEventListener('click', previewCertificate);
+    window.Common.handleFormSubmitOnEnter('certificateForm', saveCertificate);
+    document.getElementById('printButton').addEventListener('click', printCertificate);
+    document.getElementById('saveButton').addEventListener('click', saveCertificate);
     document.getElementById('currentYear').textContent = new Date().getFullYear();
+    window.Common.renderDocTabs('medication');
+    window.Common.setupLanguageToggle('certificateForm');
+    window.Common.syncPatientFields({
+        patientName: 'patientName',
+        dob: 'dob',
+        passportNumber: 'passportNumber'
+    });
+    window.Common.setupClearFormButtons('certificateForm');
+    window.Common.setupPdfPreview({
+        formId: 'certificateForm',
+        collectData: collectCertificateData,
+        buildPayload: data => ({
+            type: 'Medication-Certificate',
+            patientName: data.patientName,
+            language: data.language,
+            content: window.PdfTemplates.buildMedicationCertificate(data)
+        })
+    });
     window.Common.autoFocusPatientName();
 
     ['patientName', 'doctorNameEnglish', 'otherNationality', 'otherSalutation', 'passportNumber'].forEach(id => {
@@ -55,31 +74,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function initializeDateInputs() {
-        const form = document.getElementById('certificateForm');
-        const getEra = () => window.Common.getEraFromForm(form);
         document.querySelectorAll('.date-input').forEach(input => {
-            window.Common.attachDateAutoFormat(input, getEra);
-            input.placeholder = 'DD/MM/YYYY';
+            window.Common.attachSmartDate(input);
         });
         const letterDateInput = document.getElementById('letterDate');
-        window.Common.setTodayIfEmpty(letterDateInput, getEra());
-        const eraSelect = document.getElementById('yearEra');
-        if (eraSelect) {
-            const onEraChange = () => {
-                const newEra = getEra();
-                window.Common.updateDateLabelsForEra(form, newEra);
-                document.querySelectorAll('.date-input').forEach(inp => {
-                    const v = inp.value;
-                    if (v && v.length === 10) {
-                        const fromEra = (newEra === window.Common.ERA_BE) ? window.Common.ERA_CE : window.Common.ERA_BE;
-                        const converted = window.Common.convertDateString(v, fromEra, newEra);
-                        if (converted) inp.value = converted;
-                    }
-                });
-            };
-            eraSelect.addEventListener('change', onEraChange);
-            window.Common.updateDateLabelsForEra(form, getEra());
-        }
+        window.Common.setTodayIfEmpty(letterDateInput, window.Common.ERA_CE);
     }
 
     function initializeSalutationField() {
@@ -221,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.textContent = 'ลบ / Remove';
-        removeBtn.classList.add('text-red-400', 'hover:text-red-300', 'text-xs', 'thai-font', 'py-1', 'px-2', 'border', 'border-red-400', 'rounded', 'w-full', 'md:w-auto', 'mt-2', 'md:mt-0'); // Adjusted margin
+        removeBtn.classList.add('btn-danger', 'thai-font');
         removeBtn.onclick = function () { itemDiv.remove(); };
         removeBtnDiv.appendChild(removeBtn);
 
@@ -263,18 +262,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    async function previewCertificate() {
+    function collectCertificateData() {
         const form = document.getElementById('certificateForm');
         const data = {};
+        const language = document.getElementById('language')?.value || 'th';
         let isValid = true;
-        let missingFieldsMessages = [];
+        const missingFieldsMessages = [];
 
         const requiredFields = [
             { id: 'letterDate', name: 'วันที่ออกเอกสาร / Certificate date' },
             { id: 'patientName', name: 'ชื่อ-นามสกุลผู้ป่วย / Patient full name' },
             { id: 'dob', name: 'วันเกิด / Date of birth' },
-            { id: 'nationality', name: 'สัญชาติ / Nationality' },
-            { id: 'doctorNameEnglish', name: 'ชื่อแพทย์ (ภาษาอังกฤษ) / Doctor\'s name (English)' },
+            { id: language === 'th' ? 'doctorNameThai' : 'doctorNameEnglish', name: language === 'th' ? 'ชื่อแพทย์' : 'Doctor\'s name' },
             { id: 'medicalLicense', name: 'เลขที่ใบประกอบวิชาชีพ / Medical license no.' }
         ];
 
@@ -287,8 +286,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (element) {
                 element.style.borderColor = '';
                 if (element.classList.contains('date-input') && element.value.length > 0) {
-                    const era = window.Common.getEraFromForm('certificateForm');
-                    const ok = !!window.Common.parseDate(element.value, era);
+                    const ok = !!window.Common.parseDateAuto(element.value);
                     if (!ok) {
                         missingFieldsMessages.push(`${fieldInfo.name} (Invalid format: ${element.value})`);
                         element.style.borderColor = 'red';
@@ -336,12 +334,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 medItems.forEach((item, index) => {
                     const selectEl = item.querySelector('select[id^="artMedSelect-"]');
                     let medicationName = '';
-                    selectEl.style.borderColor = ''; // Reset border
+                    selectEl.style.borderColor = '';
 
                     if (selectEl && selectEl.value) {
                         if (selectEl.value === 'OTHER') {
                             const otherInputEl = item.querySelector('input[id^="artMedOther-"]');
-                            otherInputEl.style.borderColor = ''; // Reset border
+                            otherInputEl.style.borderColor = '';
                             if (otherInputEl && otherInputEl.value.trim()) {
                                 medicationName = otherInputEl.value.trim().toUpperCase();
                             } else {
@@ -355,81 +353,96 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (medicationName) {
                             data.artMedications.push({ medication: medicationName });
                         }
-                    } else if (selectEl) { // Case where select element exists but no value selected (should not happen with default)
+                    } else if (selectEl) {
                         missingFieldsMessages.push(`รายการยาที่ ${index + 1} (ยังไม่ได้เลือก / Not selected)`);
                         isValid = false;
                         selectEl.style.borderColor = 'red';
                     }
                 });
                 const artContainer = document.getElementById('artMedicationsContainer');
-                if (artContainer) artContainer.style.border = ''; // Reset border if all items are valid
+                if (artContainer) artContainer.style.border = '';
             }
         }
 
+        if (isValid) {
+            new FormData(form).forEach((value, key) => {
+                const element = form.elements[key];
+                if (key.startsWith('artMedSelect-') || key.startsWith('artMedOther-')) return;
+                if (element && element.type === 'checkbox' && key !== 'includeMedications') return;
 
+                const fieldsToUppercase = ['patientName', 'doctorNameEnglish', 'otherNationality', 'otherSalutation', 'passportNumber'];
+                if (fieldsToUppercase.includes(key)) {
+                    data[key] = value.trim().toUpperCase();
+                } else if (element && typeof value === 'string') {
+                    data[key] = value.trim();
+                } else {
+                    data[key] = value;
+                }
+            });
+
+            if (data.salutation === 'OTHER' && data.otherSalutation) {
+                data.salutation = data.otherSalutation;
+            } else if (data.salutation === 'NONE') {
+                data.salutation = '';
+            } else if (data.salutation) {
+                const option = salutationSelect.options[salutationSelect.selectedIndex];
+                data.salutation = language === 'th' ? (option.dataset.thai || data.salutation) : data.salutation.toUpperCase();
+            }
+
+            if (data.nationality === 'OTHER' && data.otherNationality) {
+                data.nationality = data.otherNationality;
+            } else if (data.nationality) {
+                data.nationality = data.nationality.toUpperCase();
+            }
+
+            data.doctorNameEnglish = document.getElementById('doctorNameEnglish').value.toUpperCase();
+            data.passportNumber = document.getElementById('passportNumber').value.toUpperCase();
+            data.additionalNotes = (document.getElementById('additionalNotes')?.value || '').trim();
+
+            const toCE = (v) => v ? window.Common.convertDateToEra(v, window.Common.ERA_CE) : '';
+            data.letterDate = toCE(data.letterDate);
+            data.dob = toCE(data.dob);
+        }
+
+        return { data, isValid, missingFieldsMessages };
+    }
+
+    function certificatePayload() {
+        const { data, isValid, missingFieldsMessages } = collectCertificateData();
         if (!isValid) {
             alert(`กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วนและถูกต้อง / Complete all required fields correctly:\n- ${missingFieldsMessages.join('\n- ')}`);
-            // Focus logic can be improved to find the first actual invalid medication item
-            const firstInvalidField = requiredFields.find(f => missingFieldsMessages.some(m => m.includes(f.name)));
-            if (firstInvalidField) document.getElementById(firstInvalidField.id)?.focus();
-            else if (missingFieldsMessages.some(m => m.includes("Salutation (Other)"))) document.getElementById('otherSalutation')?.focus();
-            else if (missingFieldsMessages.some(m => m.includes("Nationality (Other)"))) document.getElementById('otherNationality')?.focus();
-            // Could add focusing for first invalid medication item here
-            return;
+            const firstInvalidField = document.querySelector('[style*="border-color: red"]');
+            if (firstInvalidField) firstInvalidField.focus();
+            return null;
         }
+        return {
+            type: 'Medication-Certificate',
+            patientName: data.patientName,
+            language: data.language,
+            content: window.PdfTemplates.buildMedicationCertificate(data)
+        };
+    }
 
-        new FormData(form).forEach((value, key) => {
-            const element = form.elements[key];
-            // Skip individual medication fields as they are handled separately above
-            if (key.startsWith('artMedSelect-') || key.startsWith('artMedOther-')) return;
-            if (element && element.type === 'checkbox' && key !== 'includeMedications') return;
-
-            const fieldsToUppercase = ['patientName', 'doctorNameEnglish', 'otherNationality', 'otherSalutation', 'passportNumber'];
-            if (fieldsToUppercase.includes(key)) {
-                data[key] = value.trim().toUpperCase();
-            } else if (element && typeof value === 'string') {
-                data[key] = value.trim();
-            } else {
-                data[key] = value;
-            }
-        });
-
-        if (data.salutation === 'OTHER' && data.otherSalutation) {
-            data.salutation = data.otherSalutation;
-        } else if (data.salutation === 'NONE') {
-            data.salutation = '';
-        } else if (data.salutation) {
-            data.salutation = data.salutation.toUpperCase();
-        }
-
-        if (data.nationality === 'OTHER' && data.otherNationality) {
-            data.nationality = data.otherNationality;
-        } else if (data.nationality) {
-            data.nationality = data.nationality.toUpperCase();
-        }
-
-        // artMedications array already populated correctly above
-
-        data.doctorNameEnglish = document.getElementById('doctorNameEnglish').value.toUpperCase();
-        data.passportNumber = document.getElementById('passportNumber').value.toUpperCase();
-        data.additionalNotes = (document.getElementById('additionalNotes')?.value || '').trim();
-
-        // Normalize all dates to CE for certificate
-        const era = window.Common.getEraFromForm('certificateForm');
-        const toCE = (v) => v ? window.Common.convertDateString(v, era, window.Common.ERA_CE) : '';
-        data.letterDate = toCE(data.letterDate);
-        data.dob = toCE(data.dob);
-        data._yearEra = era;
-
+    async function saveCertificate() {
+        const payload = certificatePayload();
+        if (!payload) return;
         try {
-            await window.PdfGenerator.generateAndPrint({
-                type: 'Medication-Certificate',
-                patientName: data.patientName,
-                content: window.PdfTemplates.buildMedicationCertificate(data)
-            });
+            await window.PdfGenerator.save(payload);
         } catch (error) {
             console.error('Error generating medication certificate PDF:', error);
             alert('Unable to generate PDF. Please check the console for details.');
         }
     }
+
+    async function printCertificate() {
+        const payload = certificatePayload();
+        if (!payload) return;
+        try {
+            await window.PdfGenerator.print(payload);
+        } catch (error) {
+            console.error('Error printing medication certificate PDF:', error);
+            alert('Unable to print PDF. Please check the console for details.');
+        }
+    }
+
 });

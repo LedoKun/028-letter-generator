@@ -51,6 +51,13 @@ test('auto-formats and validates month-year input as MM/YYYY', () => {
     assert.equal(input.style.borderColor, 'red');
 });
 
+test('smart date validation and conversion accept MM/YYYY', () => {
+    assert.ok(Common.parseDateAuto('07/2026'));
+    assert.ok(Common.parseDateAuto('07/2569'));
+    assert.equal(Common.convertDateToEra('07/2026', Common.ERA_BE), '07/2569');
+    assert.equal(Common.convertDateToEra('07/2569', Common.ERA_CE), '07/2026');
+});
+
 test('auto-formats time input as HH:MM and pads three-digit times on blur', () => {
     const input = inputElement();
     Common.attachTimeAutoFormat(input);

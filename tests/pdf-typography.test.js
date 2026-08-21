@@ -19,3 +19,11 @@ test('PDF footer typography stays compact', () => {
     assert.match(source, /margin:\s*\[0,\s*1,\s*0,\s*1\]/);
     assert.match(source, /paddingTop:\s*\(\)\s*=>\s*1/);
 });
+
+test('PDF letterhead and footer remain bilingual in every document language', () => {
+    assert.match(source, /ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี\\nPublic Health Center 28 - Krung Thon Buri/);
+    assert.match(source, /สำนักอนามัย \/ Health Department/);
+    assert.match(source, /พิมพ์เมื่อ \/ Printed on/);
+    assert.match(source, /โทร \/ Tel/);
+    assert.doesNotMatch(source, /const stamp = language/);
+});

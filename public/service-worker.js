@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'clinical-letter-generators-';
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v20`;
 const APP_SHELL = [
     '/',
     '/index.html',
