@@ -288,38 +288,34 @@
         if (trim(data.patientGender) || trim(data.patientGenderEnglish) || trim(data.patientAge)) {
             const sexThai = trim(data.patientGender) || trim(data.patientGenderEnglish);
             const sexEng = trim(data.patientGenderEnglish) || trim(data.patientGender);
-            const thaiParts = [];
-            const engParts = [];
+            const thaiDetails = [];
+            const englishDetails = [];
             if (sexThai) {
-                thaiParts.push(H.bold('เพศ: '), H.highlight(sexThai));
-                engParts.push(H.bold('Sex: '), H.highlight(sexEng));
+                thaiDetails.push(H.para([H.bold('เพศ: '), H.highlight(sexThai)], { margin: [0, 0, 0, 0] }));
+                englishDetails.push(H.para([H.bold('Sex: '), H.highlight(sexEng)], { margin: [0, 0, 0, 0] }));
             }
             if (trim(data.patientAge)) {
-                if (thaiParts.length) thaiParts.push('    ');
-                if (engParts.length) engParts.push('    ');
-                thaiParts.push(H.bold('อายุ: '), H.highlight(trim(data.patientAge)), ' ปี');
-                engParts.push(H.bold('Age: '), H.highlight(trim(data.patientAge)), ' years');
+                thaiDetails.push(H.para([H.bold('อายุ: '), H.highlight(trim(data.patientAge)), ' ปี'], { margin: [0, 0, 0, 0] }));
+                englishDetails.push(H.para([H.bold('Age: '), H.highlight(trim(data.patientAge)), ' years'], { margin: [0, 0, 0, 0] }));
             }
-            if (thaiParts.length) thai.push(H.para(thaiParts, { margin: [12, 0, 0, 0] }));
-            if (engParts.length) english.push(H.para(engParts, { margin: [12, 0, 0, 0] }));
+            if (thaiDetails.length) thai.push({ columns: thaiDetails, columnGap: 12, margin: [12, 0, 0, 0] });
+            if (englishDetails.length) english.push({ columns: englishDetails, columnGap: 12, margin: [12, 0, 0, 0] });
         }
 
         // Identifiers
         if (trim(data.nationalIdNumber) || trim(data.passportNumber)) {
-            const thaiParts = [];
-            const engParts = [];
+            const thaiDetails = [];
+            const englishDetails = [];
             if (trim(data.nationalIdNumber)) {
-                thaiParts.push(H.bold('เลขประจำตัวประชาชน: '), H.highlight(trim(data.nationalIdNumber)));
-                engParts.push(H.bold('National ID: '), H.highlight(trim(data.nationalIdNumber)));
+                thaiDetails.push(H.para([H.bold('เลขประจำตัวประชาชน: '), H.highlight(trim(data.nationalIdNumber))], { margin: [0, 0, 0, 0] }));
+                englishDetails.push(H.para([H.bold('National ID: '), H.highlight(trim(data.nationalIdNumber))], { margin: [0, 0, 0, 0] }));
             }
             if (trim(data.passportNumber)) {
-                if (thaiParts.length) thaiParts.push('    ');
-                if (engParts.length) engParts.push('    ');
-                thaiParts.push(H.bold('เลขที่หนังสือเดินทาง: '), H.highlight(trim(data.passportNumber)));
-                engParts.push(H.bold('Passport no.: '), H.highlight(trim(data.passportNumber)));
+                thaiDetails.push(H.para([H.bold('เลขที่หนังสือเดินทาง: '), H.highlight(trim(data.passportNumber))], { margin: [0, 0, 0, 0] }));
+                englishDetails.push(H.para([H.bold('Passport no.: '), H.highlight(trim(data.passportNumber))], { margin: [0, 0, 0, 0] }));
             }
-            if (thaiParts.length) thai.push(H.para(thaiParts, { margin: [12, 0, 0, 2] }));
-            if (engParts.length) english.push(H.para(engParts, { margin: [12, 0, 0, 2] }));
+            if (thaiDetails.length) thai.push({ columns: thaiDetails, columnGap: 12, margin: [12, 0, 0, 2] });
+            if (englishDetails.length) english.push({ columns: englishDetails, columnGap: 12, margin: [12, 0, 0, 2] });
         }
 
         if (yes(data.includeConsultationDiagnosis)) {
