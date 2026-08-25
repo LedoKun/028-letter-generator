@@ -273,50 +273,37 @@
             nameThai.push(H.highlight(trim(data.patientName)));
             nameEng.push(H.highlight(trim(data.patientName)));
         }
+        const patientThai = nameThai.length ? nameThai : [H.highlight('ผู้ป่วยรายนี้')];
+        const patientEnglish = nameEng.length ? nameEng : [H.highlight('the patient')];
+        const sexThai = trim(data.patientGender) || trim(data.patientGenderEnglish);
+        const sexEnglish = trim(data.patientGenderEnglish) || trim(data.patientGender);
+        if (sexThai) {
+            patientThai.push(', ', H.bold('เพศ: '), H.highlight(sexThai));
+            patientEnglish.push(', ', H.bold('Sex: '), H.highlight(sexEnglish));
+        }
+        if (trim(data.patientAge)) {
+            patientThai.push(', ', H.bold('อายุ: '), H.highlight(trim(data.patientAge)), ' ปี');
+            patientEnglish.push(', ', H.bold('Age: '), H.highlight(trim(data.patientAge)), ' years');
+        }
+        if (trim(data.nationalIdNumber)) {
+            patientThai.push(', ', H.bold('เลขประจำตัวประชาชน: '), H.highlight(trim(data.nationalIdNumber)));
+            patientEnglish.push(', ', H.bold('National ID: '), H.highlight(trim(data.nationalIdNumber)));
+        }
+        if (trim(data.passportNumber)) {
+            patientThai.push(', ', H.bold('เลขที่หนังสือเดินทาง: '), H.highlight(trim(data.passportNumber)));
+            patientEnglish.push(', ', H.bold('Passport no.: '), H.highlight(trim(data.passportNumber)));
+        }
+        if (sexThai || trim(data.patientAge) || trim(data.nationalIdNumber) || trim(data.passportNumber)) patientEnglish.push(',');
         thai.push(H.para([
             'หนังสือรับรองฉบับนี้ขอรับรองว่า ',
-            ...(nameThai.length ? nameThai : [H.highlight('ผู้ป่วยรายนี้')]),
+            ...patientThai,
             ' อยู่ระหว่างการดูแลรักษาของศูนย์บริการสาธารณสุข 28 กรุงธนบุรี'
         ]));
         english.push(H.para([
             'This is to certify that ',
-            ...(nameEng.length ? nameEng : [H.highlight('the patient')]),
+            ...patientEnglish,
             ' is currently under the care of Public Health Center 28 Krung Thon Buri.'
         ]));
-
-        // Sex and age
-        if (trim(data.patientGender) || trim(data.patientGenderEnglish) || trim(data.patientAge)) {
-            const sexThai = trim(data.patientGender) || trim(data.patientGenderEnglish);
-            const sexEng = trim(data.patientGenderEnglish) || trim(data.patientGender);
-            const thaiDetails = [];
-            const englishDetails = [];
-            if (sexThai) {
-                thaiDetails.push(H.para([H.bold('เพศ: '), H.highlight(sexThai)], { margin: [0, 0, 0, 0] }));
-                englishDetails.push(H.para([H.bold('Sex: '), H.highlight(sexEng)], { margin: [0, 0, 0, 0] }));
-            }
-            if (trim(data.patientAge)) {
-                thaiDetails.push(H.para([H.bold('อายุ: '), H.highlight(trim(data.patientAge)), ' ปี'], { margin: [0, 0, 0, 0] }));
-                englishDetails.push(H.para([H.bold('Age: '), H.highlight(trim(data.patientAge)), ' years'], { margin: [0, 0, 0, 0] }));
-            }
-            if (thaiDetails.length) thai.push({ columns: thaiDetails, columnGap: 12, margin: [12, 0, 0, 0] });
-            if (englishDetails.length) english.push({ columns: englishDetails, columnGap: 12, margin: [12, 0, 0, 0] });
-        }
-
-        // Identifiers
-        if (trim(data.nationalIdNumber) || trim(data.passportNumber)) {
-            const thaiDetails = [];
-            const englishDetails = [];
-            if (trim(data.nationalIdNumber)) {
-                thaiDetails.push(H.para([H.bold('เลขประจำตัวประชาชน: '), H.highlight(trim(data.nationalIdNumber))], { margin: [0, 0, 0, 0] }));
-                englishDetails.push(H.para([H.bold('National ID: '), H.highlight(trim(data.nationalIdNumber))], { margin: [0, 0, 0, 0] }));
-            }
-            if (trim(data.passportNumber)) {
-                thaiDetails.push(H.para([H.bold('เลขที่หนังสือเดินทาง: '), H.highlight(trim(data.passportNumber))], { margin: [0, 0, 0, 0] }));
-                englishDetails.push(H.para([H.bold('Passport no.: '), H.highlight(trim(data.passportNumber))], { margin: [0, 0, 0, 0] }));
-            }
-            if (thaiDetails.length) thai.push({ columns: thaiDetails, columnGap: 12, margin: [12, 0, 0, 2] });
-            if (englishDetails.length) english.push({ columns: englishDetails, columnGap: 12, margin: [12, 0, 0, 2] });
-        }
 
         if (yes(data.includeConsultationDiagnosis)) {
             const thaiClinical = [];

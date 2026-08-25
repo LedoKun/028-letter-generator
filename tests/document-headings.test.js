@@ -176,8 +176,11 @@ test('medical certificate stacks formal Thai and English clinical sentences', ()
     assert.doesNotMatch(output, /diagnosis:|Medical leave is advised/);
 });
 
-test('medical certificate keeps patient details in columns in both languages', () => {
+test('medical certificate puts patient details after the name in both languages', () => {
     const data = {
+        patientSalutation: 'นาย',
+        patientSalutationEnglish: 'Mr.',
+        patientName: 'สมชาย ใจดี',
         patientGender: 'ชาย',
         patientGenderEnglish: 'Male',
         patientAge: '30',
@@ -186,14 +189,13 @@ test('medical certificate keeps patient details in columns in both languages', (
     };
 
     [
-        ['th', ['เพศ: ชาย', 'อายุ: 30 ปี', 'เลขประจำตัวประชาชน: 1-2345-67890-12-3', 'เลขที่หนังสือเดินทาง: AB123456']],
-        ['en', ['Sex: Male', 'Age: 30 years', 'National ID: 1-2345-67890-12-3', 'Passport no.: AB123456']]
+        ['th', /นาย สมชาย ใจดี, เพศ: ชาย, อายุ: 30 ปี, เลขประจำตัวประชาชน: 1-2345-67890-12-3, เลขที่หนังสือเดินทาง: AB123456/],
+        ['en', /Mr\. สมชาย ใจดี, Sex: Male, Age: 30 years, National ID: 1-2345-67890-12-3, Passport no\.: AB123456, is currently/]
     ].forEach(([language, expected]) => {
-        const body = buildMedicalCertificate({ ...data, language })[2].stack;
-        const details = body.filter(node => node.columns);
+        const body = paragraphTexts(buildMedicalCertificate({ ...data, language })).join('\n');
 
-        assert.equal(details.length, 2);
-        assert.deepEqual(details.flatMap(node => node.columns.map(column => textValue(column.text))), expected);
+        assert.match(body, expected);
+        assert.doesNotMatch(body, /\n(?:Sex|Age|National ID|Passport no\.)/);
     });
 });
 
