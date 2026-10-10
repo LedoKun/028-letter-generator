@@ -333,7 +333,8 @@
   function convertDateToEra(value, targetEra) {
     const sourceEra = detectEraFromValue(value);
     return convertDateString(value, sourceEra, targetEra)
-      || convertMonthYearString(value, sourceEra, targetEra);
+      || convertMonthYearString(value, sourceEra, targetEra)
+      || (/^\d{4}$/.test(String(value)) ? String(Number(value) + (sourceEra === targetEra ? 0 : targetEra === ERA_BE ? 543 : -543)) : '');
   }
 
   function convertMonthYearToEra(value, targetEra) {
@@ -467,38 +468,8 @@
     passportNumber: 'passportNumber'
   };
 
-  function readPatientStore() {
-    try {
-      const raw = localStorage.getItem(PATIENT_STORE_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch (e) {
-      return {};
-    }
-  }
-
-  function writePatientStore(data) {
-    try {
-      localStorage.setItem(PATIENT_STORE_KEY, JSON.stringify(data));
-    } catch (e) {
-      // ignore quota/security errors
-    }
-  }
-
   function syncPatientFields(mapping) {
-    // mapping: { canonicalKey: elementId }
-    const store = readPatientStore();
-    Object.keys(mapping).forEach(key => {
-      const el = document.getElementById(mapping[key]);
-      if (!el) return;
-      if (store[key]) el.value = store[key];
-      const persist = () => {
-        const current = readPatientStore();
-        current[key] = el.value;
-        writePatientStore(current);
-      };
-      el.addEventListener('input', persist);
-      el.addEventListener('change', persist);
-    });
+    clearPatientStore();
   }
 
   function clearPatientStore() {
@@ -784,7 +755,7 @@
     render();
   }
 
-  window.Common = {
+  const api = {
     ERA_BE,
     ERA_CE,
     parseDate,
@@ -823,4 +794,6 @@
     setupLanguageToggle,
     setupPdfPreview
   };
+  if (typeof window !== 'undefined') window.Common = api;
+  globalThis.Common = api;
 })();

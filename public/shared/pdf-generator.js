@@ -1,8 +1,8 @@
 (function () {
     const PDFMAKE_VERSION = '0.3.9';
     const AUTHOR = 'Public Health Center 28 Krung Thon Buri';
-    const THAI_FONT = 'NotoSansThai';
-    const EN_FONT = 'NotoSans';
+    const THAI_FONT = 'Sarabun';
+    const EN_FONT = 'Sarabun';
     const LOGO_URL = '/media/logo/logo.png';
     const MM = 72 / 25.4;
 
@@ -43,7 +43,7 @@
     }
 
     function inlineOptions(options) {
-        const keys = ['bold', 'italics', 'decoration', 'decorationStyle', 'decorationColor', 'color', 'background'];
+        const keys = ['fontSize', 'bold', 'italics', 'decoration', 'decorationStyle', 'decorationColor', 'color', 'background'];
         return keys.reduce((acc, key) => {
             if (Object.prototype.hasOwnProperty.call(options, key)) acc[key] = options[key];
             return acc;
@@ -78,17 +78,11 @@
             window.pdfMake.setUrlAccessPolicy((url) => new URL(url).origin === window.location.origin);
         }
         const fonts = {
-            [THAI_FONT]: {
-                normal: toAbsoluteUrl('/vendor/fonts/NotoSansThai-Regular.ttf'),
-                bold: toAbsoluteUrl('/vendor/fonts/NotoSansThai-Bold.ttf'),
-                italics: toAbsoluteUrl('/vendor/fonts/NotoSansThai-Regular.ttf'),
-                bolditalics: toAbsoluteUrl('/vendor/fonts/NotoSansThai-Bold.ttf')
-            },
-            [EN_FONT]: {
-                normal: toAbsoluteUrl('/vendor/fonts/NotoSans-Regular.ttf'),
-                bold: toAbsoluteUrl('/vendor/fonts/NotoSans-Bold.ttf'),
-                italics: toAbsoluteUrl('/vendor/fonts/NotoSans-Regular.ttf'),
-                bolditalics: toAbsoluteUrl('/vendor/fonts/NotoSans-Bold.ttf')
+            Sarabun: {
+                normal: toAbsoluteUrl('/vendor/fonts/Sarabun-Regular.ttf'),
+                bold: toAbsoluteUrl('/vendor/fonts/Sarabun-Bold.ttf'),
+                italics: toAbsoluteUrl('/vendor/fonts/Sarabun-Italic.ttf'),
+                bolditalics: toAbsoluteUrl('/vendor/fonts/Sarabun-BoldItalic.ttf')
             }
         };
         window.pdfMake.addFonts(fonts);
@@ -229,11 +223,11 @@
                         { image: logoDataUrl, width: 223, margin: [0, 2, 4, 2] },
                         {
                             text: [
-                                ...splitTextRuns('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี\nPublic Health Center 28 - Krung Thon Buri\n', { bold: true, fontSize: 12.5 }),
-                                ...splitTextRuns('สำนักอนามัย / Health Department\nกรุงเทพมหานคร / Bangkok Metropolitan Administration', { fontSize: 8.5 })
+                                ...splitTextRuns('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี\nPublic Health Center 28 - Krung Thon Buri\n', { bold: true, fontSize: 9 }),
+                                ...splitTextRuns('สำนักอนามัย / Health Department\nกรุงเทพมหานคร / Bangkok Metropolitan Administration', { fontSize: 6.5 })
                             ],
                             alignment: 'right',
-                            fontSize: 8.5,
+                            fontSize: 6.5,
                             lineHeight: 0.95,
                             margin: [0, 7, 0, 2]
                         }
@@ -265,7 +259,7 @@
                             text('Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong San, Bangkok 10600, Thailand', { margin: [0, 0, 0, 0] }),
                             text('โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com', { margin: [0, 0, 0, 0] })
                         ],
-                        fontSize: 7,
+                        fontSize: 6.5,
                         lineHeight: 0.85
                     }]]
                 },
@@ -299,7 +293,7 @@
             },
             defaultStyle: {
                 font: THAI_FONT,
-                fontSize: 8.5,
+                fontSize: 11,
                 lineHeight: 1.05
             },
             styles: {
@@ -351,7 +345,7 @@ function buildFilename(type, patientName, generatedAt) {
 
   async function print({ type, patientName, content, language }) {
     const pdf = await buildPdf({ type, patientName, content, language, generatedAt: new Date() });
-    pdf.print();
+    await pdf.print();
   }
 
   async function generateAndPrint({ type, patientName, content, language }) {
@@ -359,9 +353,9 @@ function buildFilename(type, patientName, generatedAt) {
     const pdf = await buildPdf({ type, patientName, content, language, generatedAt });
     const blob = await pdf.getBlob();
     downloadBlob(blob, buildFilename(type, patientName, generatedAt));
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        pdf.print();
+        await pdf.print();
       } catch (error) {
         console.warn('Unable to trigger PDF print dialog:', error);
       }

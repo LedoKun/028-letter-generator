@@ -3,3 +3,9 @@ build
 npm-debug.log
 .env
 .DS_Store
+dist/
+test-results/
+playwright-report/
+pdf-results/
+# User-supplied clinical reference PDFs stay local.
+docs/samples/legacy/* - *.pdf

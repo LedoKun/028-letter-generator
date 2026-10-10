@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'tests/browser',timeout:30000,expect:{timeout:8000},fullyParallel:true,workers:2,reporter:[['list'],['json',{outputFile:'test-results/browser-results.json'}]],use:{baseURL:'http://127.0.0.1:4175',viewport:{width:1440,height:1000},timezoneId:'Asia/Bangkok',trace:'retain-on-failure'},projects:[{name:'chromium',use:{browserName:'chromium'}},{name:'firefox',use:{browserName:'firefox'}}],webServer:{command:'npm run preview -- --port 4175',url:'http://127.0.0.1:4175',reuseExistingServer:false}});

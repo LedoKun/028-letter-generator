@@ -1,109 +1,79 @@
-# Clinical Letter Generators
+# Clinical Document Editor
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A Word-like, local clinical editor for four built-in documents: Patient Referral Letter, Medical Certificate, Medication Certificate for Travel, and Free-form / Custom Letter.
 
-Clinical Letter Generators is a web-based application designed to streamline the creation of common medical documents. It currently offers tools for generating Patient Referral Letters, Certificates for Carrying Medications, and general Medical Certificates.
+The application opens directly into a referral. The interface is light and English; letter content can be Thai or British English. The document-template and letter-language dropdowns sit together in the main toolbar. Sarabun is bundled for both scripts.
 
-**GitHub Repository:** [https://github.com/LedoKun/028-letter-generator](https://github.com/LedoKun/028-letter-generator)
-**Docker Image:** `ghcr.io/ledokun/028-letter-generator:latest`
+## Use
 
-## Features
+1. Start typing in the automatically focused field. **Tab** / **Shift+Tab** select the next/previous field for replacement. **Alt+Down** opens choices or field actions.
+2. Choose values from the dropdown beneath the field. Thai letters use the original Thai choice phrases; clinical terms and medicine names retain their original wording.
+3. Click an **Add…** point in the document, or **Insert Block**, to insert whole related groups. Multiple selections are supported. All eleven original disease/history modules remain available; referrals start with none selected.
+4. Use **×** to remove an occurrence and its associated phrase. Values remain in session memory; Undo or **Restore occurrence** restores it. Blocks and medicines can also be removed, restored and reordered.
+5. Switch document type in place. Common facts carry across; each document retains its prose, formatting, pictures, sections, omissions and overrides. Unused information remains available when returning. When first opening the travel certificate, active named referral medicines are reused; other clinical details stay available in their original context.
+6. Insert a local PNG/JPEG picture. Drag a bottom corner, use its Arrow keys, or choose a width to resize proportionally. Files are validated and re-encoded locally to remove metadata.
+7. Preview, print or download a searchable PDF. Empty optional phrases disappear; final exports require applicable valid information. Export never clears any retained document.
+8. The canvas keeps only the relevant insertion controls. Other medicines and whole identity/administrative blocks remain available through the toolbar’s **Insert Block** menu. The referral closing point offers admission and financial requests; the medical-certificate point excludes attendance and identity/physician blocks. Travel and free-form letters have no closing insertion button; the free-form body shows only **Start writing your letter here...** when empty.
+9. **Clear Form** intentionally clears the whole patient session after confirmation, including inactive documents. It preserves the current document type/language and permitted doctor preferences.
 
-* **Multiple Document Types:**
-    * **Patient Referral Letter Generator:** Create comprehensive patient referral letters.
-    * **Certificate for Carrying Medications Generator:** Generate certificates for patients needing to carry medications, especially for travel.
-    * **Medical Certificate Generator:** Produce general medical certificates for various purposes like sick leave or fitness.
-* **Dynamic Form Input:** User-friendly forms for entering patient details, medical history, and other relevant information for each document type.
-* **Detailed Medical History Sections (Referral Letter):**
-    * Retroviral Infection (including NAP-ID, diagnosis date, CD4 counts, viral load, ART medications, and TMX/SMP prophylaxis).
-    * Active Syphilis (with automatic calculation of treatment dose schedule).
-    * HBV Co-infection.
-    * HCV Co-infection (Active/Untreated).
-    * Treated Syphilis.
-    * Treated HCV (medication and completion date).
-    * Treated TB (sites, medication, and completion date).
-    * Completed TPT (medication and completion date).
-    * Other Medical History.
-    * Option for referral for admission.
-* **Medical Certificate Specifics:**
-    * Patient identification including salutation, gender, age, and optional Passport/ID numbers.
-    * Optional sections for consultation details, diagnosis, advised rest period (with automatic duration calculation), history of Syphilis or TB treatment, and general doctor's comments.
-    * Date fields for optional sections default to today's date when enabled.
-    * Auto-formatting for Thai National ID input.
-* **Certificate for Carrying Medications Specifics:**
-    * Patient identification including salutation (with "Other" option), nationality (with "Other" option), and passport number.
-    * List of current medications (generic names).
-* **Medication Management (Referral & Med Carry Cert):**
-    * Dynamically add multiple medications with details like dosage and timing (for referral) or generic names (for med carry cert).
-* **Bilingual Support:** Interface elements and generated letter content often include both Thai and English.
-* **Date Handling:**
-    * Supports Buddhist Era (พ.ศ.) date inputs for referral and medical certificates, with automatic conversion to Christian Era (ค.ศ.) in the output.
-    * Supports Christian Era (ค.ศ.) date inputs for the medication carrying certificate.
-    * Automatic formatting of date inputs as users type.
-    * Printed documents include "Printed on" date and time (ISO format for time).
-* **Doctor Information:** Saves doctor's name (Thai and English) and medical license number in browser `localStorage` for convenience across all generators.
-* **Print Preview:** Generates a preview of the documents formatted for A4 paper, ready for printing.
-* **Theming:** Dark mode interface for comfortable use.
-* **Responsive Design:** Accessible on various screen sizes.
+Dates, National IDs and NAP IDs format automatically. Structured dates display BE in Thai and CE in English. Exact DOB supports completed-year Age; Age remains editable with explicit recalculation. Scheduled Benzathine penicillin G dates have separate fields from documented administration. Medical leave includes both calendar dates. Doxycycline’s duration is already in its regimen choice; no second duration line is printed. TPT month/year precision is retained.
 
-## Technologies Used
+Referral wording uses the original GitHub templates and the user's saved legacy PDFs, with the requested opening and signature adjustments. Referral purposes are inline in the opening paragraph, before patient identification; there is no separate Additional details block. All eleven diagnoses/history modules share one clinical summary, using outer diagnosis bullets and nested clinical facts, medicines and injection dates. Its insertion point offers only those eleven modules. Original diagnosis names, canonical choice values and applicable validation remain. **CD4 at first visit** remains the required terminology. Thai labels use spacing rather than English colons, semicolons or sentence-ending full stops; entered prose, medical abbreviations, decimal doses and times are preserved. Inserting Retroviral Infection includes an editable medication-continuity bullet, defaulting collection to today and supply to 60 days. The optional prophylaxis menu is labelled TMX/SMP 80/400 mg. Active Syphilis starts with today and the original Benzathine penicillin G option; dates remain explicitly scheduled, with manual overrides and recalculation. Existing entered values take priority. Original pick-up validation applies within HIV unless the date is explicitly omitted for duration-only wording.
 
-* HTML5
-* CSS3 (including Tailwind CSS for base styling and utilities)
-* JavaScript (for form logic, data handling, dynamic content, and date/ID formatting)
-* Paged.js (for print formatting of generated documents)
+The medical-certificate title always stays **Medical Certificate** / **ใบรับรองแพทย์**, regardless of the selected examination, leave or actual-treatment sections. A manually edited title is preserved. Treatment history does not certify disease clearance; the tuberculosis date remains the documented completion date. English treatment statements spell out **tuberculosis**. Clinician-entered diagnoses and prose are never machine translated.
 
-## Getting Started
+All four documents close with **Yours faithfully,** / **ขอแสดงความนับถือ**, blank signing space, the plain physician name and medical licence number. The default signature stays together when it fits; manual page breaks remain available. Certificates use plain examination, leave and actual-treatment sentences. English introductions add **Dr** when the entered name has no recognised title, while retaining the original name in session data and the signature.
 
-### Using Docker
+Referrals keep diagnoses together and other medicines, closing requests and enclosures separate. Latest laboratory results is included by default as an editable inline field; Tab, × removal and restoration work just like patient/addressee fields. Untouched default wording follows the letter language; manually entered wording stays unchanged. Redundant Notes / Additional Notes blocks and child note placeholders are removed; ordinary text stays freely editable, with Other Medical History and medical-certificate physician comments available. Legacy note definitions/values remain compatible in memory. Modules remain separate and can be removed, restored and reordered within their group. Thai enclosures are numbered; English enclosures use bullets. Other-medication quantities can include an explicitly selected tablet/capsule/bottle/unit; no unit is assumed when none is entered. British **Centre** spelling applies to the editable body; the protected official header retains its original wording.
 
-The easiest way to run the Clinical Letter Generators is by using the provided Docker image.
+Multiple-choice fields retain canonical options without empty leading entries, so mpox/TB lists and validation stay consistent. Default bullet paragraphs/lists use 2 pt after-spacing; ordinary paragraph spacing and deliberate formatting remain supported.
 
-1.  **Pull the Docker image:**
-    ```bash
-    docker pull ghcr.io/ledokun/028-letter-generator:latest
-    ```
+The optional financial-assistance paragraph politely requests consideration of available support, is OFF by default, and is inserted before the closing/signature. It does not promise coordination, funding or eligibility.
 
-2.  **Run the Docker container:**
-    ```bash
-    docker run -d -p 4000:4000 ghcr.io/ledokun/028-letter-generator:latest
-    ```
-    (You can replace `4000` with any port you prefer on your host machine.)
+Patient values, pictures and all retained documents stay in page memory. Reloading/closing discards them. Only doctor names, licence and the letter-language preference use persistent browser storage. There are no saved patient drafts, patient databases or external writing/translation services.
 
-3.  **Access the application:**
-    Open your web browser and navigate to `http://localhost:4000`.
+## Development and production
 
-### Manual Setup (from GitHub)
+Use Node 24 or a compatible version (Vite requires 20.19+ or 22.12+).
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/LedoKun/028-letter-generator.git
-    ```
-2.  **Navigate to the project directory:**
-    ```bash
-    cd 028-letter-generator
-    ```
-3.  **Serve the HTML files:**
-    You can serve the files using any simple HTTP server. For example, using Python's built-in server:
-    * Python 3: `python -m http.server`
-    * Python 2: `python -m SimpleHTTPServer`
-    Or use a tool like `live-server` for Visual Studio Code.
+```bash
+npm ci
+npm run dev
+```
 
-4.  **Access the application:**
-    Open `public/index.html` in your web browser (e.g., `http://localhost:8000/public/` if using Python's server and you are in the root `028-letter-generator` directory).
+```bash
+npm run build
+npm run preview -- --port 4000
+```
 
-## Usage
+Deploy `dist`. Source pages should be served through Vite. Fonts, editor code, templates and PDF libraries are local. Offline use requires an initial successful service-worker installation over HTTPS or localhost. Only static assets are cached; working documents and inserted pictures are not.
 
-1.  Navigate to the application in your web browser.
-2.  Select the desired document generator from the main page:
-    * Patient Referral Letter (`referral/index.html`)
-    * Certificate for Carrying Medications (`certificate-medication-letter/index.html`)
-    * Medical Certificate (`medical-certificate/index.html`)
-3.  Fill in the required and relevant optional information in the form.
-4.  Doctor's information, once entered, will be saved locally in the browser for future use.
-5.  Click the "ดูตัวอย่างและพิมพ์ / Preview & Print" button.
-6.  A new browser tab or window will open with the formatted document. The print dialog should appear automatically.
+## Docker / Caddy
 
-## License
+```bash
+docker build -t letter-generator .
+docker run --rm -p 4000:4000 letter-generator
+```
 
-This project is licensed under the MIT License. See the [LICENSE](https://opensource.org/licenses/MIT) file for details.
+Open `http://localhost:4000`. Node performs the build; the final container serves static files with Caddy. The existing multi-architecture workflow remains available.
+
+## Verification
+
+```bash
+npm test
+npx playwright install chromium firefox
+npm run test:browser
+npm run test:pdf
+```
+
+PDF regression also needs Python 3 and Poppler (`pdfinfo`, `pdftotext`, `pdftoppm`). It preserves historical samples and compares every current PDF page against the original logo and an authorised typography reference. Twelve current samples include all four document categories, treatment-only medical certificates and compact referral wording samples in Thai/English. Medical certificates keep the same title in every sample. Its ignored raster output uses `pdf-results`, separately from Playwright's temporary files. To recapture original samples, run `node scripts/capture-legacy.mjs http://localhost:4001` against the original app: it checks served source, fonts, PDF library and logo against the pinned GitHub commit before generation. User-supplied PDFs are preserved and recorded separately.
+
+[Original GitHub / legacy sample provenance](docs/legacy-sample-provenance.json) · [Master plan](docs/master-plan.md) · [Field migration](docs/field-migration-map.md) · [Section migration](docs/section-migration-map.md) · [Dependency audit](docs/dependency-audit.md) · [Language review](docs/template-language-review.md) · [PDF regression](docs/pdf-regression.md) · [Verification report](docs/verification.md)
+
+The official logo, wording, contact details, margins and printed-date/page-number formats remain protected. Approved typography uses 9 pt clinic-name lines and 6.5 pt institutional/footer text. Body layout may differ between editor and pdfmake; PDF Preview is the final layout reference.
+
+## Licence and clinical review
+
+Project code is MIT. Packages and fonts retain their own licences; [distributed notices](public/third-party-notices.txt) and the [dependency ledger](docs/dependency-licenses.json) record them. No proprietary editor or paid runtime service is used.
+
+Engineering tests do not constitute clinical approval. A qualified clinician should review the final wording and retained original medication/regimen catalogue before official deployment. Safari/WebKit and physical printer checks are reported separately in verification.

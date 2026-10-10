@@ -1,0 +1,55 @@
+# Implementation verification
+
+Verified on 11 October 2026 against the local working tree. Engineering checks and local Docker validation are complete; clinical editorial approval has not been obtained.
+
+## Implemented behaviour
+
+The application opens directly into a referral with a light English interface. Document and letter-language selectors remain in the main toolbar. Shared patient facts and each document's native editor state stay in memory, preserving values, manual prose, formatting, pictures, section/field archives and calculation overrides across template changes. Export does not clear these states. Confirmed Clear Form intentionally clears the whole patient session and restores the current built-in body, retaining doctor preferences and language/type selection.
+
+Referral clinical wording now follows the original GitHub source and the user's saved legacy PDFs. The app at localhost:4001 matched pinned commit `aa8599a19ca8045ff924428609084a4070e6ae6d`. [Legacy provenance](legacy-sample-provenance.json) records original source/assets, sample inputs and hashes, with no source transformations; user-supplied exports are preserved separately. The [language review](template-language-review.md) records the explicit amendments.
+
+Referral purposes occur inline in the opening, before patient identification. The duplicate fixed intention and separate Additional details block are removed. Custom purpose remains an inline Other choice with conditional validation. One summary holds only the eleven original diagnosis/history modules: outer diagnosis bullets, nested facts and further-indented ART/injection lists. They remain independently editable, removable, restorable and reorderable without data loss. Reusing existing ART/pick-up blocks when adding Retroviral Infection preserves their medicines, values and prose.
+
+Retroviral Infection includes the original collection/supply bullet, with editable today/60-day defaults, retaining pre-existing values and deliberate clearing. The optional prophylaxis choice/point is named TMX/SMP 80/400 mg. Tablet quantity and Other prophylaxis data remain supported. Active Syphilis defaults to today and the original first regimen choice, Benzathine penicillin G. Scheduled doses use its full name, retain calendar Day 0/7/14 calculation and manual overrides, and stay separate from documented certificate administration. CD4 retains first-visit terminology and original field mappings. Latest laboratory results is included by default as a highlighted editable field. Tab selects its complete value; ×/Undo/restoration preserve its canonical value. Only untouched default wording switches language. Redundant subtitles, Notes / Additional Notes blocks and child note placeholders are removed; legacy note definitions/values remain compatible. Free prose, Other Medical History and certificate physician comments remain available. Doxycycline states its duration once in the selected regimen; the redundant duration paragraph is removed, with the 14/28-day calculation retained in memory.
+
+Medical certificates always use Medical Certificate / ใบรับรองแพทย์ as their title, irrespective of examination, leave or treatment-only sections. Manual title changes remain supported. The user's latest certificate paragraphs are retained, with examination/date validation, inclusive leave and distinct actual-treatment dates. English spells out tuberculosis. Other template wording was reviewed against the original source and saved samples; clinician-entered diagnoses are not translated. All four signatures retain the requested closing, blank signing space, plain physician name and licence number.
+
+Dropdowns beneath fields/insertion points reserve document space. Field × removes its semantic unit while retaining the canonical value; Undo and explicit restoration work. Optional omission cannot leave unsupported diagnosis/summary headings. Proportional local pictures and formatting remain supported. Filled/calculate/override fields stay highlighted and keyboard-accessible. English/Thai switching now updates the available physician-field ID in the same transaction, preserving the name in PDF output immediately after switching.
+
+
+The referral canvas has no patient/administrative or Other Medications insertion buttons; the toolbar retains these workflows and inserts medicines into their original group. Its closing point offers admission and financial requests only. The medical-certificate context menu offers only examination, medical leave, syphilis treatment and tuberculosis treatment. Physician comments, document date, addressee, attendance and identity workflows remain available in the global catalogue. Travel/free-form closing insertion controls are removed. Free form has one empty-body writing hint, which disappears on typing; clicking it sets the native body selection immediately so keystrokes cannot replace the selected date field.
+
+Multi-selection normalisation removes empty entries and duplicates without discarding meaningful unknown input. Dropdowns no longer retain an empty initial choice. Mpox/TB rendering, mandatory symptom/risk checks, exclusive no-risk selection, conditional Other detail and unsupported-option validation all pass. Default bullet paragraph/list spacing is 2 pt, with no additional list-item margin; ordinary 5 pt spacing, explicit formatting and 44 pt signing space are preserved.
+
+Thai referrals now use the requested **ART adherence** label, retaining the value and language switching. The English sentence remains **The patient reported ART adherence of**. The production compatibility generator uses the same Thai label; original fixtures/PDF references are unchanged. PDF body conversion uses native Thai word segmentation and empty text runs to allow natural line wrapping without adding spaces, missing-glyph characters or hard breaks. Formatting and canonical text remain unchanged; official header/footer conversion is untouched. Both Thai referral samples verify that the financial paragraph continues on its opening line after “ทั้งนี้ หากเห็นสมควร”.
+
+## Executed checks
+
+| Check | Executed result | Evidence |
+| --- | --- | --- |
+| `npm test` | 170 passed; 0 failed; 0 skipped | Node unit/integration tests |
+| `npm run test:browser` | 215 passed; 1 skipped; 0 failed or flaky | [Browser results](browser-verification.json); 108 cases per project in Chromium and Firefox |
+| `npm run test:pdf` | 12 samples passed, covering 30 PDF pages | [PDF results](pdf-regression-results.json); [current samples](samples/current) |
+| Original sample capture | 10 samples from unchanged original app code; 6 user PDFs preserved | [Provenance](legacy-sample-provenance.json); [original samples](samples/legacy) |
+| `npm run build` | Passed | Vite production build and static/offline asset generation |
+| `docker build --progress=plain -t letter-generator:editor-check .` | Passed on linux/amd64 | Node build stage and static Caddy runtime |
+| Docker runtime / offline smoke | Passed; zero external requests or page errors | [Docker results](docker-verification.json) |
+| `npm audit --json` | 0 reported advisories | [Audit](npm-audit.json); no new dependencies in this revision |
+| `git diff --check` | Passed | Working-tree whitespace check |
+
+Thirty-four browser cases specifically cover the latest simplified controls, lab editing/language/removal, fresh multiple selections and validation, doxycycline omission, compact bullet spacing, immediate free-form body typing, the four-option medical menu and the revised bilingual adherence label. The full suite also covers autofocus, typing and replacement, Tab/Shift+Tab across pages and calculated fields, Thai composition, field omission/restoration, all eleven module lifecycles, reordering, medicine lists, existing-data reuse, conditional defaults, purpose validation, language switching, non-destructive export/error paths, Clear Form, image insertion/resizing, safe paste/drop and offline operation. The one skip uses Chromium's composition protocol, which Firefox does not expose; Chromium executed that case.
+
+Every PDF page passed A4 size, searchable Thai/English text, original-logo pixel comparison and the approved header/footer raster comparison. Signatures retain at least 40 pt between the closing and physician text; measured samples use a 64.73 pt gap from the 44 pt blank paragraph. Current samples include four categories, treatment-only medical certificates with the same title, and compact complete referrals for wording review. Thai/English referral first pages and the English certificate were inspected visually, including enlarged diagnosis/schedule details.
+
+The authorised typography reference uses Sarabun, 9 pt clinic-name lines and 6.5 pt institutional/footer text. Official logo, wording, contact details, margins, rules and printed-date/page-number formats were not changed in this revision. Header/footer regression checks every current page against that reference and the unmodified original logo.
+
+The Docker smoke test loads all four types, checks both letter languages and the common signature/title, installs the service worker, disconnects the network, reloads without restoring a patient, switches documents offline and generates non-destructive referral and treatment-only PDFs. The latest Docker smoke also checks the revised Thai ART-adherence label, the restricted medical-certificate menu, an edited laboratory enclosure and immediate free-form typing offline. [Editor screenshot](editor-screenshot.png) records the light interface. The temporary QA container is removed after verification; the user's legacy server is preserved.
+
+## Review limits
+
+- A qualified clinician has not approved the wording, retained medication/regimen catalogue or clinical suitability. User-requested today/60-day defaults remain editable and require review for the actual patient.
+- Safari/WebKit, physical mobile devices, ARM Docker execution, operating-system print-dialogue cancellation and physical printers were not tested. Browser tests exercise the application's PDF/print-generation paths.
+- Browser and pdfmake body metrics can differ, especially after empty optional phrases are omitted. Genuine editor pagination is tested; pixel-perfect body parity is not claimed. PDF Preview remains the printed-layout reference.
+- Vite reports a bundle-size warning and notices for retained classic PDF/offline scripts. The build succeeds and assets are locally cached.
+
+Patient documents are not persisted. Closing or reloading discards their session; only permitted doctor and letter-language preferences remain.

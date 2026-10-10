@@ -1,0 +1,3 @@
+# Preserve upstream licence text verbatim, including its whitespace.
+public/third-party-notices.txt whitespace=-blank-at-eol
+public/vendor/fonts/OFL-*.txt whitespace=-blank-at-eol

@@ -38,8 +38,8 @@ test('service worker precache entries exist in the public directory', () => {
         assert.ok(fs.existsSync(path.join(publicDir, relativePath)), assetPath);
     });
 
-    assert.match(source, /request\.mode === 'navigate'/);
-    assert.match(source, /caches\.match\(request,\s*\{\s*ignoreSearch:\s*true\s*\}\)/);
+    assert.match(source, /request\.mode\s*===\s*'navigate'/);
+    assert.match(source, /caches\.match\(request,\s*\{\s*ignoreSearch:\s*true[\s\S]*?\}\)/);
 });
 
 test('web manifest is installable from the site root', () => {

@@ -1,0 +1,207 @@
+{
+  "repository": "https://github.com/LedoKun/028-letter-generator",
+  "commit": "aa8599a19ca8045ff924428609084a4070e6ae6d",
+  "servedFrom": "http://localhost:4001",
+  "capturedAt": "2026-10-10T16:17:49.837Z",
+  "printedAt": "2026-10-10T03:00:00Z",
+  "sourceVerifiedAgainstGitCommit": true,
+  "sourceTransformations": [],
+  "sources": [
+    {
+      "path": "public/shared/pdf-generator.js",
+      "sha256": "440bd460c12983d2c6f971fecc40f87acf8a4437101755d4788d3b7936ad7950",
+      "bytes": 15082,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/shared/pdf-generator.js"
+    },
+    {
+      "path": "public/shared/pdf-templates.js",
+      "sha256": "1a0f7a821db5bc1dc5d8e86de7a566c3b5d9f80f0b44402e53299e82a1766b11",
+      "bytes": 48639,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/shared/pdf-templates.js"
+    },
+    {
+      "path": "public/shared/print-header-footer.js",
+      "sha256": "5e97148c2a900b5c287f8a0437eb99edcabb1d27a2504c826fa51e0f3cc312ae",
+      "bytes": 3438,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/shared/print-header-footer.js"
+    },
+    {
+      "path": "public/shared/print-header-footer.css",
+      "sha256": "db99ab9426c5c2046be79282be65e5511eab9596b9f529f9ad5f2e67c6acd8ba",
+      "bytes": 2601,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/shared/print-header-footer.css"
+    },
+    {
+      "path": "public/js/common.js",
+      "sha256": "f9ccffd31bfea8902a8d9e4318294085c9ba90278fe5f37115b39936b4c5cb5d",
+      "bytes": 32087,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/js/common.js"
+    },
+    {
+      "path": "public/referral/index.html",
+      "sha256": "ab4c2afbe97591f639dab2a64beda977a155c719a40143acd7f6d66ddf40c602",
+      "bytes": 60867,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/referral/index.html"
+    },
+    {
+      "path": "public/referral/script.js",
+      "sha256": "09e84737a796e5c809b945ce76a914b743c052a7d0227130ec7f60da88d50558",
+      "bytes": 39856,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/referral/script.js"
+    },
+    {
+      "path": "public/referral/referral-data.js",
+      "sha256": "919d28987caaf4cf62a9226ee1287322a02fd531dd6b31148ac839e0edf472b7",
+      "bytes": 13646,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/referral/referral-data.js"
+    },
+    {
+      "path": "public/medical-certificate/medical-certificate-script.js",
+      "sha256": "0661643e097ed93b534661a8fed96141cd0b3a381ee277d5ed65ac1ad7e2ca7a",
+      "bytes": 19046,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/medical-certificate/medical-certificate-script.js"
+    },
+    {
+      "path": "public/certificate-medication-letter/certificate-script.js",
+      "sha256": "736f9ca987ffe8545300a73299f865b3463e7d82f5411e7c5f41952b89cbc0f9",
+      "bytes": 23074,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/certificate-medication-letter/certificate-script.js"
+    },
+    {
+      "path": "public/free-form-letter/script.js",
+      "sha256": "540ecf38de5567005697109da34051f6f79af708145a7ffab993ea0c5dba7907",
+      "bytes": 5216,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/free-form-letter/script.js"
+    },
+    {
+      "path": "public/vendor/pdfmake/pdfmake.min.js",
+      "sha256": "1f4aee34a75519c0ca8f1e9914afc59d9056c71d22b42009fd39d1fc376f8b8c",
+      "bytes": 1055897,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/vendor/pdfmake/pdfmake.min.js"
+    },
+    {
+      "path": "public/media/logo/logo.png",
+      "sha256": "0ad698c4d94ef4b05b030c5ec09a1e65963aea30a1b0d879cec54934ce2a43ea",
+      "bytes": 312964,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/media/logo/logo.png"
+    },
+    {
+      "path": "public/vendor/fonts/NotoSansThai-Regular.ttf",
+      "sha256": "404ddfb5ed0aaa6b6ec8a85700d682978992062d67da93903967b56cbd9a4acc",
+      "bytes": 37752,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/vendor/fonts/NotoSansThai-Regular.ttf"
+    },
+    {
+      "path": "public/vendor/fonts/NotoSansThai-Bold.ttf",
+      "sha256": "2b67cfb22337a868c6c85709e648ea30c79e0a7c530a5fc169a73d3f461d7c52",
+      "bytes": 37796,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/vendor/fonts/NotoSansThai-Bold.ttf"
+    },
+    {
+      "path": "public/vendor/fonts/NotoSans-Regular.ttf",
+      "sha256": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5",
+      "bytes": 569208,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/vendor/fonts/NotoSans-Regular.ttf"
+    },
+    {
+      "path": "public/vendor/fonts/NotoSans-Bold.ttf",
+      "sha256": "c976e4b1b99edc88775377fcc21692ca4bfa46b6d6ca6522bfda505b28ff9d6a",
+      "bytes": 575740,
+      "github": "https://github.com/LedoKun/028-letter-generator/blob/aa8599a19ca8045ff924428609084a4070e6ae6d/public/vendor/fonts/NotoSans-Bold.ttf"
+    }
+  ],
+  "samples": [
+    {
+      "file": "docs/samples/legacy/referral-th.pdf",
+      "language": "th",
+      "sha256": "9da8a8839e2af2dca421616ff00904db94585be064baadbace349b517e0df293",
+      "input": "tests/fixtures/representative-data.json#referral"
+    },
+    {
+      "file": "docs/samples/legacy/referral-en.pdf",
+      "language": "en",
+      "sha256": "9fb4861b186de579991fabdf8baf4bb8f6c1198cf81d3cc8ebbf56f7e48e1a33",
+      "input": "tests/fixtures/representative-data.json#referral"
+    },
+    {
+      "file": "docs/samples/legacy/medical-th.pdf",
+      "language": "th",
+      "sha256": "27923fd3cda78df3e30f09bfcabef3123866b3953df018fdcb47c03b350844f3",
+      "input": "tests/fixtures/representative-data.json#medical"
+    },
+    {
+      "file": "docs/samples/legacy/medical-en.pdf",
+      "language": "en",
+      "sha256": "062ea8375338fb331071dae734fd9a5bd508f081db8fc3ecfdb6539f42acade1",
+      "input": "tests/fixtures/representative-data.json#medical"
+    },
+    {
+      "file": "docs/samples/legacy/medication-th.pdf",
+      "language": "th",
+      "sha256": "b69685b8db984e86852e889c74f717dd0b8d044f7690db5c2216f2efa0be41a5",
+      "input": "tests/fixtures/representative-data.json#medication"
+    },
+    {
+      "file": "docs/samples/legacy/medication-en.pdf",
+      "language": "en",
+      "sha256": "f092199369776f446f10fb527e42c4a30bbcc5d4359cfe0f64962675f74980fb",
+      "input": "tests/fixtures/representative-data.json#medication"
+    },
+    {
+      "file": "docs/samples/legacy/freeform-th.pdf",
+      "language": "th",
+      "sha256": "bafffa268e6dde6d82ed2b73f8f2a8ad6b40ecf6a3af4dbb9fa6ef30be7af6e2",
+      "input": "tests/fixtures/representative-data.json#freeform"
+    },
+    {
+      "file": "docs/samples/legacy/freeform-en.pdf",
+      "language": "en",
+      "sha256": "25d64272e6205d60c89234970371760ab77b9cb5b456a2b38b9bd01556e368af",
+      "input": "tests/fixtures/representative-data.json#freeform"
+    },
+    {
+      "file": "docs/samples/legacy/referral-complete-th.pdf",
+      "language": "th",
+      "sha256": "c39291210c361c1856452ac560cba5c0af0b18c06a67db477ac518c931d01e2a",
+      "input": "tests/fixtures/legacy-complete-referral.json"
+    },
+    {
+      "file": "docs/samples/legacy/referral-complete-en.pdf",
+      "language": "en",
+      "sha256": "237800e08177cf717b5a545ea2d7c6e0361a86e34b2827a9aab5f1a47143b8f3",
+      "input": "tests/fixtures/legacy-complete-referral.json"
+    }
+  ],
+  "userProvidedSamples": [
+    {
+      "file": "docs/samples/legacy/Medical-Certificate - 0571498d-7f81-4011-bffe-762ba9807f2e.pdf",
+      "sha256": "5053109271f857e36c902c656d1d4ffc4679962d2bffe0a1ace9e5dc65f9e319",
+      "provenance": "Legacy app export supplied by the user; reviewed for wording; inputs not recreated"
+    },
+    {
+      "file": "docs/samples/legacy/Medical-Certificate - a41f38b4-a14c-43ea-97a5-7330076b9897.pdf",
+      "sha256": "b2384a6b1190ff43ae6b0b5e37b4801eff1ff5c9c8efdeba77f6342eed6e6c32",
+      "provenance": "Legacy app export supplied by the user; reviewed for wording; inputs not recreated"
+    },
+    {
+      "file": "docs/samples/legacy/Medication-Certificate - 07af9e4d-5f9d-48b7-b8db-47d2c6e381f2.pdf",
+      "sha256": "91c4151c369bfbf46aa66bf82da8297c90134cd7f1bba7e1ecc704fab3bfa752",
+      "provenance": "Legacy app export supplied by the user; reviewed for wording; inputs not recreated"
+    },
+    {
+      "file": "docs/samples/legacy/Medication-Certificate - 3671c3b6-083d-408a-9b22-cc3e50ab23ad.pdf",
+      "sha256": "d6079982732cf1fca6f9866e272c7ed5cc689d4300f23c9dadffa6aa19eb3e37",
+      "provenance": "Legacy app export supplied by the user; reviewed for wording; inputs not recreated"
+    },
+    {
+      "file": "docs/samples/legacy/Referral-Letter - 7260b8c9-807c-41a4-89cf-7515b55a33d9.pdf",
+      "sha256": "8b9867296b346bfe552db12c606da4b892f6a4e2e256fb5752cc8ef2824a0b3c",
+      "provenance": "Legacy app export supplied by the user; reviewed for wording; inputs not recreated"
+    },
+    {
+      "file": "docs/samples/legacy/Referral-Letter - f91cefd9-4349-477e-8f3b-2cb9fa45f9db.pdf",
+      "sha256": "78c0d775a0b7fa2278dee3a7f55392d786274f1ce6e533a75dca31d468706ac3",
+      "provenance": "Legacy app export supplied by the user; reviewed for wording; inputs not recreated"
+    }
+  ]
+}

@@ -455,9 +455,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const syphilisActiveCheckbox = document.getElementById('includeSyphilisActive');
         if (!syphilisActiveCheckbox || !syphilisActiveCheckbox.checked) {
-            dose1DateEl.textContent = 'N/A';
-            dose2DateEl.textContent = 'N/A';
-            dose3DateEl.textContent = 'N/A';
+            dose1DateEl.textContent = '';
+            dose2DateEl.textContent = '';
+            dose3DateEl.textContent = '';
             startDateInput.style.borderColor = '';
             return;
         }
@@ -481,9 +481,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const startDate = window.Common.parseDate(startDateInput.value, era);
 
         if (!startDate) {
-            dose1DateEl.textContent = 'N/A';
-            dose2DateEl.textContent = 'N/A';
-            dose3DateEl.textContent = 'N/A';
+            dose1DateEl.textContent = '';
+            dose2DateEl.textContent = '';
+            dose3DateEl.textContent = '';
             if (startDateInput.value.length > 0 && startDateInput.value.length < 10) startDateInput.style.borderColor = 'red';
             else if (startDateInput.value.length === 10 && !window.Common.parseDate(startDateInput.value, era)) startDateInput.style.borderColor = 'red';
             else startDateInput.style.borderColor = '';

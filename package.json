@@ -2,10 +2,27 @@
   "scripts": {
     "build:css": "tailwindcss -i ./tailwind.css -o ./public/css/style.css",
     "dev:css": "tailwindcss -i ./tailwind.css -o ./public/css/style.css --watch",
-    "test": "node --test"
+    "test": "node --test tests/*.test.js tests/*.test.mjs",
+    "dev": "vite",
+    "build": "npm run build:css && vite build && node scripts/build-static.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "test:browser": "playwright test",
+    "test:pdf": "node scripts/pdf-regression.mjs"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.3.3",
+    "@tiptap/core": "3.31.4",
+    "@tiptap/extension-text-align": "3.31.4",
+    "@tiptap/extension-text-style": "3.31.4",
+    "@tiptap/pm": "3.31.4",
+    "@tiptap/starter-kit": "3.31.4",
     "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "vite": "8.3.4"
+  },
+  "overrides": {
+    "@parcel/watcher": "2.6.0"
   }
 }

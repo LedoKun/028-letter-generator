@@ -1,0 +1,2070 @@
+{
+  "public/certificate-medication-letter/index.html": [
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "letterDate",
+      "name": "letterDate",
+      "placeholder": "DD/MM/YYYY",
+      "required": null,
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "select",
+      "id": "salutation",
+      "name": "salutation",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "options": [
+        {
+          "value": "",
+          "text": "เลือก / Select"
+        },
+        {
+          "value": "MR.",
+          "data-thai": "นาย",
+          "text": "นาย / Mr."
+        },
+        {
+          "value": "MS.",
+          "data-thai": "นางสาว",
+          "text": "นางสาว / Ms."
+        },
+        {
+          "value": "MRS.",
+          "data-thai": "นาง",
+          "text": "นาง / Mrs."
+        },
+        {
+          "value": "MISS",
+          "data-thai": "นางสาว",
+          "text": "นางสาว / Miss"
+        },
+        {
+          "value": "DR.",
+          "data-thai": "ดร.",
+          "text": "ดร. / Dr."
+        },
+        {
+          "value": "PROF.",
+          "data-thai": "ศ.",
+          "text": "ศ. / Prof."
+        },
+        {
+          "value": "NONE",
+          "text": "เว้นว่าง / Leave blank"
+        },
+        {
+          "value": "OTHER",
+          "text": "อื่น ๆ / Other"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "otherSalutation",
+      "name": "otherSalutation",
+      "placeholder": "ระบุคำนำหน้า / Specify salutation",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "patientName",
+      "name": "patientName",
+      "placeholder": "e.g., JOHN DOE",
+      "required": null,
+      "autofocus": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "style": "text-transform: uppercase;"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "dob",
+      "name": "dob",
+      "placeholder": "DD/MM/YYYY",
+      "required": null,
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "select",
+      "id": "nationality",
+      "name": "nationality",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "options": [
+        {
+          "value": "",
+          "text": "เลือกสัญชาติ / Select nationality"
+        },
+        {
+          "value": "CAMBODIAN",
+          "text": "CAMBODIAN"
+        },
+        {
+          "value": "CHINESE",
+          "text": "CHINESE"
+        },
+        {
+          "value": "FILIPINO",
+          "text": "FILIPINO"
+        },
+        {
+          "value": "LAOTIAN",
+          "text": "LAOTIAN"
+        },
+        {
+          "value": "MALAYSIAN",
+          "text": "MALAYSIAN"
+        },
+        {
+          "value": "MYANMAR",
+          "text": "MYANMAR"
+        },
+        {
+          "value": "THAI",
+          "text": "THAI"
+        },
+        {
+          "disabled": null,
+          "text": "────────────────────"
+        },
+        {
+          "value": "AFGHAN",
+          "text": "AFGHAN"
+        },
+        {
+          "value": "ALBANIAN",
+          "text": "ALBANIAN"
+        },
+        {
+          "value": "ALGERIAN",
+          "text": "ALGERIAN"
+        },
+        {
+          "value": "AMERICAN",
+          "text": "AMERICAN"
+        },
+        {
+          "value": "ANDORRAN",
+          "text": "ANDORRAN"
+        },
+        {
+          "value": "ANGOLAN",
+          "text": "ANGOLAN"
+        },
+        {
+          "value": "ANTIGUANS",
+          "text": "ANTIGUANS"
+        },
+        {
+          "value": "ARGENTINEAN",
+          "text": "ARGENTINEAN"
+        },
+        {
+          "value": "ARMENIAN",
+          "text": "ARMENIAN"
+        },
+        {
+          "value": "AUSTRALIAN",
+          "text": "AUSTRALIAN"
+        },
+        {
+          "value": "AUSTRIAN",
+          "text": "AUSTRIAN"
+        },
+        {
+          "value": "AZERBAIJANI",
+          "text": "AZERBAIJANI"
+        },
+        {
+          "value": "BAHAMIAN",
+          "text": "BAHAMIAN"
+        },
+        {
+          "value": "BAHRAINI",
+          "text": "BAHRAINI"
+        },
+        {
+          "value": "BANGLADESHI",
+          "text": "BANGLADESHI"
+        },
+        {
+          "value": "BARBADIAN",
+          "text": "BARBADIAN"
+        },
+        {
+          "value": "BARBUDANS",
+          "text": "BARBUDANS"
+        },
+        {
+          "value": "BATSWANA",
+          "text": "BATSWANA"
+        },
+        {
+          "value": "BELARUSIAN",
+          "text": "BELARUSIAN"
+        },
+        {
+          "value": "BELGIAN",
+          "text": "BELGIAN"
+        },
+        {
+          "value": "BELIZEAN",
+          "text": "BELIZEAN"
+        },
+        {
+          "value": "BENINESE",
+          "text": "BENINESE"
+        },
+        {
+          "value": "BHUTANESE",
+          "text": "BHUTANESE"
+        },
+        {
+          "value": "BOLIVIAN",
+          "text": "BOLIVIAN"
+        },
+        {
+          "value": "BOSNIAN",
+          "text": "BOSNIAN"
+        },
+        {
+          "value": "BRAZILIAN",
+          "text": "BRAZILIAN"
+        },
+        {
+          "value": "BRITISH",
+          "text": "BRITISH"
+        },
+        {
+          "value": "BRUNEIAN",
+          "text": "BRUNEIAN"
+        },
+        {
+          "value": "BULGARIAN",
+          "text": "BULGARIAN"
+        },
+        {
+          "value": "BURKINABE",
+          "text": "BURKINABE"
+        },
+        {
+          "value": "BURMESE",
+          "text": "BURMESE"
+        },
+        {
+          "value": "BURUNDIAN",
+          "text": "BURUNDIAN"
+        },
+        {
+          "value": "CAMEROONIAN",
+          "text": "CAMEROONIAN"
+        },
+        {
+          "value": "CANADIAN",
+          "text": "CANADIAN"
+        },
+        {
+          "value": "CAPE VERDEAN",
+          "text": "CAPE VERDEAN"
+        },
+        {
+          "value": "CENTRAL AFRICAN",
+          "text": "CENTRAL AFRICAN"
+        },
+        {
+          "value": "CHADIAN",
+          "text": "CHADIAN"
+        },
+        {
+          "value": "CHILEAN",
+          "text": "CHILEAN"
+        },
+        {
+          "value": "COLOMBIAN",
+          "text": "COLOMBIAN"
+        },
+        {
+          "value": "COMORAN",
+          "text": "COMORAN"
+        },
+        {
+          "value": "CONGOLESE",
+          "text": "CONGOLESE"
+        },
+        {
+          "value": "COSTA RICAN",
+          "text": "COSTA RICAN"
+        },
+        {
+          "value": "CROATIAN",
+          "text": "CROATIAN"
+        },
+        {
+          "value": "CUBAN",
+          "text": "CUBAN"
+        },
+        {
+          "value": "CYPRIOT",
+          "text": "CYPRIOT"
+        },
+        {
+          "value": "CZECH",
+          "text": "CZECH"
+        },
+        {
+          "value": "DANISH",
+          "text": "DANISH"
+        },
+        {
+          "value": "DJIBOUTI",
+          "text": "DJIBOUTI"
+        },
+        {
+          "value": "DOMINICAN",
+          "text": "DOMINICAN"
+        },
+        {
+          "value": "DUTCH",
+          "text": "DUTCH"
+        },
+        {
+          "value": "EAST TIMORESE",
+          "text": "EAST TIMORESE"
+        },
+        {
+          "value": "ECUADOREAN",
+          "text": "ECUADOREAN"
+        },
+        {
+          "value": "EGYPTIAN",
+          "text": "EGYPTIAN"
+        },
+        {
+          "value": "EMIRIAN",
+          "text": "EMIRIAN"
+        },
+        {
+          "value": "EQUATORIAL GUINEAN",
+          "text": "EQUATORIAL GUINEAN"
+        },
+        {
+          "value": "ERITREAN",
+          "text": "ERITREAN"
+        },
+        {
+          "value": "ESTONIAN",
+          "text": "ESTONIAN"
+        },
+        {
+          "value": "ETHIOPIAN",
+          "text": "ETHIOPIAN"
+        },
+        {
+          "value": "FIJIAN",
+          "text": "FIJIAN"
+        },
+        {
+          "value": "FINNISH",
+          "text": "FINNISH"
+        },
+        {
+          "value": "FRENCH",
+          "text": "FRENCH"
+        },
+        {
+          "value": "GABONESE",
+          "text": "GABONESE"
+        },
+        {
+          "value": "GAMBIAN",
+          "text": "GAMBIAN"
+        },
+        {
+          "value": "GEORGIAN",
+          "text": "GEORGIAN"
+        },
+        {
+          "value": "GERMAN",
+          "text": "GERMAN"
+        },
+        {
+          "value": "GHANAIAN",
+          "text": "GHANAIAN"
+        },
+        {
+          "value": "GREEK",
+          "text": "GREEK"
+        },
+        {
+          "value": "GRENADIAN",
+          "text": "GRENADIAN"
+        },
+        {
+          "value": "GUATEMALAN",
+          "text": "GUATEMALAN"
+        },
+        {
+          "value": "GUINEA-BISSAUAN",
+          "text": "GUINEA-BISSAUAN"
+        },
+        {
+          "value": "GUINEAN",
+          "text": "GUINEAN"
+        },
+        {
+          "value": "GUYANESE",
+          "text": "GUYANESE"
+        },
+        {
+          "value": "HAITIAN",
+          "text": "HAITIAN"
+        },
+        {
+          "value": "HERZEGOVINIAN",
+          "text": "HERZEGOVINIAN"
+        },
+        {
+          "value": "HONDURAN",
+          "text": "HONDURAN"
+        },
+        {
+          "value": "HUNGARIAN",
+          "text": "HUNGARIAN"
+        },
+        {
+          "value": "ICELANDER",
+          "text": "ICELANDER"
+        },
+        {
+          "value": "INDIAN",
+          "text": "INDIAN"
+        },
+        {
+          "value": "INDONESIAN",
+          "text": "INDONESIAN"
+        },
+        {
+          "value": "IRANIAN",
+          "text": "IRANIAN"
+        },
+        {
+          "value": "IRAQI",
+          "text": "IRAQI"
+        },
+        {
+          "value": "IRISH",
+          "text": "IRISH"
+        },
+        {
+          "value": "ISRAELI",
+          "text": "ISRAELI"
+        },
+        {
+          "value": "ITALIAN",
+          "text": "ITALIAN"
+        },
+        {
+          "value": "IVORIAN",
+          "text": "IVORIAN"
+        },
+        {
+          "value": "JAMAICAN",
+          "text": "JAMAICAN"
+        },
+        {
+          "value": "JAPANESE",
+          "text": "JAPANESE"
+        },
+        {
+          "value": "JORDANIAN",
+          "text": "JORDANIAN"
+        },
+        {
+          "value": "KAZAKHSTANI",
+          "text": "KAZAKHSTANI"
+        },
+        {
+          "value": "KENYAN",
+          "text": "KENYAN"
+        },
+        {
+          "value": "KITTIAN AND NEVISIAN",
+          "text": "KITTIAN AND NEVISIAN"
+        },
+        {
+          "value": "KUWAITI",
+          "text": "KUWAITI"
+        },
+        {
+          "value": "KYRGYZ",
+          "text": "KYRGYZ"
+        },
+        {
+          "value": "LATVIAN",
+          "text": "LATVIAN"
+        },
+        {
+          "value": "LEBANESE",
+          "text": "LEBANESE"
+        },
+        {
+          "value": "LIBERIAN",
+          "text": "LIBERIAN"
+        },
+        {
+          "value": "LIBYAN",
+          "text": "LIBYAN"
+        },
+        {
+          "value": "LIECHTENSTEINER",
+          "text": "LIECHTENSTEINER"
+        },
+        {
+          "value": "LITHUANIAN",
+          "text": "LITHUANIAN"
+        },
+        {
+          "value": "LUXEMBOURGER",
+          "text": "LUXEMBOURGER"
+        },
+        {
+          "value": "MACEDONIAN",
+          "text": "MACEDONIAN"
+        },
+        {
+          "value": "MALAGASY",
+          "text": "MALAGASY"
+        },
+        {
+          "value": "MALAWIAN",
+          "text": "MALAWIAN"
+        },
+        {
+          "value": "MALDIVAN",
+          "text": "MALDIVAN"
+        },
+        {
+          "value": "MALIAN",
+          "text": "MALIAN"
+        },
+        {
+          "value": "MALTESE",
+          "text": "MALTESE"
+        },
+        {
+          "value": "MARSHALLESE",
+          "text": "MARSHALLESE"
+        },
+        {
+          "value": "MAURITANIAN",
+          "text": "MAURITANIAN"
+        },
+        {
+          "value": "MAURITIAN",
+          "text": "MAURITIAN"
+        },
+        {
+          "value": "MEXICAN",
+          "text": "MEXICAN"
+        },
+        {
+          "value": "MICRONESIAN",
+          "text": "MICRONESIAN"
+        },
+        {
+          "value": "MOLDOVAN",
+          "text": "MOLDOVAN"
+        },
+        {
+          "value": "MONACAN",
+          "text": "MONACAN"
+        },
+        {
+          "value": "MONGOLIAN",
+          "text": "MONGOLIAN"
+        },
+        {
+          "value": "MOROCCAN",
+          "text": "MOROCCAN"
+        },
+        {
+          "value": "MOSOTHO",
+          "text": "MOSOTHO"
+        },
+        {
+          "value": "MOTSWANA",
+          "text": "MOTSWANA"
+        },
+        {
+          "value": "MOZAMBICAN",
+          "text": "MOZAMBICAN"
+        },
+        {
+          "value": "NAMIBIAN",
+          "text": "NAMIBIAN"
+        },
+        {
+          "value": "NAURUAN",
+          "text": "NAURUAN"
+        },
+        {
+          "value": "NEPALESE",
+          "text": "NEPALESE"
+        },
+        {
+          "value": "NEW ZEALANDER",
+          "text": "NEW ZEALANDER"
+        },
+        {
+          "value": "NI-VANUATU",
+          "text": "NI-VANUATU"
+        },
+        {
+          "value": "NICARAGUAN",
+          "text": "NICARAGUAN"
+        },
+        {
+          "value": "NIGERIEN",
+          "text": "NIGERIEN"
+        },
+        {
+          "value": "NORTH KOREAN",
+          "text": "NORTH KOREAN"
+        },
+        {
+          "value": "NORTHERN IRISH",
+          "text": "NORTHERN IRISH"
+        },
+        {
+          "value": "NORWEGIAN",
+          "text": "NORWEGIAN"
+        },
+        {
+          "value": "OMANI",
+          "text": "OMANI"
+        },
+        {
+          "value": "PAKISTANI",
+          "text": "PAKISTANI"
+        },
+        {
+          "value": "PALAUAN",
+          "text": "PALAUAN"
+        },
+        {
+          "value": "PANAMANIAN",
+          "text": "PANAMANIAN"
+        },
+        {
+          "value": "PAPUA NEW GUINEAN",
+          "text": "PAPUA NEW GUINEAN"
+        },
+        {
+          "value": "PARAGUAYAN",
+          "text": "PARAGUAYAN"
+        },
+        {
+          "value": "PERUVIAN",
+          "text": "PERUVIAN"
+        },
+        {
+          "value": "POLISH",
+          "text": "POLISH"
+        },
+        {
+          "value": "PORTUGUESE",
+          "text": "PORTUGUESE"
+        },
+        {
+          "value": "QATARI",
+          "text": "QATARI"
+        },
+        {
+          "value": "ROMANIAN",
+          "text": "ROMANIAN"
+        },
+        {
+          "value": "RUSSIAN",
+          "text": "RUSSIAN"
+        },
+        {
+          "value": "RWANDAN",
+          "text": "RWANDAN"
+        },
+        {
+          "value": "SAINT LUCIAN",
+          "text": "SAINT LUCIAN"
+        },
+        {
+          "value": "SALVADORAN",
+          "text": "SALVADORAN"
+        },
+        {
+          "value": "SAMOAN",
+          "text": "SAMOAN"
+        },
+        {
+          "value": "SAN MARINESE",
+          "text": "SAN MARINESE"
+        },
+        {
+          "value": "SAO TOMEAN",
+          "text": "SAO TOMEAN"
+        },
+        {
+          "value": "SAUDI",
+          "text": "SAUDI"
+        },
+        {
+          "value": "SCOTTISH",
+          "text": "SCOTTISH"
+        },
+        {
+          "value": "SENEGALESE",
+          "text": "SENEGALESE"
+        },
+        {
+          "value": "SERBIAN",
+          "text": "SERBIAN"
+        },
+        {
+          "value": "SEYCHELLOIS",
+          "text": "SEYCHELLOIS"
+        },
+        {
+          "value": "SIERRA LEONEAN",
+          "text": "SIERRA LEONEAN"
+        },
+        {
+          "value": "SINGAPOREAN",
+          "text": "SINGAPOREAN"
+        },
+        {
+          "value": "SLOVAKIAN",
+          "text": "SLOVAKIAN"
+        },
+        {
+          "value": "SLOVENIAN",
+          "text": "SLOVENIAN"
+        },
+        {
+          "value": "SOLOMON ISLANDER",
+          "text": "SOLOMON ISLANDER"
+        },
+        {
+          "value": "SOMALI",
+          "text": "SOMALI"
+        },
+        {
+          "value": "SOUTH AFRICAN",
+          "text": "SOUTH AFRICAN"
+        },
+        {
+          "value": "SOUTH KOREAN",
+          "text": "SOUTH KOREAN"
+        },
+        {
+          "value": "SPANISH",
+          "text": "SPANISH"
+        },
+        {
+          "value": "SRI LANKAN",
+          "text": "SRI LANKAN"
+        },
+        {
+          "value": "SUDANESE",
+          "text": "SUDANESE"
+        },
+        {
+          "value": "SURINAMER",
+          "text": "SURINAMER"
+        },
+        {
+          "value": "SWAZI",
+          "text": "SWAZI"
+        },
+        {
+          "value": "SWEDISH",
+          "text": "SWEDISH"
+        },
+        {
+          "value": "SWISS",
+          "text": "SWISS"
+        },
+        {
+          "value": "SYRIAN",
+          "text": "SYRIAN"
+        },
+        {
+          "value": "TAIWANESE",
+          "text": "TAIWANESE"
+        },
+        {
+          "value": "TAJIK",
+          "text": "TAJIK"
+        },
+        {
+          "value": "TANZANIAN",
+          "text": "TANZANIAN"
+        },
+        {
+          "value": "TOGOLESE",
+          "text": "TOGOLESE"
+        },
+        {
+          "value": "TONGAN",
+          "text": "TONGAN"
+        },
+        {
+          "value": "TRINIDADIAN OR TOBAGONIAN",
+          "text": "TRINIDADIAN OR TOBAGONIAN"
+        },
+        {
+          "value": "TUNISIAN",
+          "text": "TUNISIAN"
+        },
+        {
+          "value": "TURKISH",
+          "text": "TURKISH"
+        },
+        {
+          "value": "TUVALUAN",
+          "text": "TUVALUAN"
+        },
+        {
+          "value": "UGANDAN",
+          "text": "UGANDAN"
+        },
+        {
+          "value": "UKRAINIAN",
+          "text": "UKRAINIAN"
+        },
+        {
+          "value": "URUGUAYAN",
+          "text": "URUGUAYAN"
+        },
+        {
+          "value": "UZBEKISTANI",
+          "text": "UZBEKISTANI"
+        },
+        {
+          "value": "VENEZUELAN",
+          "text": "VENEZUELAN"
+        },
+        {
+          "value": "VIETNAMESE",
+          "text": "VIETNAMESE"
+        },
+        {
+          "value": "WELSH",
+          "text": "WELSH"
+        },
+        {
+          "value": "YEMENITE",
+          "text": "YEMENITE"
+        },
+        {
+          "value": "ZAMBIAN",
+          "text": "ZAMBIAN"
+        },
+        {
+          "value": "ZIMBABWEAN",
+          "text": "ZIMBABWEAN"
+        },
+        {
+          "disabled": null,
+          "text": "────────────────────"
+        },
+        {
+          "value": "STATELESS",
+          "text": "STATELESS / NATIONALITY PROBLEM"
+        },
+        {
+          "value": "OTHER",
+          "text": "OTHER (SPECIFY)"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "otherNationality",
+      "name": "otherNationality",
+      "placeholder": "ระบุสัญชาติเป็นภาษาอังกฤษ / Specify nationality in English",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field",
+      "style": "text-transform: uppercase;"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "passportNumber",
+      "name": "passportNumber",
+      "placeholder": "PASSPORTNUMBER123",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "style": "text-transform: uppercase;"
+    },
+    {
+      "tag": "input",
+      "id": "includeMedications",
+      "name": "includeMedications",
+      "type": "checkbox",
+      "checked": null,
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "doctorNameThai",
+      "name": "doctorNameThai",
+      "required": null,
+      "placeholder": "เช่น นพ. สมชาย ใจดี",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "doctorNameEnglish",
+      "name": "doctorNameEnglish",
+      "required": null,
+      "placeholder": "DR. JANE SMITH",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "style": "text-transform: uppercase;"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "medicalLicense",
+      "name": "medicalLicense",
+      "required": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "additionalNotes",
+      "name": "additionalNotes",
+      "rows": "3",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    }
+  ],
+  "public/free-form-letter/index.html": [
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "letterDate",
+      "name": "letterDate",
+      "placeholder": "DD/MM/YYYY",
+      "required": null,
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "documentTitle",
+      "name": "documentTitle",
+      "value": "บันทึกข้อความ / Medical Notes",
+      "data-value-th": "บันทึกข้อความ",
+      "data-value-en": "MEDICAL NOTES",
+      "placeholder": "เช่น บันทึกข้อความ / e.g., MEDICAL CERTIFICATE",
+      "required": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "style": "text-transform: uppercase;"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "addressee",
+      "name": "addressee",
+      "value": "เจ้าหน้าที่ผู้เกี่ยวข้อง",
+      "data-value-th": "เจ้าหน้าที่ผู้เกี่ยวข้อง",
+      "data-value-en": "To whom it may concern",
+      "placeholder": "เช่น ผู้อำนวยการโรงพยาบาล / e.g., The Immigration Officer",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "letterBody",
+      "name": "letterBody",
+      "rows": "10",
+      "required": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm placeholder-gray-500",
+      "placeholder": "ระบุเนื้อหาหนังสือ / Enter the letter content"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "doctorNameThai",
+      "name": "doctorNameThai",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "doctorNameEnglish",
+      "name": "doctorNameEnglish",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "style": "text-transform: uppercase;"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "medicalLicense",
+      "name": "medicalLicense",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    }
+  ],
+  "public/medical-certificate/index.html": [
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "letterDate",
+      "name": "letterDate",
+      "placeholder": "DD/MM/YYYY",
+      "required": null,
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "select",
+      "id": "patientSalutation",
+      "name": "patientSalutation",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "options": [
+        {
+          "value": "",
+          "text": "-- Select --"
+        },
+        {
+          "value": "นาย",
+          "data-english": "Mr.",
+          "text": "นาย / Mr."
+        },
+        {
+          "value": "นาง",
+          "data-english": "Mrs.",
+          "text": "นาง / Mrs."
+        },
+        {
+          "value": "นางสาว",
+          "data-english": "Ms.",
+          "text": "นางสาว / Ms."
+        },
+        {
+          "value": "นางสาว",
+          "data-english": "Miss",
+          "text": "นางสาว / Miss"
+        },
+        {
+          "value": "ดร.",
+          "data-english": "Dr.",
+          "text": "ดร. / Dr."
+        },
+        {
+          "value": "ศ.",
+          "data-english": "Prof.",
+          "text": "ศ. / Prof."
+        },
+        {
+          "value": "NONE",
+          "data-english": "",
+          "text": "(เว้นว่าง) / (Leave Blank)"
+        },
+        {
+          "value": "OTHER",
+          "data-english": "",
+          "text": "อื่นๆ (ระบุ) / Other (Specify)"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "otherPatientSalutation",
+      "name": "otherPatientSalutation",
+      "placeholder": "ระบุคำนำหน้า",
+      "data-placeholder-th": "ระบุคำนำหน้า",
+      "data-placeholder-en": "Specify salutation",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm hidden-field"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "patientName",
+      "name": "patientName",
+      "placeholder": "เช่น สมชาย ใจดี / e.g., Somchai Jaidee",
+      "required": null,
+      "autofocus": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "select",
+      "id": "patientGender",
+      "name": "patientGender",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "options": [
+        {
+          "value": "",
+          "text": "-- Select --"
+        },
+        {
+          "value": "ชาย",
+          "data-english": "Male",
+          "text": "ชาย / Male"
+        },
+        {
+          "value": "หญิง",
+          "data-english": "Female",
+          "text": "หญิง / Female"
+        },
+        {
+          "value": "NONE",
+          "data-english": "",
+          "text": "(เว้นว่าง) / (Leave Blank)"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "id": "patientAge",
+      "name": "patientAge",
+      "min": "0",
+      "placeholder": "เช่น 30",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "passportNumber",
+      "name": "passportNumber",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "nationalIdNumber",
+      "name": "nationalIdNumber",
+      "placeholder": "X-XXXX-XXXXX-XX-X",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeConsultationDiagnosis",
+      "name": "includeConsultationDiagnosis",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "consultationDate",
+      "name": "consultationDate",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "diagnosis",
+      "name": "diagnosis",
+      "rows": "2",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeAdvisedRest",
+      "name": "includeAdvisedRest",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "restStartDate",
+      "name": "restStartDate",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "restEndDate",
+      "name": "restEndDate",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "restDurationDays",
+      "name": "restDurationDays",
+      "readonly": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm bg-gray-600"
+    },
+    {
+      "tag": "textarea",
+      "id": "advisedRestNotes",
+      "name": "advisedRestNotes",
+      "rows": "2",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeSyphilisTreatment",
+      "name": "includeSyphilisTreatment",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "syphilisTreatmentDate",
+      "name": "syphilisTreatmentDate",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "syphilisNotes",
+      "name": "syphilisNotes",
+      "rows": "2",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeTBTreatment",
+      "name": "includeTBTreatment",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "tbTreatmentCompletionDate",
+      "name": "tbTreatmentCompletionDate",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "tbNotes",
+      "name": "tbNotes",
+      "rows": "2",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeDoctorComment",
+      "name": "includeDoctorComment",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "textarea",
+      "id": "doctorComment",
+      "name": "doctorComment",
+      "rows": "3",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "doctorNameThai",
+      "name": "doctorNameThai",
+      "placeholder": "เช่น นพ.กรุง ธนบุรี",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "doctorNameEnglish",
+      "name": "doctorNameEnglish",
+      "placeholder": "DR. KRUNG THONBURI",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "style": "text-transform: uppercase;"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "medicalLicense",
+      "name": "medicalLicense",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    }
+  ],
+  "public/referral/index.html": [
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "letterDate",
+      "name": "letterDate",
+      "placeholder": "DD/MM/YYYY",
+      "required": null,
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "patientName",
+      "name": "patientName",
+      "required": null,
+      "autofocus": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "dob",
+      "name": "dob",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "nationalId",
+      "name": "nationalId",
+      "placeholder": "X-XXXX-XXXXX-XX-X",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "passportNumber",
+      "name": "passportNumber",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "select",
+      "id": "referralIntent",
+      "name": "referralIntent",
+      "multiple": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "options": [
+        {
+          "value": "continuedCare",
+          "selected": null,
+          "text": "ขอส่งผู้ป่วยเพื่อรับการรักษาต่อ / Referral for Continued Care"
+        },
+        {
+          "value": "specializedCare",
+          "text": "การดูแลรักษาเฉพาะทาง / Specialized care and management"
+        },
+        {
+          "value": "diagnosticEvaluation",
+          "text": "การตรวจวินิจฉัยเพิ่มเติม / Further diagnostic evaluation"
+        },
+        {
+          "value": "hivCareTreatment",
+          "text": "การดูแลรักษาการติดเชื้อ HIV / HIV care and treatment"
+        },
+        {
+          "value": "syphilisCareTreatment",
+          "text": "การรักษาซิฟิลิส / Syphilis treatment"
+        },
+        {
+          "value": "mpoxCareTreatment",
+          "text": "การดูแลรักษา mpox / Mpox care and treatment"
+        },
+        {
+          "value": "hbvCareTreatment",
+          "text": "การดูแลรักษาการติดเชื้อ HBV / HBV care and treatment"
+        },
+        {
+          "value": "hcvCareTreatment",
+          "text": "การดูแลรักษาการติดเชื้อ HCV / HCV care and treatment"
+        },
+        {
+          "value": "tbCareTreatment",
+          "text": "การรักษาวัณโรค / TB treatment"
+        },
+        {
+          "value": "tptCareTreatment",
+          "text": "การให้ยาป้องกันวัณโรค (TPT) / Tuberculosis preventive treatment (TPT)"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "referralIntentCustom",
+      "name": "referralIntentCustom",
+      "placeholder": "เช่น การดูแลรักษา mpox / e.g., Mpox care and treatment",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeRetroviral",
+      "name": "includeRetroviral",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "napId",
+      "name": "napId",
+      "placeholder": "XXXX-XXXXXX",
+      "class": "block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "firstDiagnosisDateRetro",
+      "placeholder": "DD/MM/YYYY",
+      "name": "firstDiagnosisDateRetro",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "artStartDate",
+      "name": "artStartDate",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "initialCD4",
+      "name": "initialCD4",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "initialCD4Percent",
+      "name": "initialCD4Percent",
+      "placeholder": "เช่น 1%",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "initialCD4Date",
+      "placeholder": "DD/MM/YYYY",
+      "name": "initialCD4Date",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "select",
+      "id": "adherence",
+      "name": "adherence",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm",
+      "options": [
+        {
+          "value": "",
+          "text": "เลือก / Select"
+        },
+        {
+          "value": ">95%",
+          "text": ">95%"
+        },
+        {
+          "value": "80-95%",
+          "text": "80-95%"
+        },
+        {
+          "value": "<80%",
+          "text": "<80%"
+        },
+        {
+          "value": "Unknown",
+          "text": "ไม่ทราบ / Unknown"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "latestVL",
+      "name": "latestVL",
+      "placeholder": "เช่น <20",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "latestVLDate",
+      "placeholder": "DD/MM/YYYY",
+      "name": "latestVLDate",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "checkbox",
+      "id": "includeTmxSmp",
+      "name": "includeTmxSmp",
+      "class": "h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "id": "tmxSmpTablets",
+      "name": "tmxSmpTablets",
+      "placeholder": "จำนวน",
+      "min": "0",
+      "class": "ml-2 w-24 rounded-md shadow-sm py-1 px-1.5 text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeLastMedicinePickup",
+      "name": "includeLastMedicinePickup",
+      "type": "checkbox",
+      "checked": null,
+      "class": "h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "lastMedicinePickupDate",
+      "name": "lastMedicinePickupDate",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "id": "medicineDuration",
+      "name": "medicineDuration",
+      "placeholder": "เช่น 180",
+      "min": "0",
+      "value": "60",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "retroviralNotes",
+      "name": "retroviralNotes",
+      "rows": "2",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeSyphilisActive",
+      "name": "includeSyphilisActive",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "syphilisStartDate",
+      "name": "syphilisStartDate",
+      "placeholder": "DD/MM/YYYY",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "select",
+      "id": "syphilisMedication",
+      "name": "syphilisMedication",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm",
+      "options": [
+        {
+          "value": "Benzathine",
+          "text": "Benzathine penicillin G 2.4 million units IM"
+        },
+        {
+          "value": "Doxycycline2Weeks",
+          "text": "Doxycycline 200 mg PO BID for 14 days"
+        },
+        {
+          "value": "Doxycycline28Days",
+          "text": "Doxycycline 200 mg PO BID for 28 days"
+        }
+      ]
+    },
+    {
+      "tag": "textarea",
+      "id": "syphilisNotes",
+      "name": "syphilisNotes",
+      "rows": "2",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeSuspectedMpox",
+      "name": "includeSuspectedMpox",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "id": "mpoxSymptomDurationDays",
+      "name": "mpoxSymptomDurationDays",
+      "min": "1",
+      "step": "1",
+      "inputmode": "numeric",
+      "class": "mt-1 block w-36 rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomRashLesions",
+      "name": "mpoxSymptomRashLesions",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomFeverChills",
+      "name": "mpoxSymptomFeverChills",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomLymphadenopathy",
+      "name": "mpoxSymptomLymphadenopathy",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomHeadache",
+      "name": "mpoxSymptomHeadache",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomMyalgiaBackPain",
+      "name": "mpoxSymptomMyalgiaBackPain",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomFatigue",
+      "name": "mpoxSymptomFatigue",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomRespiratory",
+      "name": "mpoxSymptomRespiratory",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomProctitis",
+      "name": "mpoxSymptomProctitis",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomDysuria",
+      "name": "mpoxSymptomDysuria",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxSymptomOther",
+      "name": "mpoxSymptomOther",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "mpoxSymptomOtherText",
+      "name": "mpoxSymptomOtherText",
+      "placeholder": "ระบุอาการ / Specify symptom(s)",
+      "class": "hidden mt-2 ml-6 block rounded-md shadow-sm py-1.5 px-2 text-sm",
+      "style": "width: calc(100% - 1.5rem);"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskDirectContact",
+      "name": "mpoxRiskDirectContact",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskIntimateContact",
+      "name": "mpoxRiskIntimateContact",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskSexualPartners",
+      "name": "mpoxRiskSexualPartners",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskHouseholdCloseContact",
+      "name": "mpoxRiskHouseholdCloseContact",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskContaminatedItems",
+      "name": "mpoxRiskContaminatedItems",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskOccupational",
+      "name": "mpoxRiskOccupational",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskAnimal",
+      "name": "mpoxRiskAnimal",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskNoneKnown",
+      "name": "mpoxRiskNoneKnown",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "mpoxRiskOther",
+      "name": "mpoxRiskOther",
+      "type": "checkbox",
+      "class": "mt-0.5 h-4 w-4 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "mpoxRiskOtherText",
+      "name": "mpoxRiskOtherText",
+      "placeholder": "ระบุข้อมูลความเสี่ยง / Specify risk factor(s)",
+      "class": "hidden mt-2 ml-6 block rounded-md shadow-sm py-1.5 px-2 text-sm",
+      "style": "width: calc(100% - 1.5rem);"
+    },
+    {
+      "tag": "input",
+      "id": "includeHBV",
+      "name": "includeHBV",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "includeHCVActive",
+      "name": "includeHCVActive",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "includeTreatedSyphilis",
+      "name": "includeTreatedSyphilis",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "includeTreatedHCV",
+      "name": "includeTreatedHCV",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "treatedHCVMedication",
+      "name": "treatedHCVMedication",
+      "placeholder": "เช่น SOF/VEL",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "treatedHCVCompletionDate",
+      "placeholder": "DD/MM/YYYY",
+      "name": "treatedHCVCompletionDate",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeTreatedTB",
+      "name": "includeTreatedTB",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "select",
+      "id": "treatedTBSitesSelect",
+      "name": "treatedTBSitesSelect",
+      "multiple": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm",
+      "options": [
+        {
+          "value": "Pulmonary",
+          "text": "ปอด / Pulmonary"
+        },
+        {
+          "value": "Lymph nodes",
+          "text": "ต่อมน้ำเหลือง / Lymph nodes"
+        },
+        {
+          "value": "Pleural",
+          "text": "เยื่อหุ้มปอด / Pleural"
+        },
+        {
+          "value": "Bone",
+          "text": "กระดูก / Bone"
+        },
+        {
+          "value": "Meningeal",
+          "text": "เยื่อหุ้มสมอง / Meningeal"
+        },
+        {
+          "value": "Disseminated",
+          "text": "แพร่กระจาย / Disseminated"
+        },
+        {
+          "value": "Other",
+          "text": "อื่น ๆ / Other"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "treatedTBSitesOther",
+      "name": "treatedTBSitesOther",
+      "placeholder": "ระบุตำแหน่งอื่น ๆ คั่นด้วยจุลภาค / Specify other site(s), comma-separated",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm hidden"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "treatedTBMedication",
+      "name": "treatedTBMedication",
+      "placeholder": "เช่น 2HRZE/4HR",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "treatedTBCompletionDate",
+      "placeholder": "DD/MM/YYYY",
+      "name": "treatedTBCompletionDate",
+      "class": "date-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeCompletedTPT",
+      "name": "includeCompletedTPT",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "select",
+      "id": "completedTPTMedication",
+      "name": "completedTPTMedication",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm",
+      "options": [
+        {
+          "value": "",
+          "text": "เลือกสูตรยา / Select regimen"
+        },
+        {
+          "value": "3HP",
+          "text": "3HP"
+        },
+        {
+          "value": "1HP",
+          "text": "1HP"
+        },
+        {
+          "value": "9H",
+          "text": "9H"
+        },
+        {
+          "value": "6H",
+          "text": "6H"
+        },
+        {
+          "value": "4R",
+          "text": "4R"
+        },
+        {
+          "value": "Other",
+          "text": "อื่น ๆ / Other"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "completedTPTMedicationOther",
+      "name": "completedTPTMedicationOther",
+      "placeholder": "ระบุสูตรยา / Specify regimen",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm hidden"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "completedTPTStartDate",
+      "placeholder": "MM/YYYY",
+      "name": "completedTPTStartDate",
+      "class": "month-year-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "completedTPTNotes",
+      "name": "completedTPTNotes",
+      "rows": "2",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeOngoingTPT",
+      "name": "includeOngoingTPT",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "select",
+      "id": "ongoingTPTMedication",
+      "name": "ongoingTPTMedication",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm",
+      "options": [
+        {
+          "value": "",
+          "text": "เลือกสูตรยา / Select regimen"
+        },
+        {
+          "value": "3HP",
+          "text": "3HP"
+        },
+        {
+          "value": "1HP",
+          "text": "1HP"
+        },
+        {
+          "value": "9H",
+          "text": "9H"
+        },
+        {
+          "value": "6H",
+          "text": "6H"
+        },
+        {
+          "value": "4R",
+          "text": "4R"
+        },
+        {
+          "value": "Other",
+          "text": "อื่น ๆ / Other"
+        }
+      ]
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "ongoingTPTMedicationOther",
+      "name": "ongoingTPTMedicationOther",
+      "placeholder": "ระบุสูตรยา / Specify regimen",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm hidden"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "ongoingTPTStartDate",
+      "name": "ongoingTPTStartDate",
+      "placeholder": "MM/YYYY",
+      "class": "month-year-input mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "ongoingTPTNotes",
+      "name": "ongoingTPTNotes",
+      "rows": "2",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "id": "includeOtherHistory",
+      "name": "includeOtherHistory",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "textarea",
+      "id": "otherMedicalHistory",
+      "name": "otherMedicalHistory",
+      "rows": "3",
+      "class": "block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm placeholder-gray-500 dark:placeholder-gray-400"
+    },
+    {
+      "tag": "input",
+      "id": "includeReferralForAdmission",
+      "name": "includeReferralForAdmission",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "attachmentLabResults",
+      "name": "attachmentLabResults",
+      "type": "checkbox",
+      "checked": null,
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400"
+    },
+    {
+      "tag": "input",
+      "id": "attachmentOther",
+      "name": "attachmentOther",
+      "type": "checkbox",
+      "class": "h-5 w-5 text-indigo-500 rounded focus:ring-indigo-400 mt-0.5"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "attachmentOtherText",
+      "name": "attachmentOtherText",
+      "placeholder": "ระบุเอกสารอื่น ๆ",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-1.5 px-2 text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "doctorNameThai",
+      "name": "doctorNameThai",
+      "required": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "doctorNameEnglish",
+      "name": "doctorNameEnglish",
+      "required": null,
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm",
+      "style": "text-transform: uppercase;"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "id": "medicalLicense",
+      "name": "medicalLicense",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    },
+    {
+      "tag": "textarea",
+      "id": "additionalNotes",
+      "name": "additionalNotes",
+      "rows": "3",
+      "class": "mt-1 block w-full rounded-md shadow-sm py-2 px-3 sm:text-sm"
+    }
+  ]
+}

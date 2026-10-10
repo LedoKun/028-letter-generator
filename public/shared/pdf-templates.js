@@ -178,16 +178,16 @@
         const language = documentLanguage(data);
         let fullName = '';
         if (trim(data.salutation)) fullName += `${trim(data.salutation)} `;
-        fullName += trim(data.patientName) || 'PATIENT NAME N/A';
+        fullName += trim(data.patientName);
         const patientName = fullName.toUpperCase();
         const nationality = trim(data.nationality).toUpperCase();
         const passportNumber = trim(data.passportNumber).toUpperCase();
-        const dobCE = trim(data.dob) || 'N/A';
+        const dobCE = trim(data.dob);
         const letterDateCE = trim(data.letterDate) || '';
 
         const meds = (data.includeMedications && Array.isArray(data.artMedications) && data.artMedications.length)
             ? data.artMedications.map(item => H.highlight(trim(item.medication).toUpperCase()))
-            : [H.text(localize(language, 'ไม่ได้ระบุรายการยา', 'None specified'))];
+            : [];
 
         const content = [
             documentDateLine(H, letterDateCE, language, 'วันที่ออกเอกสาร', 'Certificate date'),
@@ -237,8 +237,8 @@
         }
         content.push(signatureBlock({
             thaiName: trim(data.doctorNameThai),
-            englishName: trim(data.doctorNameEnglish) || 'DOCTOR NAME N/A',
-            license: trim(data.medicalLicense) || 'N/A',
+            englishName: trim(data.doctorNameEnglish),
+            license: trim(data.medicalLicense),
             medicalOfficer: true,
             language
         }));
@@ -407,8 +407,8 @@
         return H.listItem([H.bold(`${englishLabel}: `), H.highlight(ceDate || date)]);
     }
 
-    function baselineCd4(H, th, data) {
-        const parts = th ? ['ผล CD4 แรกรับเท่ากับ '] : ['Baseline CD4 was '];
+    function firstVisitCd4(H, th, data) {
+        const parts = th ? ['ผล CD4 เมื่อมารับบริการครั้งแรก '] : ['CD4 at first visit: '];
         if (trim(data.initialCD4)) parts.push(H.highlight(trim(data.initialCD4)), ' cells/mm3');
         if (trim(data.initialCD4Percent)) {
             if (trim(data.initialCD4)) parts.push(' (');
@@ -543,9 +543,9 @@
                     ? ['เริ่ม ART เมื่อวันที่ ', H.highlight(date)]
                     : ['ART was initiated on ', H.highlight(H.convertBEtoCE(date) || date), '.']));
             }
-            if (trim(data.initialCD4) || trim(data.initialCD4Percent)) nested.push(H.listItem(baselineCd4(H, th, data)));
+            if (trim(data.initialCD4) || trim(data.initialCD4Percent)) nested.push(H.listItem(firstVisitCd4(H, th, data)));
             if (trim(data.adherence)) nested.push(H.listItem(th
-                ? ['ผู้ป่วยรายงานความสม่ำเสมอในการรับประทาน ART เท่ากับ ', H.highlight(trim(data.adherence))]
+                ? ['ART adherence ', H.highlight(trim(data.adherence))]
                 : ['The patient reported ART adherence of ', H.highlight(trim(data.adherence)), '.']));
             if (trim(data.latestVL)) nested.push(H.listItem(hivVl(H, th, data)));
             if (Array.isArray(data.artMedications) && data.artMedications.length) {

@@ -1,0 +1,8 @@
+<!doctype html><html><head><link rel="stylesheet" href="/css/fonts.css"><style>
+body{background:#e8edf2}.tiptap{background:white;margin:auto;font:11pt/1.4 'Noto Sans','Noto Sans Thai Looped';box-sizing:border-box}.tiptap p{margin:0 0 5pt}.field{background:#dcecf4;border-bottom:1px solid #387990}.section{display:contents}.rm-page-header-content,.rm-page-footer-content{pointer-events:none}
+</style></head><body><div id="editor"></div><script type="module">
+import {Editor,Node} from '@tiptap/core'; import StarterKit from '@tiptap/starter-kit'; import {PaginationPlus} from 'tiptap-pagination-plus';
+const Field=Node.create({name:'field',inline:true,group:'inline',content:'text*',renderHTML(){return ['span',{class:'field'},0]}});
+const Section=Node.create({name:'section',group:'block',content:'block+',renderHTML(){return ['section',{class:'section'},0]}});
+window.editor=new Editor({element:document.querySelector('#editor'),extensions:[StarterKit,Field,Section,PaginationPlus.configure({pageHeight:1122.52,pageWidth:793.7,marginTop:100,marginBottom:95,marginLeft:56.69,marginRight:56.69,contentMarginTop:0,contentMarginBottom:0,pageGap:24,pageBreakBackground:'#e8edf2',headerLeft:'Official header',footerLeft:'Official footer {page}'})],content:{type:'doc',content:[{type:'paragraph',content:[{type:'field',content:[{type:'text',text:'First value'}]},{type:'text',text:' Initial paragraph'}]},{type:'section',content:[{type:'paragraph',content:[{type:'text',text:('ภาษาไทยสำหรับตรวจสอบการแบ่งหน้าโดยอัตโนมัติ Long clinical paragraph with English and Thai. ').repeat(400)}]}]},{type:'paragraph',content:[{type:'field',content:[{type:'text',text:'Final value'}]}]}]}});
+</script></body></html>

@@ -1,0 +1,54 @@
+{
+  "testedAt": "2026-10-10T18:08:17.641Z",
+  "image": "letter-generator:editor-check",
+  "imageId": "sha256:9e1d5c6274723325eb0d425a515c8ea97a45c201d89e5a30943f2abf732f7fd1",
+  "platform": "linux/amd64",
+  "port": 4180,
+  "routes": [
+    {
+      "type": "referral",
+      "loaded": true,
+      "commonSignature": true,
+      "bothLanguages": true
+    },
+    {
+      "type": "medical",
+      "loaded": true,
+      "commonSignature": true,
+      "bothLanguages": true
+    },
+    {
+      "type": "medication",
+      "loaded": true,
+      "commonSignature": true,
+      "bothLanguages": true
+    },
+    {
+      "type": "freeform",
+      "loaded": true,
+      "commonSignature": true,
+      "bothLanguages": true
+    }
+  ],
+  "defaultReferral": true,
+  "singleMedicalCertificateTitle": true,
+  "editableLabEnclosure": true,
+  "restrictedMedicalMenu": true,
+  "thaiArtAdherenceLabel": true,
+  "freeformBodyClickTyping": true,
+  "offlineReload": true,
+  "patientStateDiscardedOnReload": true,
+  "offlineTemplateSwitching": true,
+  "offlinePdf": {
+    "errors": [],
+    "bytes": 590662,
+    "unchanged": true
+  },
+  "offlineTreatmentOnlyPdf": {
+    "errors": [],
+    "bytes": 588289,
+    "unchanged": true
+  },
+  "externalRequests": 0,
+  "pageErrors": []
+}

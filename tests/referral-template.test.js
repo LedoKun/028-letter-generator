@@ -120,6 +120,9 @@ test('renders all selected conditions with concise clinical wording', () => {
     const output = paragraphs.join('\n');
 
     assert.match(output, /Retroviral infection/);
+    assert.match(output, /ART adherence >95%/);
+    assert.match(output, /The patient reported ART adherence of >95%\./);
+    assert.doesNotMatch(output, /ผู้ป่วยรายงานความสม่ำเสมอในการรับประทาน ART เท่ากับ/);
     assert.match(output, /ผลตรวจ HIV VL ล่าสุดเท่ากับ <20 copies\/mL ตรวจเมื่อวันที่ 05\/05\/2569/);
     assert.match(output, /The latest HIV VL was <20 copies\/mL, measured on 05\/05\/2026\./);
     assert.match(output, /Active Syphilis/);

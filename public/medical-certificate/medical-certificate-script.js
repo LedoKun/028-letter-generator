@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (startDate && endDate && validStart && validEnd) {
             if (endDate < startDate) {
                 endDateInput.style.borderColor = 'red';
-                durationInput.value = 'N/A';
+                durationInput.value = '';
             } else {
                 endDateInput.style.borderColor = '';
                 const diffTime = Math.abs(endDate - startDate);
