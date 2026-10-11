@@ -5,9 +5,9 @@
     "firefox"
   ],
   "stats": {
-    "startTime": "2026-10-11T13:43:37.327Z",
-    "duration": 227348.893,
-    "expected": 313,
+    "startTime": "2026-10-11T14:42:53.986Z",
+    "duration": 235738.724,
+    "expected": 351,
     "skipped": 1,
     "unexpected": 0,
     "flaky": 0
@@ -15,9 +15,9 @@
   "skipped": [
     "Firefox: Chromium-specific composition protocol test; the Chromium case passed"
   ],
-  "casesPerProject": 157,
-  "source": "Full npm run test:browser before the subsequent logo-only update; final logo/offline recheck recorded separately",
-  "revision": "Clinic wording, blank line after titles, direct TMX/SMP and completed insertion controls",
+  "casesPerProject": 176,
+  "source": "Latest full npm run test:browser",
+  "revision": "Matched footer/logo text height and view-only 50\u2013200% zoom; includes all previous ergonomics and clinical workflows",
   "finalLogoChecks": {
     "command": "npm run test:browser -- tests/browser/completion-controls.spec.mjs tests/browser/editor.spec.mjs --grep 'blank line after the title|cached production application'",
     "stats": {
@@ -53,5 +53,17 @@
       "flaky": 0
     },
     "coverage": "All four templates: immediate typing and Tab, date preserved, help visible, both bars absent in Chromium and Firefox"
+  },
+  "zoomAndFooterChecks": {
+    "command": "npm run test:browser -- tests/browser/zoom.spec.mjs tests/browser/footer-and-examination.spec.mjs",
+    "stats": {
+      "startTime": "2026-10-11T14:40:42.240Z",
+      "duration": 27204.968999999997,
+      "expected": 38,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "coverage": "50\u2013200% buttons/keyboard slider and percentage, view-only state/PDF invariance, scaled Thai/English pagination and full-width scroll, field/dropdown/Tab editing, proportional picture drag with Undo, all-template footer logo matching text height without increasing the footer"
   }
 }

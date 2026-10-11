@@ -222,3 +222,10 @@ Do not report planned checks as passed. Actual results are recorded in verificat
 * Include the original Health Department logo at the right of the protected footer in all documents, preserving its proportions, existing footer height, text and margins.
 * Move shortcut-hint and status-bar information into the existing ? help panel, remove both bars and keep the page count current while help is open.
 * Retain the supplied header logo’s PNG copy; the user removed its source WebP.
+
+## Zoom and footer-height corrections
+
+* Scale the original footer logo to the existing text block’s full height, keeping its proportions, text positions and footer height.
+* Add Zoom out/in buttons, a horizontal range slider and percentage readout to format-tools, using 50–200% in 10% steps.
+* Keep zoom outside the canonical document. Preserve page count, selection, fields, Undo and PDF output; account for the view scale in pagination measurement and proportional picture dragging.
+* Keep the full enlarged page reachable through scrolling, and preserve session zoom across template/language changes.

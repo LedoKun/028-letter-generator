@@ -1640,14 +1640,37 @@
   outline-offset: 2px;
 }
 .official-footer {
-  padding-right: 128pt;
+  padding-right: 188pt;
 }
 .official-footer .footer-logo {
   position: absolute;
   right: 0;
   top: 2pt;
-  width: 120pt;
-  height: auto;
+  width: auto;
+  height: calc(100% - 2pt);
+}
+.document-zoom {
+  margin: auto;
+}
+.document-zoom>.document-surface {
+  margin: 0;
+  transform-origin: top left;
+}
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.zoom-controls input[type=range] {
+  width: 90px;
+  padding: 0;
+  accent-color: #176879;
+}
+.zoom-controls output {
+  min-width: 42px;
+  font-size: 12px;
+  text-align: center;
 }
 @property --tw-rotate-x {
   syntax: "*";

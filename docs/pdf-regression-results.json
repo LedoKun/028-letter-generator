@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-11T14:06:54.596Z",
+  "generatedAt": "2026-10-11T14:38:47.536Z",
   "printedAt": "2026-10-10T03:00:00Z",
   "samples": [
     {
@@ -14,11 +14,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "cb9ae1bf2784f1408fe1dc5100ce945b90366373ba57e3f09a3f86ce85eac8fb"
+      "sha256": "ee3515d65d48dbd301e5c94cf267ebe495cb1079c446549c4a3f088494a17e97"
     },
     {
       "type": "referral",
@@ -32,11 +33,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "832212a20c2b606666e88b98c4b260eca77e49d8e3d940b3ac07e17e36451778"
+      "sha256": "d1298ac48b93e82e5689426979a1fcf6382ff763ac8a64b167231802c858a25e"
     },
     {
       "type": "medical",
@@ -50,11 +52,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "364e3b2088597f448489207a67b3a6085b26871110dd54e1a722b17ca8072f85"
+      "sha256": "6fe4733d2c4c912a7ca76ad7280f842736c333fc15ce9d0cca3c7a1eb08201d7"
     },
     {
       "type": "medical",
@@ -68,11 +71,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "6b640e414cade88a42ac0ce67ae169464dedf2f14010fcde20031387ff64bb1d"
+      "sha256": "24d5cabb0067da065c64df755433c93061f84f592e7dc7221d5962512165a8e9"
     },
     {
       "type": "medication",
@@ -86,11 +90,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "acc02b0247f0689e14215001efac4b25953c12cdde5fd2ef43f744173dd85a07"
+      "sha256": "b1145a5bf33f1e6b621aaf6bd0c3d72c53431bcf95a6e3f95e77bfac71092b43"
     },
     {
       "type": "medication",
@@ -104,11 +109,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "fe4296c09e5ac3eaec82a595bbcde62df4511ad423189ce85e683da459ed5bfa"
+      "sha256": "af698fb7c6ff184e5954cf61b92dbdf9c821a24d2f4772c49f94c12579e2cf37"
     },
     {
       "type": "freeform",
@@ -122,11 +128,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "e58f6d879c2463b744fc126fc93009d4372a28cab64c05a8e623b597dfd510e7"
+      "sha256": "429d3b8defba7caaedb6189ffb9001336f06354d3ef699254b77a81e464cb914"
     },
     {
       "type": "freeform",
@@ -140,11 +147,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "fd41266ea63d19c546a8868b8fd991c4924c59189a2bb7fbb31d66a536d117fa"
+      "sha256": "97720d481216a05d927654f54ce32b5b8069b444ae8f1ab7d94ef3d8a4243281"
     },
     {
       "type": "medical",
@@ -158,11 +166,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "3b7579bcadeb88691129386715ccef4908ffe337022038f4cb73d5fa8e8ae4f3"
+      "sha256": "453bfad1f8f93cf06aebc8e1f110842f6d232bb211b56e94393b3c5acfaa1f87"
     },
     {
       "type": "medical",
@@ -176,11 +185,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "53f60aca7fba96f4354c59cbcf0625199006b29320f3a752ede9f32a76666849"
+      "sha256": "f7f0272940ccb98a0a69df20f1f1bcb8a4105e92eb572f3cc30f313122d375c5"
     },
     {
       "type": "referral",
@@ -194,11 +204,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "8ba33a7867f26ce816af4e1b92431297dc608478a3de7cc07530a70cba922447"
+      "sha256": "a2cd37b5edf6e1e91c0b200c86360b568fa79fe842d0de7a2d22eb6052c1a48e"
     },
     {
       "type": "referral",
@@ -212,11 +223,12 @@
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "a57df49f2956b1758d203bb913b0f7d81d1aba3a678b2d54403220001be1e202"
+      "sha256": "301cef809795f43abec2f540f1ece573f318a6522e137ad909c8cfa744d86723"
     }
   ]
 }

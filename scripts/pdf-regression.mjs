@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 const server=spawn('python3',['-m','http.server','4176','--directory','dist'],{stdio:'ignore'});
 const browser=await chromium.launch();
+const footerHeight=6.5*1.3*0.85*5+2,footerWidth=footerHeight*5300/1182;
 const rows=[],routes={referral:'referral',medical:'medical-certificate',medication:'certificate-medication-letter',freeform:'free-form-letter'};
 mkdirSync('docs/samples/current',{recursive:true});mkdirSync('pdf-results',{recursive:true});
 function raster(file,prefix,page=1){execFileSync('pdftoppm',['-r','144','-f',String(page),'-singlefile',file,prefix]);const raw=readFileSync(prefix+'.ppm'),match=raw.toString('ascii',0,60).match(/^P6\s+(\d+)\s+(\d+)\s+255\s/);assert.ok(match);return {width:Number(match[1]),height:Number(match[2]),data:raw.subarray(match[0].length)};}
@@ -77,13 +78,13 @@ try{
   for(let index=1;index<=pageCount;index++){
    const actual=raster(file,`pdf-results/current-${type}-${language}-${index}`,index);
    const header=compare(approvedImage,actual,[0,Math.floor(33*144/25.4)]);
-   const mask=(x,y)=>x>=pageLabel.right*2-1&&y>=pageLabel.y*2-2&&y<=pageLabel.bottom*2+2||x>=(595.28-13*72/25.4-120)*2-1&&y>=footerTop*2-4&&y<=(footerTop+28)*2+1;
+   const mask=(x,y)=>x>=pageLabel.right*2-1&&y>=pageLabel.y*2-2&&y<=pageLabel.bottom*2+2||x>=(595.28-13*72/25.4-footerWidth)*2-1&&y>=footerTop*2-4&&y<=(footerTop+footerHeight+2)*2+1;
    const footer=compare(approvedImage,actual,[Math.ceil((297-30)*144/25.4),actual.height],mask);
    assert.ok(Math.abs(logoHeight(file,index)-legacyLogoHeight)<0.2,'New clinic logo height differs from the legacy height');
-   const footerLogo=pdfImages(file,index).find(image=>image[3]==='5300'&&image[4]==='1182');assert.ok(footerLogo,'Missing original footer logo');assert.ok(Number(footerLogo[4])*72/Number(footerLogo[13])<=28,'Footer logo exceeds the available height');assert.ok(Math.abs(Number(footerLogo[3])*72/Number(footerLogo[12])-120)<0.2,'Footer logo is not proportional at the intended width');
+   const footerLogo=pdfImages(file,index).find(image=>image[3]==='5300'&&image[4]==='1182');assert.ok(footerLogo,'Missing original footer logo');assert.ok(Math.abs(Number(footerLogo[4])*72/Number(footerLogo[13])-footerHeight)<0.2,'Footer logo does not match the existing text height');assert.ok(Math.abs(Number(footerLogo[3])*72/Number(footerLogo[12])-footerWidth)<0.2,'Footer logo is not proportional at the intended width');
    assert.equal(header,0,`${type}-${language} page ${index}: header differs from approved typography`);assert.equal(footer,0,`${type}-${language} page ${index}: footer differs from approved typography`);
   }
-  rows.push({type,sample,language,pages:pageCount,searchable:true,approvedLogoPixelsIdentical:true,logoHeightMatchesLegacy:true,logoHeightPoints:Math.round(logoHeight(file)*100)/100,headerMatchesApprovedTypography:true,footerMatchesApprovedTypography:true,originalFooterLogoIncluded:true,footerTextAndHeightUnchanged:true,signatureMatchesRequestedLayout:true,signatureGapPoints:Math.round(signatureGapPoints*100)/100,nonDestructive:true,sha256:createHash('sha256').update(Buffer.from(bytes)).digest('hex')});console.log(`${sample}-${language}: ${pageCount} pages; header/footer, original footer logo and unchanged footer height verified`);await context.close();
+  rows.push({type,sample,language,pages:pageCount,searchable:true,approvedLogoPixelsIdentical:true,logoHeightMatchesLegacy:true,logoHeightPoints:Math.round(logoHeight(file)*100)/100,headerMatchesApprovedTypography:true,footerMatchesApprovedTypography:true,originalFooterLogoIncluded:true,footerLogoMatchesTextHeight:true,footerTextAndHeightUnchanged:true,signatureMatchesRequestedLayout:true,signatureGapPoints:Math.round(signatureGapPoints*100)/100,nonDestructive:true,sha256:createHash('sha256').update(Buffer.from(bytes)).digest('hex')});console.log(`${sample}-${language}: ${pageCount} pages; header/footer, original footer logo and unchanged footer height verified`);await context.close();
  }
  writeFileSync('docs/pdf-regression-results.json',JSON.stringify({generatedAt:new Date().toISOString(),printedAt:'2026-10-10T03:00:00Z',samples:rows},null,2)+'\n');
 }finally{await browser.close();server.kill();}

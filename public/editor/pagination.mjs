@@ -5,16 +5,16 @@ export const PAGE={width:210*96/25.4,height:297*96/25.4,top:34*96/25.4,bottom:30
 const key=new PluginKey('clinicalPagination');
 const graphemes=new Intl.Segmenter(undefined,{granularity:'grapheme'});
 function lines(view) {
- const origin=view.dom.getBoundingClientRect().top,records=[];
+ const origin=view.dom.getBoundingClientRect().top,scale=Number(view.dom.closest('.document-surface')?.dataset.zoom)||1,records=[];
  view.state.doc.descendants((node,pos)=>{
   if(node.attrs.hidden)return false;
-  if(node.type.name==='pageBreak'){records.push({pos,top:view.nodeDOM(pos).getBoundingClientRect().top-origin,manual:true});return false;}
-  if(node.type.name==='clinicalGroup'&&node.attrs.id==='signature'){const r=view.nodeDOM(pos).getBoundingClientRect();let manual=false;node.descendants(child=>{if(child.type.name==='pageBreak')manual=true;});if(!manual&&r.height<=PAGE.height-PAGE.top-PAGE.bottom){records.push({pos,top:r.top-origin,bottom:r.bottom-origin});return false;}}
-  if(['picture','insertionPoint'].includes(node.type.name)){const r=view.nodeDOM(pos).getBoundingClientRect();records.push({pos,top:r.top-origin,bottom:r.bottom-origin});return false;}
+  if(node.type.name==='pageBreak'){records.push({pos,top:(view.nodeDOM(pos).getBoundingClientRect().top-origin)/scale,manual:true});return false;}
+  if(node.type.name==='clinicalGroup'&&node.attrs.id==='signature'){const r=view.nodeDOM(pos).getBoundingClientRect();let manual=false;node.descendants(child=>{if(child.type.name==='pageBreak')manual=true;});if(!manual&&r.height/scale<=PAGE.height-PAGE.top-PAGE.bottom){records.push({pos,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});return false;}}
+  if(['picture','insertionPoint'].includes(node.type.name)){const r=view.nodeDOM(pos).getBoundingClientRect();records.push({pos,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});return false;}
   if(!node.isTextblock)return;
   const dom=view.nodeDOM(pos);if(!dom?.getClientRects().length)return false;
   let lastTop=-Infinity;const $pos=view.state.doc.resolve(pos),listStart=['listItem','medicationRow'].includes($pos.parent.type.name)&&$pos.index()===0?$pos.before($pos.depth):null;
-  const add=(p,r)=>{if(r.height&&r.width&&Math.abs(r.top-lastTop)>4){records.push({pos:listStart!==null&&!Number.isFinite(lastTop)?listStart:p,top:r.top-origin,bottom:r.bottom-origin});lastTop=r.top;}};
+  const add=(p,r)=>{const top=(r.top-origin)/scale;if(r.height&&r.width&&Math.abs(top-lastTop)>4){records.push({pos:listStart!==null&&!Number.isFinite(lastTop)?listStart:p,top,bottom:(r.bottom-origin)/scale});lastTop=top;}};
   const walker=document.createTreeWalker(dom,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT,{acceptNode(n){
    if(n.nodeType===1){if(n.matches('[hidden],.page-spacer,.inline-choice,.field-remove,.editor-dropdown'))return NodeFilter.FILTER_REJECT;if(n.matches('.clinical-field[data-empty="true"]'))return NodeFilter.FILTER_ACCEPT;return NodeFilter.FILTER_SKIP;}
    return NodeFilter.FILTER_ACCEPT;
@@ -24,7 +24,7 @@ function lines(view) {
    if(n.nodeType===1){add(view.posAtDOM(n,0)-1,n.getBoundingClientRect());continue;}
    for(const part of graphemes.segment(n.data)) {range.setStart(n,part.index);range.setEnd(n,part.index+part.segment.length);add(view.posAtDOM(n,part.index),range.getBoundingClientRect());}
   }
-  if(!Number.isFinite(lastTop)) {const r=dom.getBoundingClientRect();records.push({pos:pos+1,top:r.top-origin,bottom:r.bottom-origin});}
+  if(!Number.isFinite(lastTop)) {const r=dom.getBoundingClientRect();records.push({pos:pos+1,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});}
   return false;
  });
  return records;

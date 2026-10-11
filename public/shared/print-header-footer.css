@@ -96,14 +96,14 @@
 }
 .footer-content {
     position: relative;
-    padding-right: 128pt;
+    padding-right: 188pt;
 }
 .footer-logo {
     position: absolute;
     right: 0;
-    top: 2pt;
-    width: 120pt;
-    height: auto;
+    top: 0;
+    width: auto;
+    height: 100%;
 }
 
 .footer-page-number-container {

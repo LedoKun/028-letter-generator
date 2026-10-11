@@ -296,4 +296,5 @@
 .tiptap li{margin-bottom:0}.tiptap li>p{margin-bottom:2pt}.tiptap ul,.tiptap ol{margin-bottom:2pt}
 .editor-dropdown{position:fixed;z-index:30;margin:0;min-width:0;max-width:calc(100vw - 24px);max-height:min(480px,calc(100vh - 24px));overflow:auto;box-shadow:0 8px 28px #173c4c30}.editor-dropdown .catalogue-list{max-height:min(260px,40vh);overflow:auto}.choice-hint{font-size:11px;color:#57727e;margin:0 0 6px}.field-choice.is-current-choice{background:#dfedf2;outline:1px solid #4e94ab;outline-offset:-1px}
 .block-insertion>button:focus-visible{outline:2px solid #28869b;outline-offset:2px}
-.official-footer{padding-right:128pt}.official-footer .footer-logo{position:absolute;right:0;top:2pt;width:120pt;height:auto}
+.official-footer{padding-right:188pt}.official-footer .footer-logo{position:absolute;right:0;top:2pt;width:auto;height:calc(100% - 2pt)}
+.document-zoom{margin:auto}.document-zoom>.document-surface{margin:0;transform-origin:top left}.zoom-controls{display:flex;align-items:center;gap:4px;margin-left:auto}.zoom-controls input[type=range]{width:90px;padding:0;accent-color:#176879}.zoom-controls output{min-width:42px;font-size:12px;text-align:center}

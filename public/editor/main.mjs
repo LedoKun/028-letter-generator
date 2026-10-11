@@ -16,7 +16,7 @@ import { readPicture, PICTURE_LIMITS } from './pictures.mjs';
 const app=document.querySelector('#app');
 const routes={referral:'/referral/index.html',medical:'/medical-certificate/index.html',medication:'/certificate-medication-letter/index.html',freeform:'/free-form-letter/index.html'};
 const UI={back:['เลือกเอกสาร','Select Template'],clear:['ล้างข้อมูลในเอกสาร','Clear Form'],preview:['ดูตัวอย่าง PDF','PDF Preview'],print:['พิมพ์','Print'],download:['ดาวน์โหลด PDF','Download PDF'],undo:['ย้อนกลับ','Undo'],redo:['ทำซ้ำ','Redo'],fields:['เพิ่มช่องข้อมูล','Insert Field'],sections:['เพิ่มหัวข้อทางคลินิก','Insert Clinical Section'],help:['แป้นพิมพ์ลัด','Keyboard Shortcuts'],cancel:['ยกเลิก','Cancel'],close:['ปิด','Close'],remove:['นำออก','Remove'],up:['ขึ้น','Move Up'],down:['ลง','Move Down'],restore:['คืนค่า','Restore'],add:['เพิ่ม','Add'],fresh:['เริ่มหัวข้อที่เลือกด้วยข้อมูลว่าง','Start selected sections afresh']};
-let editor,language='th',dirty=false,baseline='',currentPath=location.pathname,busy=false,layout={pages:1,stable:true},pagesLayer,sidebar,banner,fieldPanel,sectionPanel,lastField='',opening=0;
+let editor,language='th',dirty=false,baseline='',currentPath=location.pathname,busy=false,zoom=100,layout={pages:1,stable:true},pagesLayer,sidebar,banner,fieldPanel,sectionPanel,lastField='',opening=0;
 const patientMemory=new PatientSession();
 try{language=localStorage.getItem('documentLanguage')==='en'?'en':'th';}catch{}
 Common.clearPatientStore();
@@ -60,14 +60,28 @@ function renderToolbar(){
  format('•','toggleBulletList',tr('รายการหัวข้อย่อย','Bulleted list')),format('1.','toggleOrderedList',tr('รายการลำดับเลข','Numbered list')),
  button('→',()=>indent(1),{'aria-label':tr('เพิ่มการเยื้อง','Increase indent'),onmousedown:e=>e.preventDefault()}),button('←',()=>indent(-1),{'aria-label':tr('ลดการเยื้อง','Decrease indent'),onmousedown:e=>e.preventDefault()}),
  selectControl(tr('ระยะห่างย่อหน้า','Paragraph spacing'),[['5',tr('ระยะห่าง 5 pt','Spacing 5 pt')],['8','8 pt'],['12','12 pt']],v=>editor.chain().focus().updateAttributes(editor.isActive('heading')?'heading':'paragraph',{spacingAfter:Number(v)}).run()),
- button('Insert Block',blockDialog),button('Insert Picture',choosePicture),button(tr('ขึ้นหน้าใหม่','Page Break'),insertPageBreak,{title:tr('ขึ้นหน้าใหม่หลังย่อหน้าปัจจุบัน','Start a new page after the current paragraph')})]);
+ button('Insert Block',blockDialog),button('Insert Picture',choosePicture),button(tr('ขึ้นหน้าใหม่','Page Break'),insertPageBreak,{title:tr('ขึ้นหน้าใหม่หลังย่อหน้าปัจจุบัน','Start a new page after the current paragraph')}),
+ el('div',{class:'zoom-controls',role:'group','aria-label':'Document zoom'},[
+  button('−',()=>setZoom(zoom-10),{'aria-label':'Zoom out',title:'Zoom out','data-zoom-out':'',disabled:zoom===50,onmousedown:event=>event.preventDefault()}),
+  el('input',{type:'range',min:50,max:200,step:10,value:zoom,'aria-label':'Document zoom','aria-valuetext':zoom+'%',oninput:event=>setZoom(event.target.value)}),
+  button('+',()=>setZoom(zoom+10),{'aria-label':'Zoom in',title:'Zoom in','data-zoom-in':'',disabled:zoom===200,onmousedown:event=>event.preventDefault()}),
+  el('output',{'aria-label':'Zoom percentage','aria-live':'polite'},zoom+'%')])]);
  host.replaceChildren(main,controls);
 }
 function indent(delta){const type=editor.isActive('heading')?'heading':'paragraph';editor.chain().focus().updateAttributes(type,{indent:Math.max(0,Math.min(8,(editor.getAttributes(type).indent||0)+delta))}).run();}
+function applyZoom(){
+ const surface=document.querySelector('.document-surface');if(!surface)return;const scale=zoom/100;
+ surface.dataset.zoom=scale;surface.style.transform=`scale(${scale})`;surface.parentElement.style.width=`${PAGE.width*scale}px`;surface.parentElement.style.height=`${(layout.pages*PAGE.height+(layout.pages-1)*PAGE.gap)*scale}px`;
+}
+function setZoom(value){
+ zoom=Math.max(50,Math.min(200,Number(value)));layout.stable=false;applyZoom();const controls=document.querySelector('.zoom-controls'),slider=controls.querySelector('input');slider.value=zoom;slider.setAttribute('aria-valuetext',zoom+'%');controls.querySelector('output').textContent=zoom+'%';controls.querySelector('[data-zoom-out]').disabled=zoom===50;controls.querySelector('[data-zoom-in]').disabled=zoom===200;
+ document.dispatchEvent(new Event('clinical-layout'));
+}
 function documentStatus(){return `${layout.pages} page${layout.pages===1?'':'s'} · A4 · Session memory only`;}
 function renderPages(next){layout=next;if(!pagesLayer)return;
  pagesLayer.replaceChildren(...Array.from({length:next.pages},(_,i)=>el('div',{class:'paper','aria-hidden':'true'},[officialHeader(),officialFooter(i+1,next.pages)])));
  document.querySelector('.document-surface').style.minHeight=`${next.pages*PAGE.height+(next.pages-1)*PAGE.gap}px`;
+ applyZoom();
  const status=document.querySelector('[data-document-status]');if(status)status.textContent=documentStatus();
  if(!next.stable)showMessage(tr('โปรดตรวจสอบการจัดหน้าในตัวอย่าง PDF','Please check the layout in PDF Preview'));
 }
@@ -100,7 +114,7 @@ async function openTemplate(template,reset=false){
  pagesLayer=el('div',{class:'paper-layer'});fieldPanel=el('div',{class:'field-panel'});sectionPanel=el('div');sidebar=el('aside',{class:'editor-sidebar','aria-label':tr('เครื่องมือข้อมูลและหัวข้อ','Field and section tools')},[fieldPanel,sectionPanel]);
  banner=el('div',{class:'validation-banner',role:'status',hidden:true});
  const mount=el('div',{id:'document-editor'});
- app.replaceChildren(el('div',{class:'editor-toolbar',id:'toolbar'}),banner,el('main',{class:'editor-workspace'},[el('div',{class:'canvas-scroll'},el('div',{class:'document-surface'},[pagesLayer,mount])),sidebar]));
+ app.replaceChildren(el('div',{class:'editor-toolbar',id:'toolbar'}),banner,el('main',{class:'editor-workspace'},[el('div',{class:'canvas-scroll'},el('div',{class:'document-zoom'},el('div',{class:'document-surface'},[pagesLayer,mount]))),sidebar]));
  editor=new Editor({element:mount,
   extensions:[StarterKit.configure({document:false,blockquote:false,code:false,codeBlock:false,horizontalRule:false,strike:false,link:false,trailingNode:false}),
    SessionData.extend({name:'doc',atom:false,selectable:false,content:'sessionData block+',topNode:true,addAttributes(){return {};},renderHTML(){return ['div',{},0];}}),

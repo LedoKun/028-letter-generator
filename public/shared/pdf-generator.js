@@ -247,11 +247,13 @@
     }
 
     function makeFooter(printedDate, logoDataUrl) {
+        // Five Sarabun lines at the existing spacing, including the stamp margins.
+        const textHeight = 6.5 * 1.3 * 0.85 * 5 + 2;
         return function (currentPage, pageCount) {
             return {
                 margin: [mm(13), 0, mm(13), mm(7)],
                 table: {
-                    widths: ['*', 120],
+                    widths: ['*', 180],
                     body: [[{
                         stack: [
                             bold(`เอกสารฉบับนี้จะสมบูรณ์เมื่อมีตราประทับเท่านั้น / Valid only with an official stamp.\nพิมพ์เมื่อ / Printed on: ${printedDate} (DD/MM/YYYY) · หน้า / Page: ${currentPage} of ${pageCount}`, { margin: [0, 1, 0, 1] }),
@@ -262,7 +264,7 @@
                         margin: [0, 0, 8, 0],
                         fontSize: 6.5,
                         lineHeight: 0.85
-                    }, { image: logoDataUrl, fit: [120, 28], alignment: 'right' }]]
+                    }, { image: logoDataUrl, height: textHeight, alignment: 'right' }]]
                 },
                 layout: {
                     hLineWidth: i => i === 0 ? 0.5 : 0,
