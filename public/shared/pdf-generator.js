@@ -3,7 +3,7 @@
     const AUTHOR = 'Public Health Center 28 Krung Thon Buri';
     const THAI_FONT = 'Sarabun';
     const EN_FONT = 'Sarabun';
-    const LOGO_URL = '/media/logo/logo.png';
+    const LOGO_URL = '/media/logo/028-logo.png';
     const MM = 72 / 25.4;
 
     let logoDataUrlPromise = null;
@@ -220,10 +220,10 @@
                 table: {
                     widths: [223, '*'],
                     body: [[
-                        { image: logoDataUrl, width: 223, margin: [0, 2, 4, 2] },
+                        { image: logoDataUrl, height: 223 * 1182 / 5300, margin: [0, 2, 4, 2] },
                         {
                             text: [
-                                ...splitTextRuns('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี\nPublic Health Center 28 - Krung Thon Buri\n', { bold: true, fontSize: 9 }),
+                                ...splitTextRuns('ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี\nPublic Health Center 28 Krung Thon Buri\n', { bold: true, fontSize: 9 }),
                                 ...splitTextRuns('สำนักอนามัย / Health Department\nกรุงเทพมหานคร / Bangkok Metropolitan Administration', { fontSize: 6.5 })
                             ],
                             alignment: 'right',

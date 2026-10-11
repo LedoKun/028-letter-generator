@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-11T10:44:17.646Z",
+  "generatedAt": "2026-10-11T13:49:46.255Z",
   "printedAt": "2026-10-10T03:00:00Z",
   "samples": [
     {
@@ -8,13 +8,15 @@
       "language": "th",
       "pages": 6,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "2a3ba3bdb193ce31c8e0b35b61cd22921a26186889bdc0ea019e2958420d61f6"
+      "sha256": "79a2fc4d1cc58f5b82150cbf19152635848073dded548f38a28af01495f1cf73"
     },
     {
       "type": "referral",
@@ -22,13 +24,15 @@
       "language": "en",
       "pages": 6,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "700c4b9a2b72c35befec7360cb1e389464b2ef9688ede4f0cbe4ecbd9811456c"
+      "sha256": "f13714d655ff73da9d7c6245af85faf15179b470795a167265157ce62f6d0f27"
     },
     {
       "type": "medical",
@@ -36,13 +40,15 @@
       "language": "th",
       "pages": 1,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "e12d0b7101480d5c795794ae30f4cb01f465ac8959d6c826a2d7d41db16da212"
+      "sha256": "692c4a9a8269d3e902816df8e5d62e7d3e2ff8daf218772dd82a986c208cd7ce"
     },
     {
       "type": "medical",
@@ -50,13 +56,15 @@
       "language": "en",
       "pages": 1,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "8d476804f0fe2cccebf255652971aef3cb25a5dec162304d8b20be62db263069"
+      "sha256": "71112d509bb87bae6ab0f9c5ba0298430b153c63a0fb0d1121b23382c1979f02"
     },
     {
       "type": "medication",
@@ -64,13 +72,15 @@
       "language": "th",
       "pages": 1,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "9a26f6e440af2563bca4cdfc20446f4a21c46ee501a68fd6dbfa56572d2aedfa"
+      "sha256": "2666b5b9aab90b98531d89d5ceffe3bb9d1ecae522f428d5b6853e39f0db6f64"
     },
     {
       "type": "medication",
@@ -78,13 +88,15 @@
       "language": "en",
       "pages": 1,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "2d38c1f95b9c061d4f8015569bd74ae599daa109db905d5692b21bad17874916"
+      "sha256": "c7f01582801600ae1a5d035def3681ac4a9a7c79d478c72eebb5d3dd0af7509e"
     },
     {
       "type": "freeform",
@@ -92,13 +104,15 @@
       "language": "th",
       "pages": 4,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "fb2793cfe50460de1fa944eef9d71466d00ea5773058c88a623cfe1eaa4d77a5"
+      "sha256": "3ad5820e5b9daf56ad31f7e5760c19cfc0f2a9c0eac2df4eb10de4158f421e0d"
     },
     {
       "type": "freeform",
@@ -106,13 +120,15 @@
       "language": "en",
       "pages": 4,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "24064e458860df0d9ca25b20943f0bc75c296ae156941a18aa1f842c8242f168"
+      "sha256": "e59e45440b4243bb77f4bd74653655bde11d36e31bd938ab4ef47abf1241d306"
     },
     {
       "type": "medical",
@@ -120,13 +136,15 @@
       "language": "th",
       "pages": 1,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "900a7e3fd50399e84221ebb4328b2d04a57b84ba99f84ce2b8014e5972bd8ea5"
+      "sha256": "3182dad579c076959466c94b61b96f10032c2a9587a0987f0dd667c233bedddd"
     },
     {
       "type": "medical",
@@ -134,13 +152,15 @@
       "language": "en",
       "pages": 1,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "2ffd87e7cc64b093ff9d3f61a219a2b272e3f1d81b2c2802133044af8a2b0ffe"
+      "sha256": "a359d647cde3575e62fac4a4345b6a9fda93cad9cc780b98d60275e2962aed4f"
     },
     {
       "type": "referral",
@@ -148,13 +168,15 @@
       "language": "th",
       "pages": 2,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "d799135e1fdd0c4e7c375f8f2181fa790fd3df47e9c4faa95e6109f0d4695937"
+      "sha256": "49e170f5d6cba3e4a3c8fc69e18653a930b775569701bb53f8b35ddcc0201597"
     },
     {
       "type": "referral",
@@ -162,13 +184,15 @@
       "language": "en",
       "pages": 2,
       "searchable": true,
-      "originalLogoPixelsIdentical": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
       "headerMatchesApprovedTypography": true,
       "footerMatchesApprovedTypography": true,
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "925e994aa54684bfc393c62695dce8304fa8a0f393df8821f42ca4c3cb8fc2f6"
+      "sha256": "abd9055afca85bda0cf18dd3cc95a13976bdd4f230851e3e620f05c304f73f2e"
     }
   ]
 }

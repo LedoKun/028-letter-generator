@@ -4,6 +4,7 @@ import { definition, label } from './fields.mjs';
 import { sessionOf, displayValue, normalise, fieldError, fieldRequirements, conditionActive, recalculate, templateProse, formatFieldInput, inputFitsField } from './model.mjs';
 import { patchSession } from './session.mjs';
 import { pictureWidthPercent } from './pictures.mjs';
+import { availableBlocks } from './templates.mjs';
 import { closeHistory } from '@tiptap/pm/history';
 export const SessionData=Node.create({name:'sessionData',atom:true,selectable:false,addAttributes(){return {template:{default:'referral'},language:{default:'th'},values:{default:{}},archives:{default:{}},fieldArchives:{default:{}},omitted:{default:[]},activeSections:{default:[]},availableFields:{default:[]},converted:{default:[]}};},renderHTML(){return ['span',{hidden:true,contenteditable:'false','data-session':''}];}});
 export const TemplateText=Mark.create({name:'templateText',inclusive:false,addAttributes(){return {th:{default:''},en:{default:''},summaryTh:{default:null},summaryEn:{default:null},historyTh:{default:null},historyEn:{default:null},examTh:{default:null},doctorId:{default:null},withoutTitleEn:{default:null},dateId:{default:null},partialTh:{default:null},partialEn:{default:null},countId:{default:null},singularEn:{default:null}};},renderHTML(){return ['span',{},0];}});
@@ -41,13 +42,14 @@ export const ClinicalGroup=Node.create({name:'clinicalGroup',group:'block',conte
 export const MedicationRow=Node.create({priority:50,name:'medicationRow',group:'block',content:'paragraph+',defining:true,addAttributes(){return {id:{default:''},kind:{default:'art'}};},renderHTML({node}){return ['ul',{'data-medication-row':node.attrs.id,'data-kind':node.attrs.kind,class:'medication-row'},['li',{},0]];}});
 export const BodyText=Node.create({priority:50,name:'bodyText',group:'block',content:'block+',defining:true,renderHTML(){return ['div',{'data-letter-body':'',class:'letter-body'},0];}});
 export const PageBreak=Node.create({name:'pageBreak',group:'block',atom:true,renderHTML(){return ['div',{'data-page-break':'',class:'manual-page-break',contenteditable:'false','aria-label':'Manual page break'}];}});
-export const InsertionPoint=Node.create({name:'insertionPoint',group:'block',atom:true,selectable:false,addAttributes(){return {id:{default:'clinical'},hint:{default:'Add clinical information'},kind:{default:'blocks'},section:{default:null},allowed:{default:null}};},renderHTML({node}){return ['div',{class:'block-insertion','data-insertion-point':node.attrs.id,contenteditable:'false'},['button',{type:'button'},'+ '+node.attrs.hint]];},addNodeView(){return ({node,editor,getPos})=>{
- const dom=document.createElement('div'),button=document.createElement('button');dom.className='block-insertion';dom.contentEditable='false';dom.dataset.insertionPoint=node.attrs.id;button.type='button';button.textContent='+ '+node.attrs.hint;button.setAttribute('aria-label',node.attrs.hint);dom.append(button);
+export const InsertionPoint=Node.create({name:'insertionPoint',group:'block',atom:true,selectable:false,addAttributes(){return {id:{default:'clinical'},hint:{default:'Add clinical information'},kind:{default:'blocks'},section:{default:null},allowed:{default:null},hidden:{default:false}};},renderHTML({node}){return ['div',{class:'block-insertion','data-insertion-point':node.attrs.id,contenteditable:'false',...(node.attrs.hidden?{hidden:true}:{})},['button',{type:'button'},'+ '+node.attrs.hint]];},addNodeView(){return ({node,editor,getPos})=>{
+ const dom=document.createElement('div'),button=document.createElement('button');dom.className='block-insertion';dom.contentEditable='false';button.type='button';dom.append(button);
+ const update=current=>{node=current;dom.dataset.insertionPoint=node.attrs.id;dom.hidden=node.attrs.hidden;button.textContent='+ '+node.attrs.hint;button.setAttribute('aria-label',node.attrs.hint);return true;};update(node);
  const open=automatic=>document.dispatchEvent(new CustomEvent('insertblocks',{detail:{...node.attrs,pos:getPos(),automatic}}));
  button.addEventListener('click',()=>open(false));
- button.addEventListener('focus',()=>{if(!button.suppressChoices&&node.attrs.kind!=='medicine')open(true);});
- button.addEventListener('keydown',event=>{if(event.isComposing||editor.view.composing||event.ctrlKey||event.metaKey)return;if(event.key==='Tab'&&!event.altKey&&moveField(editor,event.shiftKey)){event.preventDefault();event.stopPropagation();}else if(event.altKey&&event.key==='ArrowDown'&&node.attrs.kind!=='medicine'){event.preventDefault();open(false);}});
- return {dom,stopEvent:()=>true,ignoreMutation:()=>true};
+ button.addEventListener('focus',()=>{if(!button.suppressChoices&&!['medicine','section'].includes(node.attrs.kind))open(true);});
+ button.addEventListener('keydown',event=>{if(event.isComposing||editor.view.composing||event.ctrlKey||event.metaKey)return;if(event.key==='Tab'&&!event.altKey&&moveField(editor,event.shiftKey)){event.preventDefault();event.stopPropagation();}else if(event.altKey&&event.key==='ArrowDown'&&!['medicine','section'].includes(node.attrs.kind)){event.preventDefault();open(false);}});
+ return {dom,stopEvent:()=>true,ignoreMutation:()=>true,update:current=>current.type.name==='insertionPoint'&&update(current)};
 };}});
 export const Picture=Node.create({name:'picture',group:'block',atom:true,draggable:true,addAttributes(){return {src:{default:''},naturalWidth:{default:1},naturalHeight:{default:1},width:{default:100},alt:{default:'Inserted picture'},caption:{default:''}};},renderHTML({node}){
  return ['figure',{class:'picture-node','data-picture':''},['img',{src:node.attrs.src,alt:node.attrs.alt,style:`width:${pictureWidthPercent(node.attrs)}%;height:auto`}],...(node.attrs.caption?[['figcaption',{class:'picture-caption'},node.attrs.caption]]:[])];
@@ -82,6 +84,7 @@ export function tabStops(editor) {
 }
 export function fieldsInOrder(editor){return tabStops(editor).filter(entry=>entry.node.type.name==='field');}
 export function focusStop(editor,entry,choices=true){
+ if(entry?.node.attrs.hidden)return;
  if(entry?.node.type.name!=='insertionPoint'){focusField(editor,entry,choices);return;}
  const button=editor.view.nodeDOM(entry.pos)?.querySelector('button');if(!button)return;
  button.suppressChoices=!choices;button.focus();button.scrollIntoView({block:'nearest',inline:'nearest'});button.suppressChoices=false;
@@ -106,10 +109,10 @@ export function commitField(editor,entry=activeField(editor)) {
  if(!sessionOf(editor.state.doc).values[id]?.editing)return;
  updateSession(editor,s=>{const value=s.values[id];if(value?.editing)s.values[id]={...value,value:normalise(id,value.value,s.language),editing:false};return s;});
 }
-export function moveField(editor,back=false) {
+export function moveField(editor,back=false,origin=null) {
  if(editor.view.composing)return false;const point=document.activeElement?.closest?.('[data-insertion-point]'),field=activeField(editor);
- if(!point&&!field)return false;commitField(editor,field);
- const stops=tabStops(editor),index=stops.findIndex(entry=>point?entry.node.type.name==='insertionPoint'&&entry.node.attrs.id===point.dataset.insertionPoint:entry.node.type.name==='field'&&entry.node.attrs.occurrence===field.node.attrs.occurrence),next=stops[index+(back?-1:1)];
+ if(!origin&&!point&&!field)return false;commitField(editor,field);
+ const stops=tabStops(editor),index=stops.findIndex(entry=>point?entry.node.type.name==='insertionPoint'&&entry.node.attrs.id===point.dataset.insertionPoint:entry.node.type.name==='field'&&entry.node.attrs.occurrence===field?.node.attrs.occurrence),next=origin?(back?[...stops].reverse().find(entry=>entry.pos<origin.pos):stops.find(entry=>entry.pos>origin.pos)):stops[index+(back?-1:1)];
  if(!next){if(back)return false;document.querySelector('[data-pdf-preview]')?.focus();return true;}
  focusStop(editor,next);return true;
 }
@@ -184,6 +187,10 @@ export const FieldBehaviour=Extension.create({
      }
      if(['phrase','paragraph','heading','listItem'].includes(node.type.name)) {
       const hidden=!conditionActive(node.attrs.condition,session)||(node.attrs.guard||[]).some(id=>session.omitted.includes(id));
+      if(hidden!==node.attrs.hidden)edits.push({pos,node,attrs:{...node.attrs,hidden}});
+     }
+     if(node.type.name==='insertionPoint'){
+      const hidden=node.attrs.kind!=='medicine'&&!availableBlocks(session,node.attrs).length;
       if(hidden!==node.attrs.hidden)edits.push({pos,node,attrs:{...node.attrs,hidden}});
      }
      if(node.isText){const m=node.marks.find(mark=>mark.type.name==='templateText');if(m){const text=templateProse(node.text,m.attrs,session)||'\u200B';if(text!==node.text)edits.push({pos,node,replace:text});}}

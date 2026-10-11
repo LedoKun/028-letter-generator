@@ -14,10 +14,10 @@
         var headerHTML = `
             <div class="page-header-running-container">
                 <div class="header-logo-column">
-                    <img src="../media/logo/logo.png" alt="Logo" class="header-logo">
+                    <img src="../media/logo/028-logo.png" alt="Logo" class="header-logo">
                 </div>
                 <div class="header-text-column thai-font">
-                    <div class="clinic-name-main">ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี<br>PUBLIC HEALTH CENTER 28 KRUNG THON BURI</div>
+                    <div class="clinic-name-main">ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี<br>Public Health Center 28 Krung Thon Buri</div>
                     <div class="clinic-name-sub">สำนักอนามัย / Health Department<br>กรุงเทพมหานคร / Bangkok Metropolitan Administration</div>
                 </div>
             </div>`;

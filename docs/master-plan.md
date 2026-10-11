@@ -206,3 +206,12 @@ Maintain the working application and update:
 * `docs/verification.md`, recording commands actually run, passed/failed/skipped checks, platform coverage and genuine limitations.
 
 Do not report planned checks as passed. Actual results are recorded in verification.md. A qualified clinical editorial approval has not been obtained; record that status explicitly before official clinical deployment.
+
+## Latest text and insertion-control amendments
+
+* Preserve acronym casing in HIV care and treatment.
+* Use Public Health Center 28 Krung Thon Buri in the official English header and letter body; preserve other approved letterhead styling and footer content.
+* Use Medical Referral Letter in Title Case. Add one blank paragraph after every built-in template title, retained in PDF output.
+* Add TMX/SMP 80/400 mg directly on click/Enter/Space without a dropdown; focus alone must not insert it.
+* Hide each finite Add control once all its blocks are included, skip it during Tab navigation and restore it on block removal/Undo. Preserve shared values and archived prose. Medicine rows remain repeatable.
+* Use the supplied Public Health Center 28 logo in protected headers, preserving the original rendered height and its proportions. Bundle a PNG copy for local PDF support, while retaining original historical samples/assets.

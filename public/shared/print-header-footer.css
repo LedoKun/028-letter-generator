@@ -43,8 +43,8 @@
 }
 
 .header-logo {
-    width: 100%;
-    height: auto;
+    width: auto;
+    height: calc(350px * 1182 / 5300);
     display: block;
 }
 

@@ -27,7 +27,7 @@ const definitions = [
  ['document.title','documentTitle','Document title','ชื่อเอกสาร','text'],
  ['document.addressee','addressee','Addressee','ผู้รับหนังสือ','text'],
  ['document.body','letterBody','Letter body','เนื้อหาหนังสือ','multiline'],
- ['referral.purposes','referralIntent','Referral purpose','วัตถุประสงค์ในการส่งตัว','multi',{options:[...options('referralIntent').map(o=>({...o,labels:[o.value==='continuedCare'?'รับการรักษาต่อ':o.labels[0],o.labels[1].replace('Specialized','Specialised').replace(/^TB treatment$/,'Tuberculosis treatment').replace('Referral for Continued Care','continued care').replace(/^[A-Z]/,letter=>letter.toLowerCase())]})),{value:'custom',labels:['วัตถุประสงค์อื่น ๆ','Other purpose (specify)']}]}],
+ ['referral.purposes','referralIntent','Referral purpose','วัตถุประสงค์ในการส่งตัว','multi',{options:[...options('referralIntent').map(o=>({...o,labels:[o.value==='continuedCare'?'รับการรักษาต่อ':o.labels[0],o.labels[1].replace('Specialized','Specialised').replace(/^TB treatment$/,'Tuberculosis treatment').replace('Referral for Continued Care','continued care').replace(/^[A-Z](?=[a-z])/,letter=>letter.toLowerCase())]})),{value:'custom',labels:['วัตถุประสงค์อื่น ๆ','Other purpose (specify)']}]}],
  ['referral.customPurpose','referralIntentCustom','Custom referral purpose','วัตถุประสงค์อื่น ๆ ในการส่งต่อ','text'],
  ['hiv.napId','napId','NAP-ID','NAP-ID','napId'],
  ['hiv.diagnosed','firstDiagnosisDateRetro','Initial diagnosis date','วันที่วินิจฉัยครั้งแรก','partialDate'],

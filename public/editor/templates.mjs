@@ -65,7 +65,7 @@ export function buildSection(id,language){
   content.push(P([G('hiv.initialCD4Percent',[B('ร้อยละ CD4 เมื่อมารับบริการครั้งแรก ','CD4 percentage at first visit: '),F('hiv.initialCD4Percent'),T('%','%'),G('hiv.initialCD4Date',[measured(),F('hiv.initialCD4Date')])])],{condition:['percentOnly']}));
   content.push(line('hiv.adherence','ART adherence ','The patient reported ART adherence of ','','.'));
   content.push(P([G('hiv.latestVL',[T('ผลตรวจ HIV VL ล่าสุดเท่ากับ ','The latest HIV VL was '),F('hiv.latestVL'),T(' copies/mL',' copies/mL'),G('hiv.latestVLDate',[D('hiv.latestVLDate',' ตรวจเมื่อวันที่ ',', measured on ',' ตรวจเมื่อ ',', measured in '),F('hiv.latestVLDate')]),T('','.')])]));
-  content.push(buildSection('art',language),insertionPoint('hiv.optional','Add TMX/SMP 80/400 mg','blocks','hiv',['oi']),buildSection('pickup',language));
+  content.push(buildSection('art',language),insertionPoint('hiv.optional','Add TMX/SMP 80/400 mg','section','hiv',['oi']),buildSection('pickup',language));
  }else if(id==='syphilis'){
   content.push(dateLine('syphilis.start','เริ่มการรักษาโรคซิฟิลิสเมื่อวันที่ ','Treatment for syphilis commenced on ','เริ่มการรักษาเมื่อ ','Treatment commenced in '),line('syphilis.regimen','ได้รับการรักษาด้วย ','The prescribed treatment regimen is ','','.'));
   const schedule=[1,2,3].map(n=>line(`syphilis.dose${n}`,`กำหนดฉีด Benzathine penicillin G เข็มที่ ${n} `,`Scheduled Benzathine penicillin G dose ${n} on `));
@@ -94,13 +94,13 @@ export function buildSection(id,language){
  else if(id==='lab'){content.push(...bullets([P([G('attachments.lab',[F('attachments.lab')])])],language==='th'?'orderedList':'bulletList'));}
  else if(id==='attachments'){content.push(...bullets([P([T('เอกสารอื่น ๆ','Supplementary documentation'),G('attachments.other',[T(' ได้แก่ ',': '),F('attachments.other')])])],language==='th'?'orderedList':'bulletList'));}
  else if(id==='examination'){
-  content.push(P([T('ผู้ป่วยรายนี้ได้รับการตรวจรักษาที่ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี เมื่อวันที่ ','The above-named patient was clinically examined at Public Health Centre 28, Krung Thon Buri, on '),F('examination.date'),T('','.')],{guard:['examination.date']}),line('examination.findings','อาการและผลการตรวจร่างกาย ','Symptoms and examination findings: '),line('examination.diagnosis','การวินิจฉัยโรค ','Diagnosis: '));
+  content.push(P([T('ผู้ป่วยรายนี้ได้รับการตรวจรักษาที่ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี เมื่อวันที่ ','The above-named patient was clinically examined at Public Health Center 28 Krung Thon Buri on '),F('examination.date'),T('','.')],{guard:['examination.date']}),line('examination.findings','อาการและผลการตรวจร่างกาย ','Symptoms and examination findings: '),line('examination.diagnosis','การวินิจฉัยโรค ','Diagnosis: '));
  }else if(id==='leave'){
   content.push(P([T('เห็นสมควรให้ผู้ป่วยหยุดพักรักษาตัว ตั้งแต่วันที่ ','The patient has been advised to take medical leave from '),F('leave.start'),T(' ถึง ',' to '),F('leave.end'),T(' รวมเป็นเวลาทั้งสิ้น ',' inclusive, for a total of '),F('leave.days'),Q('leave.days',' วัน',' calendar day.',' calendar days.')],{guard:['leave.start','leave.end','leave.days']}));
  }else if(id==='syphilisTreatment'){content.push(P([G('treatment.syphilisDate',[T('ผู้ป่วยได้รับการรักษาโรคซิฟิลิส เมื่อวันที่ ','The patient was administered treatment for syphilis on '),F('treatment.syphilisDate'),T('','.')])]));}
  else if(id==='tbTreatment'){content.push(P([G('treatment.tbDate',[T('ผู้ป่วยได้รับการรักษาวัณโรคจนครบกำหนดการรักษาเป็นที่เรียบร้อยแล้ว เมื่อวันที่ ','The patient successfully completed a course of treatment for tuberculosis on '),F('treatment.tbDate'),T('','.')])]));}
  else if(id==='comments'){content.push(line('doctor.comments','ความเห็นเพิ่มเติม ','Other comments: '));}
- else if(id==='attendance'){content.push(line('examination.date','ขอรับรองว่าผู้ป่วยมารับการตรวจรักษาที่ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี เมื่อวันที่ ','I confirm that the patient attended Public Health Centre 28, Krung Thon Buri, for medical assessment on ','','.'));}
+ else if(id==='attendance'){content.push(line('examination.date','ขอรับรองว่าผู้ป่วยมารับการตรวจรักษาที่ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี เมื่อวันที่ ','I confirm that the patient attended Public Health Center 28 Krung Thon Buri for medical assessment on ','','.'));}
  if(['admission','financial','examination','leave','syphilisTreatment','tbTreatment','comments','attendance'].includes(id)&&content[0]?.type==='paragraph')content[0].attrs={...content[0].attrs,spacingBefore:8};
  const disease=SECTIONS[id].disease;
  return {type:'clinicalSection',attrs:{id,diagnosis:disease&&id!=='otherHistory'},content:disease?id==='otherHistory'?bullets(content):[{type:'bulletList',content:[{type:'listItem',content:[P([B(...SECTIONS[id].labels)]),...bullets(content)]}]}]:['oi','pickup'].includes(id)?bullets(content):content.length?content:[P([])]};
@@ -124,7 +124,8 @@ export function createDocument(template,language='th',doctor={}){
  for(const[id,value]of Object.entries(doctor))if(id.startsWith('doctor.'))values[id]={value,status:'preference'};
  const body=[P([T('วันที่ ','Date: '),F('document.date')],{textAlign:'right'})];
  if(template==='freeform'){values['document.title']={value:language==='th'?'บันทึกข้อความ':'Medical Notes',status:'default'};body.push({type:'heading',attrs:{level:1,textAlign:'center'},content:[F('document.title')]});}
- else body.push(template==='referral'?{type:'heading',attrs:{level:1,textAlign:'center'},content:[R('หนังสือส่งตัวผู้ป่วย','MEDICAL REFERRAL LETTER','หนังสือสรุปประวัติการรักษา','MEDICAL SUMMARY')]}:template==='medical'?{type:'heading',attrs:{level:1,textAlign:'center'},content:[T('ใบรับรองแพทย์','Medical Certificate')]}:{...H(...TEMPLATE_NAMES[template]),attrs:{level:1,textAlign:'center'}});
+ else body.push(template==='referral'?{type:'heading',attrs:{level:1,textAlign:'center'},content:[R('หนังสือส่งตัวผู้ป่วย','Medical Referral Letter','หนังสือสรุปประวัติการรักษา','Medical Summary')]}:template==='medical'?{type:'heading',attrs:{level:1,textAlign:'center'},content:[T('ใบรับรองแพทย์','Medical Certificate')]}:{...H(...TEMPLATE_NAMES[template]),attrs:{level:1,textAlign:'center'}});
+ body.push(P([],{spacingAfter:8,role:'titleSpace'}));
  values['document.addressee']={value:language==='th'?'เจ้าหน้าที่ผู้เกี่ยวข้อง':template==='referral'?'To Whom It May Concern':'Whom It May Concern',status:'default'};
  if(template!=='medical')body.push(P([G('document.addressee',[B('เรียน ',template==='referral'?'To: ':'To '),F('document.addressee'),T('',template==='referral'?'':':')])]));
  if(template==='referral'){
@@ -145,13 +146,13 @@ export function createDocument(template,language='th',doctor={}){
    ]),group('medications',[]));
   }
   if(template==='medication'){
-   body.push(P([T('หนังสือรับรองฉบับนี้ขอรับรองว่าผู้ป่วยรายนี้อยู่ระหว่างการดูแลรักษาที่ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี และมีความจำเป็นต้องนำยารายการต่อไปนี้ติดตัวเพื่อใช้ในการรักษาระหว่างการเดินทาง','This is to certify that the patient named above is currently under the care of Public Health Centre 28, Krung Thon Buri, and is required to carry the medications listed below for personal therapeutic use during travel.')]));
+   body.push(P([T('หนังสือรับรองฉบับนี้ขอรับรองว่าผู้ป่วยรายนี้อยู่ระหว่างการดูแลรักษาที่ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี และมีความจำเป็นต้องนำยารายการต่อไปนี้ติดตัวเพื่อใช้ในการรักษาระหว่างการเดินทาง','This is to certify that the patient named above is currently under the care of Public Health Center 28 Krung Thon Buri and is required to carry the medications listed below for personal therapeutic use during travel.')]));
    const medicines=buildSection('travelMedications',language);medicines.content.splice(1,0,medicationRow('travel','1',language));body.push(medicines);
   }
   if(template==='medical')body.push(insertionPoint('clinical','Add examination, treatment or medical leave','blocks',null,['examination','leave','syphilisTreatment','tbTreatment']));
  }
  if(template==='referral')body.push(group('closing',[insertionPoint('closing','Add a closing request','closing',null,['admission','financial'])]));
- if(template!=='medical')body.push(P([T('หากท่านต้องการข้อมูลเพิ่มเติม กรุณาติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรี','Please contact Public Health Centre 28, Krung Thon Buri, should you require any further information.')],{role:'closing',spacingBefore:8}));
+ if(template!=='medical')body.push(P([T('หากท่านต้องการข้อมูลเพิ่มเติม กรุณาติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรี','Please contact Public Health Center 28 Krung Thon Buri, should you require any further information.')],{role:'closing',spacingBefore:8}));
  if(template==='referral')body.push(group('enclosures',[groupHeading('เอกสารแนบ','Enclosures',REFERRAL_POINTS.enclosures),buildSection('lab',language),insertionPoint('enclosures','Add enclosures','closing',null,REFERRAL_POINTS.enclosures)]));
  body.push(group('signature',[P([],{spacingAfter:8,role:'signatureLead'}),P([T('ขอแสดงความนับถือ','Yours faithfully,')],{role:'signature'}),P([],{spacingAfter:44,role:'signatureSpace'}),P([physician()]),P([G('doctor.license',[T('เลขที่ใบอนุญาตประกอบวิชาชีพเวชกรรม ','Medical licence number: '),F('doctor.license')])])]));
  return {type:'doc',content:[{type:'sessionData',attrs:{template,language,values,archives:{},fieldArchives:{},omitted:[]}},...body]};
@@ -171,6 +172,9 @@ export const INSERT_BLOCKS={...SECTIONS,
  cd4:{id:'cd4',labels:['ผล CD4 เมื่อมารับบริการครั้งแรก','CD4 at first visit'],documents:['referral','freeform'],closing:false},
  viralLoad:{id:'viralLoad',labels:['ผล HIV viral load ล่าสุด','Latest HIV viral load'],documents:['referral','freeform'],closing:false}
 };
+export function availableBlocks(session,context={}){
+ return Object.values(INSERT_BLOCKS).filter(section=>section.documents.includes(session.template)&&!session.activeSections?.includes(section.id)&&(!context.allowed||context.allowed.includes(section.id))&&(context.kind!=='closing'||section.closing));
+}
 export function buildBlock(id,language,template='referral'){
  if(SECTIONS[id])return buildSection(id,language);
  const {T,B,F,P,G,line}=writer(language),content=[];

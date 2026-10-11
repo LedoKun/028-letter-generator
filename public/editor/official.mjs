@@ -1,7 +1,7 @@
 // Protected letterhead; typography follows the user-approved Sarabun and size changes.
 export function officialHeader() {
  const header=document.createElement('div');header.className='official-header';header.contentEditable='false';
- header.innerHTML='<img src="/media/logo/logo.png" alt="Clinic logo"><div><strong>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี<br>Public Health Center 28 - Krung Thon Buri</strong><br><span>สำนักอนามัย / Health Department<br>กรุงเทพมหานคร / Bangkok Metropolitan Administration</span></div>';
+ header.innerHTML='<img src="/media/logo/028-logo.png" alt="Clinic logo"><div><strong>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี<br>Public Health Center 28 Krung Thon Buri</strong><br><span>สำนักอนามัย / Health Department<br>กรุงเทพมหานคร / Bangkok Metropolitan Administration</span></div>';
  return header;
 }
 export function officialFooter(page,count,date=new Date()) {

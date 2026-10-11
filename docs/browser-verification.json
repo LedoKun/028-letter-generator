@@ -5,9 +5,9 @@
     "firefox"
   ],
   "stats": {
-    "startTime": "2026-10-11T10:46:33.868Z",
-    "duration": 173657.895,
-    "expected": 271,
+    "startTime": "2026-10-11T13:43:37.327Z",
+    "duration": 227348.893,
+    "expected": 313,
     "skipped": 1,
     "unexpected": 0,
     "flaky": 0
@@ -15,7 +15,19 @@
   "skipped": [
     "Firefox: Chromium-specific composition protocol test; the Chromium case passed"
   ],
-  "casesPerProject": 136,
-  "source": "Latest full npm run test:browser",
-  "revision": "Signature leading blank line and shared keyboard navigation/selection for fields and insertion buttons"
+  "casesPerProject": 157,
+  "source": "Full npm run test:browser before the subsequent logo-only update; final logo/offline recheck recorded separately",
+  "revision": "Clinic wording, blank line after titles, direct TMX/SMP and completed insertion controls",
+  "finalLogoChecks": {
+    "command": "npm run test:browser -- tests/browser/completion-controls.spec.mjs tests/browser/editor.spec.mjs --grep 'blank line after the title|cached production application'",
+    "stats": {
+      "startTime": "2026-10-11T13:49:19.124Z",
+      "duration": 13254.373,
+      "expected": 18,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "coverage": "All four templates in Thai/English: supplied logo source, unchanged rendered height and proportions, blank line below title; Chromium/Firefox offline reload and non-destructive PDF generation"
+  }
 }

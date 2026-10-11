@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {FIELDS,definition,legacyFieldMap,TEMPLATE_NAMES} from '../public/editor/fields.mjs';
-import {createDocument,buildSection,medicationRow,SECTIONS,INSERT_BLOCKS,buildBlock,FINANCIAL,referralPoint,sectionDefaults,REFERRAL_POINTS} from '../public/editor/templates.mjs';
+import {createDocument,buildSection,medicationRow,SECTIONS,INSERT_BLOCKS,buildBlock,FINANCIAL,referralPoint,sectionDefaults,REFERRAL_POINTS,availableBlocks} from '../public/editor/templates.mjs';
 import {parseClinicalDate,displayDate,calculateAge,addCalendarDays,inclusiveDays,today} from '../public/editor/dates.mjs';
 import {hydrate,sessionOf,walk,valueOf,displayValue,normalise,recalculate,validateDocument,fieldRequirements,visibleFields,formatFieldInput,templateProse,fieldError,inputFitsField} from '../public/editor/model.mjs';
 import {toPdf} from '../public/editor/pdf.mjs';
@@ -18,6 +18,22 @@ function pdfText(content){if(Array.isArray(content))return content.map(pdfText).
 const output=doc=>pdfText(toPdf(doc));
 function appendMedicine(doc,sectionId,row){walk(section(doc,sectionId),parent=>{const index=parent.content?.findIndex(n=>n.type==='insertionPoint'&&n.attrs.id==='medicine:'+sectionId);if(index>=0)parent.content.splice(index,0,row);});}
 function section(doc,id){let found;walk(doc,node=>{if(node.type==='clinicalSection'&&node.attrs.id===id)found=node;});return found;}
+test('referral purpose retains acronym casing and the clinic uses its official name',()=>{
+ const option=FIELDS['referral.purposes'].options.find(option=>option.value==='hivCareTreatment');assert.equal(option.labels[1],'HIV care and treatment');
+ const doc=make('referral','en',{'referral.purposes':['hivCareTreatment']});const text=output(doc);assert.match(text,/Medical Referral Letter/);assert.match(text,/for HIV care and treatment/);assert.match(text,/Please contact Public Health Center 28 Krung Thon Buri, should you require any further information\./);
+ for(const template of Object.keys(TEMPLATE_NAMES))assert.doesNotMatch(output(make(template,'en',{},template==='medical'?['examination','attendance']:[])),/Public Health Centre|Public Health Center 28,/);
+});
+for(const template of Object.keys(TEMPLATE_NAMES))for(const language of ['th','en'])test(`one blank line follows the title in the editor and PDF: ${template}/${language}`,()=>{
+ const doc=make(template,language),index=doc.content.findIndex(node=>node.type==='heading'&&node.attrs.level===1),space=doc.content[index+1];
+ assert.equal(space.type,'paragraph');assert.equal(space.attrs.role,'titleSpace');assert.deepEqual(space.content,[]);assert.equal(space.attrs.spacingAfter,8);
+ const pdf=toPdf(doc),titleIndex=pdf.findIndex(block=>block.fontSize===16);assert.ok(titleIndex>=0);assert.deepEqual(pdf[titleIndex+1],{text:'',margin:[0,0,0,8]});
+});
+test('block availability returns only unused choices and restores removed sections',()=>{
+ const session=sessionOf(make()),context={allowed:REFERRAL_POINTS.clinical};assert.deepEqual(availableBlocks(session,context).map(block=>block.id),REFERRAL_POINTS.clinical);
+ session.activeSections.push(...REFERRAL_POINTS.clinical);assert.deepEqual(availableBlocks(session,context),[]);session.activeSections=session.activeSections.filter(id=>id!=='hbv');assert.deepEqual(availableBlocks(session,context).map(block=>block.id),['hbv']);
+ session.activeSections.push('oi');assert.deepEqual(availableBlocks(session,{allowed:['oi']}),[]);session.activeSections=session.activeSections.filter(id=>id!=='oi');assert.deepEqual(availableBlocks(session,{allowed:['oi']}).map(block=>block.id),['oi']);
+ const point=[];walk(buildSection('hiv','en'),node=>{if(node.type==='insertionPoint'&&node.attrs.id==='hiv.optional')point.push(node);});assert.equal(point[0].attrs.kind,'section');assert.deepEqual(point[0].attrs.allowed,['oi']);
+});
 for(const [input,th,en]of [['09/10/2026','09/10/2569','09/10/2026'],['09/10/2569','09/10/2569','09/10/2026'],['2026','2569','2026'],['2569','2569','2026'],['10/2569','10/2569','10/2026'],['29/02/2567','29/02/2567','29/02/2024'],['31/12/2026','31/12/2569','31/12/2026']])test(`precision-preserving BE/CE date ${input}`,()=>{
  assert.equal(displayDate(input,'th'),th);assert.equal(displayDate(input,'en'),en);const ce=parseClinicalDate(input).iso;assert.equal(displayDate(ce,'th'),th);assert.equal(parseClinicalDate(displayDate(ce,'th')).iso,ce);
 });
@@ -89,23 +105,23 @@ for(const language of ['th','en'])test(`ART adherence uses the requested prefix:
  assert.doesNotMatch(text,/ผู้ป่วยรายงานความสม่ำเสมอในการรับประทาน ART เท่ากับ/);
 });
 test('formatting and manual prose survive conversion; editing decorations are excluded',()=>{
- const doc=make();doc.content.splice(3,0,{type:'paragraph',attrs:{textAlign:'center',indent:2,spacingAfter:12},content:[{type:'text',text:'Manual 2569 prose.',marks:[{type:'bold'},{type:'italic'},{type:'underline'},{type:'textStyle',attrs:{fontSize:'14pt'}}]}]});const content=toPdf(doc),p=content.find(n=>n.text?.some(t=>t.text==='Manual 2569 prose.'));
+ const doc=make();doc.content.splice(3,0,{type:'paragraph',attrs:{textAlign:'center',indent:2,spacingAfter:12},content:[{type:'text',text:'Manual 2569 prose.',marks:[{type:'bold'},{type:'italic'},{type:'underline'},{type:'textStyle',attrs:{fontSize:'14pt'}}]}]});const content=toPdf(doc),p=content.find(n=>n.text?.some?.(t=>t.text==='Manual 2569 prose.'));
  assert.equal(p.alignment,'center');assert.deepEqual(p.margin,[24,0,0,12]);assert.equal(p.text[0].bold,true);assert.equal(p.text[0].italics,true);assert.equal(p.text[0].decoration,'underline');assert.equal(p.text[0].fontSize,14);assert.doesNotMatch(JSON.stringify(content),/background|data-field|shortcut|clinical-field|N\/A|is-focused/);
 });
 test('manual page breaks, bulleted and numbered lists export as selectable PDF text',()=>{
  const doc=make();doc.content.splice(3,0,{type:'pageBreak'},...['bulletList','orderedList'].map(type=>({type,content:[{type:'listItem',content:[{type:'paragraph',content:[{type:'text',text:'List item'}]}]}]})));const pdf=toPdf(doc);assert.ok(pdf.some(n=>n.pageBreak==='before'));assert.ok(pdf.some(n=>n.ul));assert.ok(pdf.some(n=>n.ol));assert.match(pdfText(pdf),/List item/);
 });
 test('PDF conversion is pure even with invalid or omitted values',()=>{const doc=make('referral','en',{'patient.dob':'bad'},['hiv','financial']);sessionOf(doc).archives.hbv=buildSection('hbv','en');sessionOf(doc).omitted.push('patient.passport');const before=JSON.stringify(doc);toPdf(doc);validateDocument(doc);assert.equal(JSON.stringify(doc),before);});
-test('official header/footer retain wording, logo and margins with approved size changes',()=>{
+test('official header/footer preserve the approved logo height, text and layout',()=>{
  const current=readFileSync(new URL('../public/shared/pdf-generator.js',import.meta.url),'utf8'),legacy=readFileSync(new URL('./fixtures/legacy-pdf-generator.cjs',import.meta.url),'utf8');
- const official=source=>source.slice(source.indexOf('    function makeHeader('),source.indexOf('    function downloadBlob(')).replace(/fontSize:\s*\d+(?:\.\d+)?/g,'fontSize: APPROVED');assert.equal(official(current),official(legacy));
+ const official=source=>source.slice(source.indexOf('    function makeHeader('),source.indexOf('    function downloadBlob(')).replace(/fontSize:\s*\d+(?:\.\d+)?/g,'fontSize: APPROVED');assert.equal(official(current),official(legacy).replace('Public Health Center 28 - Krung Thon Buri','Public Health Center 28 Krung Thon Buri').replace('width: 223, margin:', 'height: 223 * 1182 / 5300, margin:'));
 });
 test('all first-visit CD4 labels use the required terminology and preserve legacy identifiers',()=>{
  assert.equal(legacyFieldMap.initialCD4,'hiv.initialCD4');assert.equal(FIELDS['hiv.initialCD4'].labels[1],'CD4 at first visit');assert.equal(FIELDS['hiv.initialCD4Percent'].labels[1],'CD4 percentage at first visit');assert.equal(FIELDS['hiv.initialCD4Date'].labels[1],'Date of CD4 test at first visit');const source=readFileSync(new URL('../public/editor/fields.mjs',import.meta.url),'utf8')+readFileSync(new URL('../public/editor/templates.mjs',import.meta.url),'utf8')+readFileSync(new URL('../public/shared/pdf-templates.js',import.meta.url),'utf8');assert.doesNotMatch(source,/Baseline CD4/);
 });
-test('no selected referral purpose becomes a medical summary without unsupported referral prose',()=>{const doc=make('referral','en',{'referral.purposes':[]});const text=output(doc);assert.match(text,/MEDICAL SUMMARY/);assert.doesNotMatch(text,/am writing to refer|Purpose of Referral|Primary purpose/);});
+test('no selected referral purpose becomes a medical summary without unsupported referral prose',()=>{const doc=make('referral','en',{'referral.purposes':[]});const text=output(doc);assert.match(text,/Medical Summary/);assert.doesNotMatch(text,/am writing to refer|Purpose of Referral|Primary purpose/);});
 test('a custom purpose can be used alone without dangling subject punctuation',()=>{const doc=make('referral','en',{'referral.purposes':[],'referral.customPurpose':'Clinical assessment'});assert.match(output(doc),/refer the patient detailed below for Clinical assessment/);assert.doesNotMatch(output(doc),/Primary purpose\(s\):/);});
-test('partial formatting within a field is preserved when its displayed text is unchanged',()=>{const doc=make('referral','en',{'patient.name':'JOHN SMITH'});walk(doc,n=>{if(n.type==='field'&&n.attrs.id==='patient.name')n.content=[{type:'text',text:'JOHN',marks:[{type:'bold'}]},{type:'text',text:' SMITH'}];});const pdf=toPdf(doc);const runs=pdf.find(p=>p.text?.some(r=>r.text==='JOHN')).text;assert.equal(runs.find(r=>r.text==='JOHN').bold,true);assert.equal(runs.find(r=>r.text===' SMITH').bold,undefined);});
+test('partial formatting within a field is preserved when its displayed text is unchanged',()=>{const doc=make('referral','en',{'patient.name':'JOHN SMITH'});walk(doc,n=>{if(n.type==='field'&&n.attrs.id==='patient.name')n.content=[{type:'text',text:'JOHN',marks:[{type:'bold'}]},{type:'text',text:' SMITH'}];});const pdf=toPdf(doc);const runs=pdf.find(p=>p.text?.some?.(r=>r.text==='JOHN')).text;assert.equal(runs.find(r=>r.text==='JOHN').bold,true);assert.equal(runs.find(r=>r.text===' SMITH').bold,undefined);});
 test('restored fields retain partial formatting and multiline values',()=>{
  const doc=make('referral','en',{'history.other':'First line\nSecond line'},['otherHistory']);let field;walk(doc,n=>{if(n.type==='field'&&n.attrs.id==='history.other')field=n;});
  field.content=[{type:'text',text:'First line',marks:[{type:'bold'}]},{type:'hardBreak'},{type:'text',text:'Second line'}];
@@ -158,7 +174,7 @@ test('safe defaults and referral header ordering match the reviewed letter struc
  const s=sessionOf(doc);for(const id of ['pickup.days','pickup.date','art.1.tablets','syphilis.regimen','examination.date'])assert.equal(valueOf(s,id),'');
 });
 test('letter title and salutation have intentional formatting in PDF',()=>{
- const doc=make('freeform');doc.content.find(n=>n.type==='bodyText').content[0].content=[{type:'text',text:'Body text'}];const pdf=toPdf(doc),title=pdf.find(p=>p.text?.some(r=>r.text==='Medical Notes')),to=pdf.find(p=>p.text?.some(r=>r.text==='To '));assert.equal(title.fontSize,16);assert.equal(title.bold,true);assert.equal(title.alignment,'center');assert.equal(to.text.find(r=>r.text==='To ').bold,true);
+ const doc=make('freeform');doc.content.find(n=>n.type==='bodyText').content[0].content=[{type:'text',text:'Body text'}];const pdf=toPdf(doc),title=pdf.find(p=>p.text?.some?.(r=>r.text==='Medical Notes')),to=pdf.find(p=>p.text?.some?.(r=>r.text==='To '));assert.equal(title.fontSize,16);assert.equal(title.bold,true);assert.equal(title.alignment,'center');assert.equal(to.text.find(r=>r.text==='To ').bold,true);
 });
 test('original referral names and bullet structure avoid duplicate diagnoses',()=>{
  for(const language of ['th','en']){
@@ -269,7 +285,7 @@ test('English punctuation survives a Thai-to-English round trip without exportin
 test('referral grouping keeps requests and enclosures in the intended order',()=>{
  const doc=make('referral','en',{'history.other':'Recorded past history'},['hiv','hbv','otherHistory','admission','financial','lab','attachments']);
  const text=output(doc);
- for(const [before,after]of [['Retroviral Infection','HBV Co-Infection'],['HBV Co-Infection','We would be grateful'],['We would be grateful','Please contact Public Health Centre'],['Please contact Public Health Centre','Enclosures'],['Enclosures','Yours faithfully']])assert.ok(text.indexOf(before)<text.indexOf(after),`${before} before ${after}`);
+ for(const [before,after]of [['Retroviral Infection','HBV Co-Infection'],['HBV Co-Infection','We would be grateful'],['We would be grateful','Please contact Public Health Center'],['Please contact Public Health Center','Enclosures'],['Enclosures','Yours faithfully']])assert.ok(text.indexOf(before)<text.indexOf(after),`${before} before ${after}`);
  assert.equal(section(doc,'hbv').attrs.diagnosis,true);assert.equal(referralPoint('hbv'),'clinical');assert.equal(referralPoint('attachments'),'enclosures');
  const empty=output(make());assert.doesNotMatch(empty,/Co-Infections and Past Medical History|Additional Notes and Requests/);assert.match(empty,/EnclosuresLatest laboratory results/);
 });

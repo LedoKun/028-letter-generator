@@ -21,7 +21,7 @@ test('PDF footer typography stays compact', () => {
 });
 
 test('PDF letterhead and footer remain bilingual in every document language', () => {
-    assert.match(source, /ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี\\nPublic Health Center 28 - Krung Thon Buri/);
+    assert.match(source, /ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี\\nPublic Health Center 28 Krung Thon Buri/);
     assert.match(source, /สำนักอนามัย \/ Health Department/);
     assert.match(source, /พิมพ์เมื่อ \/ Printed on/);
     assert.match(source, /โทร \/ Tel/);
