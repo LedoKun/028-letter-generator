@@ -21,7 +21,7 @@ test('all eleven original disease choices, independent medications and pick-up a
  for(const id of ['art','oi','pickup','otherMedications','admission','lab','attachments'])assert.ok(SECTIONS[id]);const {walk}=await import('../public/editor/model.mjs');let pickup=false;walk(buildSection('hiv','en'),n=>{if(n.type==='clinicalSection'&&n.attrs.id==='pickup')pickup=true;});assert.ok(pickup);assert.equal(SECTIONS.notes,undefined);
 });
 test('Tailwind source owns the document canvas and persistent placeholder styles',()=>{
- const source=read('tailwind.css'),output=read('public/css/style.css');for(const css of ['document-surface','clinical-field','page-spacer','official-header','editor-toolbar','shortcut-hint']){assert.ok(source.includes(css));assert.ok(output.includes(css));}
+ const source=read('tailwind.css'),output=read('public/css/style.css');for(const css of ['document-surface','clinical-field','page-spacer','official-header','editor-toolbar','shortcuts-table']){assert.ok(source.includes(css));assert.ok(output.includes(css));}
 });
 test('patient values never use persistent browser storage and Clear Form confirms edits',()=>{
  const common=read('public/js/common.js'),source=read('public/editor/main.mjs');assert.doesNotMatch(common,/function writePatientStore|function readPatientStore/);assert.match(source,/if\(dirty&&!confirm/);assert.match(source,/beforeunload/);assert.match(source,/sharedDoctorNameThai/);assert.doesNotMatch(source,/localStorage\.setItem\([^\n]*(patient|draft)/i);

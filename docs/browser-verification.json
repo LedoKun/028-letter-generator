@@ -29,5 +29,29 @@
       "flaky": 0
     },
     "coverage": "All four templates in Thai/English: supplied logo source, unchanged rendered height and proportions, blank line below title; Chromium/Firefox offline reload and non-destructive PDF generation"
+  },
+  "latestErgonomicsChecks": {
+    "command": "npm run test:browser -- tests/browser/footer-and-examination.spec.mjs tests/browser/editor.spec.mjs --grep 'footer logo|examination date defaults|help contains|autofocus|true pagination|English light UI|cached production|preview, download, print'",
+    "stats": {
+      "startTime": "2026-10-11T14:11:40.284Z",
+      "duration": 26714.34,
+      "expected": 32,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "coverage": "Footer height/proportions/text clearance in all four types and both languages; today/default date editing/clearing/restoration and age reference; help information/live page count, removed bars, document-state preservation, cross-page reflow, English UI, offline PDF and non-destructive export"
+  },
+  "latestInitialFocusChecks": {
+    "command": "npm run test:browser -- tests/browser/editor.spec.mjs --grep 'first-field focus'",
+    "stats": {
+      "startTime": "2026-10-11T14:13:48.110Z",
+      "duration": 5422.599999999999,
+      "expected": 8,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "coverage": "All four templates: immediate typing and Tab, date preserved, help visible, both bars absent in Chromium and Firefox"
   }
 }

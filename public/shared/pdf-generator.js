@@ -6,7 +6,7 @@
     const LOGO_URL = '/media/logo/028-logo.png';
     const MM = 72 / 25.4;
 
-    let logoDataUrlPromise = null;
+    const logoDataUrlPromises = new Map();
     let fontsReadyPromise = null;
 
     function mm(value) {
@@ -113,14 +113,14 @@
         return blobToDataUrl(await response.blob());
     }
 
-    function getLogoDataUrl() {
-        if (!logoDataUrlPromise) {
-            logoDataUrlPromise = fetchDataUrl(LOGO_URL).catch(error => {
-                logoDataUrlPromise = null;
+    function getLogoDataUrl(url = LOGO_URL) {
+        if (!logoDataUrlPromises.has(url)) {
+            logoDataUrlPromises.set(url, fetchDataUrl(url).catch(error => {
+                logoDataUrlPromises.delete(url);
                 throw error;
-            });
+            }));
         }
-        return logoDataUrlPromise;
+        return logoDataUrlPromises.get(url);
     }
 
     function text(value, options = {}) {
@@ -246,12 +246,12 @@
         };
     }
 
-    function makeFooter(printedDate) {
+    function makeFooter(printedDate, logoDataUrl) {
         return function (currentPage, pageCount) {
             return {
                 margin: [mm(13), 0, mm(13), mm(7)],
                 table: {
-                    widths: ['*'],
+                    widths: ['*', 120],
                     body: [[{
                         stack: [
                             bold(`เอกสารฉบับนี้จะสมบูรณ์เมื่อมีตราประทับเท่านั้น / Valid only with an official stamp.\nพิมพ์เมื่อ / Printed on: ${printedDate} (DD/MM/YYYY) · หน้า / Page: ${currentPage} of ${pageCount}`, { margin: [0, 1, 0, 1] }),
@@ -259,9 +259,10 @@
                             text('Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong San, Bangkok 10600, Thailand', { margin: [0, 0, 0, 0] }),
                             text('โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com', { margin: [0, 0, 0, 0] })
                         ],
+                        margin: [0, 0, 8, 0],
                         fontSize: 6.5,
                         lineHeight: 0.85
-                    }]]
+                    }, { image: logoDataUrl, fit: [120, 28], alignment: 'right' }]]
                 },
                 layout: {
                     hLineWidth: i => i === 0 ? 0.5 : 0,
@@ -276,12 +277,12 @@
         };
     }
 
-    function buildDocDefinition({ type, content, logoDataUrl, generatedAt, language }) {
+    function buildDocDefinition({ type, content, logoDataUrl, footerLogoDataUrl, generatedAt, language }) {
         return {
             pageSize: 'A4',
             pageMargins: [mm(15), mm(34), mm(15), mm(30)],
             header: makeHeader(logoDataUrl),
-            footer: makeFooter(formatDate(generatedAt)),
+            footer: makeFooter(formatDate(generatedAt), footerLogoDataUrl),
             info: {
                 title: type,
                 author: AUTHOR,
@@ -321,8 +322,8 @@ function buildFilename(type, patientName, generatedAt) {
 
   async function buildPdf({ type, patientName, content, generatedAt, language }) {
     await registerFonts();
-    const logoDataUrl = await getLogoDataUrl();
-    const docDefinition = buildDocDefinition({ type, content, logoDataUrl, generatedAt, language });
+    const [logoDataUrl, footerLogoDataUrl] = await Promise.all([getLogoDataUrl(), getLogoDataUrl('/media/logo/logo.png')]);
+    const docDefinition = buildDocDefinition({ type, content, logoDataUrl, footerLogoDataUrl, generatedAt, language });
     return window.pdfMake.createPdf(docDefinition);
   }
 

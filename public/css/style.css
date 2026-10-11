@@ -873,11 +873,6 @@
   background: #cee9ee;
   border-color: #176879;
 }
-.shortcut-hint {
-  font-size: 11px;
-  color: #57727e;
-  margin: 8px 0 0;
-}
 .editor-workspace {
   display: grid;
   grid-template-columns: minmax(0,1fr) 285px;
@@ -1125,14 +1120,6 @@
 .row-controls button {
   font-size: 10px;
   padding: 3px 5px;
-}
-.status-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: 7px 18px;
-  background: #173f4b;
-  color: #fff;
-  font-size: 11px;
 }
 .validation-banner {
   background: #fff3dd;
@@ -1651,6 +1638,16 @@
 .block-insertion>button:focus-visible {
   outline: 2px solid #28869b;
   outline-offset: 2px;
+}
+.official-footer {
+  padding-right: 128pt;
+}
+.official-footer .footer-logo {
+  position: absolute;
+  right: 0;
+  top: 2pt;
+  width: 120pt;
+  height: auto;
 }
 @property --tw-rotate-x {
   syntax: "*";

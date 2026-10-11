@@ -215,3 +215,10 @@ Do not report planned checks as passed. Actual results are recorded in verificat
 * Add TMX/SMP 80/400 mg directly on click/Enter/Space without a dropdown; focus alone must not insert it.
 * Hide each finite Add control once all its blocks are included, skip it during Tab navigation and restore it on block removal/Undo. Preserve shared values and archived prose. Medicine rows remain repeatable.
 * Use the supplied Public Health Center 28 logo in protected headers, preserving the original rendered height and its proportions. Bundle a PNG copy for local PDF support, while retaining original historical samples/assets.
+
+## Subsequent ergonomics and footer amendments
+
+* Default the examination date to today when its medical-certificate block is inserted; preserve existing or deliberately cleared dates and CE/BE behaviour.
+* Include the original Health Department logo at the right of the protected footer in all documents, preserving its proportions, existing footer height, text and margins.
+* Move shortcut-hint and status-bar information into the existing ? help panel, remove both bars and keep the page count current while help is open.
+* Retain the supplied header logo’s PNG copy; the user removed its source WebP.

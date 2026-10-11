@@ -16,7 +16,7 @@ import { readPicture, PICTURE_LIMITS } from './pictures.mjs';
 const app=document.querySelector('#app');
 const routes={referral:'/referral/index.html',medical:'/medical-certificate/index.html',medication:'/certificate-medication-letter/index.html',freeform:'/free-form-letter/index.html'};
 const UI={back:['เลือกเอกสาร','Select Template'],clear:['ล้างข้อมูลในเอกสาร','Clear Form'],preview:['ดูตัวอย่าง PDF','PDF Preview'],print:['พิมพ์','Print'],download:['ดาวน์โหลด PDF','Download PDF'],undo:['ย้อนกลับ','Undo'],redo:['ทำซ้ำ','Redo'],fields:['เพิ่มช่องข้อมูล','Insert Field'],sections:['เพิ่มหัวข้อทางคลินิก','Insert Clinical Section'],help:['แป้นพิมพ์ลัด','Keyboard Shortcuts'],cancel:['ยกเลิก','Cancel'],close:['ปิด','Close'],remove:['นำออก','Remove'],up:['ขึ้น','Move Up'],down:['ลง','Move Down'],restore:['คืนค่า','Restore'],add:['เพิ่ม','Add'],fresh:['เริ่มหัวข้อที่เลือกด้วยข้อมูลว่าง','Start selected sections afresh']};
-let editor,language='th',dirty=false,baseline='',currentPath=location.pathname,busy=false,layout={pages:1,stable:true},pagesLayer,sidebar,banner,status,fieldPanel,sectionPanel,lastField='',opening=0;
+let editor,language='th',dirty=false,baseline='',currentPath=location.pathname,busy=false,layout={pages:1,stable:true},pagesLayer,sidebar,banner,fieldPanel,sectionPanel,lastField='',opening=0;
 const patientMemory=new PatientSession();
 try{language=localStorage.getItem('documentLanguage')==='en'?'en':'th';}catch{}
 Common.clearPatientStore();
@@ -51,7 +51,7 @@ function renderToolbar(){
  const main=el('div',{class:'main-tools'},[
  el('div',{class:'main-left'},[templateSelector(),letterLanguageSelector()]),toolbarBrand(),el('div',{class:'main-actions'},[
  button('↶',()=>editor.chain().focus().undo().run(),{title:ui('undo')+' (Ctrl/Cmd+Z)','aria-label':ui('undo')}),button('↷',()=>editor.chain().focus().redo().run(),{title:ui('redo')+' (Ctrl/Cmd+Shift+Z)','aria-label':ui('redo')}),
- button(ui('clear'),clearForm,{class:'danger'}),button(ui('preview'),()=>exportDocument('preview'),{'data-pdf-preview':'',onkeydown:event=>{if(event.key==='Tab'&&!event.shiftKey&&!event.ctrlKey&&!event.metaKey&&!event.altKey){event.preventDefault();const fields=fieldsInOrder(editor);focusField(editor,fields.find(field=>field.node.attrs.id==='document.date')||fields[0]);}}}),button(ui('print'),()=>exportDocument('print')),button(ui('download'),()=>exportDocument('download'),{class:'primary'}),button('?',shortcutHelp,{'aria-label':ui('help'),title:ui('help')})])]);
+ button(ui('clear'),clearForm,{class:'danger'}),button(ui('preview'),()=>exportDocument('preview'),{'data-pdf-preview':'',onkeydown:event=>{if(event.key==='Tab'&&!event.shiftKey&&!event.ctrlKey&&!event.metaKey&&!event.altKey){event.preventDefault();const fields=fieldsInOrder(editor);focusField(editor,fields.find(field=>field.node.attrs.id==='document.date')||fields[0]);}}}),button(ui('print'),()=>exportDocument('print')),button(ui('download'),()=>exportDocument('download'),{class:'primary'}),button('?',shortcutHelp,{'aria-label':ui('help'),title:ui('help'),'data-editor-help':''})])]);
  const controls=el('div',{class:'format-tools'},[
  format('B','toggleBold',tr('ตัวหนา','Bold')+' (Ctrl/Cmd+B)'),format('I','toggleItalic',tr('ตัวเอียง','Italic')+' (Ctrl/Cmd+I)'),format('U','toggleUnderline',tr('ขีดเส้นใต้','Underline')+' (Ctrl/Cmd+U)'),
  selectControl(tr('ขนาดตัวอักษร','Font size'),[['','pt'],...['8.5','9','10','11','12','14','16','18'].map(n=>[n,n])],n=>{if(n)editor.chain().focus().setFontSize(n+'pt').run();}),
@@ -61,13 +61,14 @@ function renderToolbar(){
  button('→',()=>indent(1),{'aria-label':tr('เพิ่มการเยื้อง','Increase indent'),onmousedown:e=>e.preventDefault()}),button('←',()=>indent(-1),{'aria-label':tr('ลดการเยื้อง','Decrease indent'),onmousedown:e=>e.preventDefault()}),
  selectControl(tr('ระยะห่างย่อหน้า','Paragraph spacing'),[['5',tr('ระยะห่าง 5 pt','Spacing 5 pt')],['8','8 pt'],['12','12 pt']],v=>editor.chain().focus().updateAttributes(editor.isActive('heading')?'heading':'paragraph',{spacingAfter:Number(v)}).run()),
  button('Insert Block',blockDialog),button('Insert Picture',choosePicture),button(tr('ขึ้นหน้าใหม่','Page Break'),insertPageBreak,{title:tr('ขึ้นหน้าใหม่หลังย่อหน้าปัจจุบัน','Start a new page after the current paragraph')})]);
- host.replaceChildren(main,controls,el('p',{class:'shortcut-hint'},'Tab → Next field / Add… / Preview | Shift+Tab → Previous | ↑/↓ → Choices | Enter → Select | Ctrl/Cmd+Z → Undo'));
+ host.replaceChildren(main,controls);
 }
 function indent(delta){const type=editor.isActive('heading')?'heading':'paragraph';editor.chain().focus().updateAttributes(type,{indent:Math.max(0,Math.min(8,(editor.getAttributes(type).indent||0)+delta))}).run();}
+function documentStatus(){return `${layout.pages} page${layout.pages===1?'':'s'} · A4 · Session memory only`;}
 function renderPages(next){layout=next;if(!pagesLayer)return;
  pagesLayer.replaceChildren(...Array.from({length:next.pages},(_,i)=>el('div',{class:'paper','aria-hidden':'true'},[officialHeader(),officialFooter(i+1,next.pages)])));
  document.querySelector('.document-surface').style.minHeight=`${next.pages*PAGE.height+(next.pages-1)*PAGE.gap}px`;
- status.textContent=tr(`${next.pages} หน้า · A4 · ข้อมูลอยู่เฉพาะในหน้านี้`,`${next.pages} page${next.pages===1?'':'s'} · A4 · Session memory only`);
+ const status=document.querySelector('[data-document-status]');if(status)status.textContent=documentStatus();
  if(!next.stable)showMessage(tr('โปรดตรวจสอบการจัดหน้าในตัวอย่าง PDF','Please check the layout in PDF Preview'));
 }
 function templateContent(template,inherit=true){
@@ -97,9 +98,9 @@ async function openTemplate(template,reset=false){
  app.replaceChildren(el('p',{class:'editor-loading',role:'status'},tr('กำลังเปิดเอกสาร…','Opening your document…')));
  await document.fonts.ready;if(version!==opening)return;
  pagesLayer=el('div',{class:'paper-layer'});fieldPanel=el('div',{class:'field-panel'});sectionPanel=el('div');sidebar=el('aside',{class:'editor-sidebar','aria-label':tr('เครื่องมือข้อมูลและหัวข้อ','Field and section tools')},[fieldPanel,sectionPanel]);
- banner=el('div',{class:'validation-banner',role:'status',hidden:true});status=el('span');
+ banner=el('div',{class:'validation-banner',role:'status',hidden:true});
  const mount=el('div',{id:'document-editor'});
- app.replaceChildren(el('div',{class:'editor-toolbar',id:'toolbar'}),banner,el('main',{class:'editor-workspace'},[el('div',{class:'canvas-scroll'},el('div',{class:'document-surface'},[pagesLayer,mount])),sidebar]),el('div',{class:'status-bar'},[status,el('span',{},tr('PDF เป็นรูปแบบอ้างอิงสำหรับการพิมพ์','PDF is the authoritative printed layout'))]));
+ app.replaceChildren(el('div',{class:'editor-toolbar',id:'toolbar'}),banner,el('main',{class:'editor-workspace'},[el('div',{class:'canvas-scroll'},el('div',{class:'document-surface'},[pagesLayer,mount])),sidebar]));
  editor=new Editor({element:mount,
   extensions:[StarterKit.configure({document:false,blockquote:false,code:false,codeBlock:false,horizontalRule:false,strike:false,link:false,trailingNode:false}),
    SessionData.extend({name:'doc',atom:false,selectable:false,content:'sessionData block+',topNode:true,addAttributes(){return {};},renderHTML(){return ['div',{},0];}}),
@@ -290,7 +291,7 @@ function pictureTools(node,pos){
 function insertPageBreak(){const {$from}=editor.state.selection;let pos=editor.state.doc.content.size;for(let d=$from.depth;d>0;d--)if($from.node(d).isTextblock){pos=$from.after(d);break;}editor.commands.insertContentAt(pos,{type:'pageBreak'});editor.commands.focus();}
 function shortcutHelp(){
  const shortcuts=[['↑ / ↓','Highlight a field choice or block'],['Enter','Apply a choice, add selected blocks, or close an unselected menu'],['Space','Toggle multiple choices/blocks; activate Add medicine'],['Alt+↓','Search choices for the selected field or insertion button'],['Tab','Next field or Add button; add selected blocks and focus their first field'],['Shift+Tab','Previous field or Add button'],['Ctrl/Cmd+Z',ui('undo')],['Ctrl/Cmd+Shift+Z / Ctrl+Y',ui('redo')],['Ctrl/Cmd+B','Bold'],['Ctrl/Cmd+I','Italic'],['Ctrl/Cmd+U','Underline'],['Ctrl/Cmd+P',ui('print')],['Escape','Close contextual overlays']];
- dropdown(ui('help'),[el('table',{class:'shortcuts-table'},el('tbody',{},shortcuts.map(([key,text])=>el('tr',{},[el('td',{},el('kbd',{},key)),el('td',{},text)])))),el('p',{},'Tab follows fields and Add buttons in document order. Selected blocks focus their first new field; unselected menus are skipped. The last stop tabs to PDF Preview, then to the document date. Shift+Tab at the first stop leaves the document. Use Move Up/Down in the section panel to reorder sections.')]);
+ dropdown(ui('help'),[el('p',{},'Tab → Next field / Add… / Preview | Shift+Tab → Previous | ↑/↓ → Choices | Enter → Select | Ctrl/Cmd+Z → Undo'),el('p',{'data-document-status':'',role:'status'},documentStatus()),el('p',{},'PDF is the authoritative printed layout'),el('table',{class:'shortcuts-table'},el('tbody',{},shortcuts.map(([key,text])=>el('tr',{},[el('td',{},el('kbd',{},key)),el('td',{},text)])))),el('p',{},'Tab follows fields and Add buttons in document order. Selected blocks focus their first new field; unselected menus are skipped. The last stop tabs to PDF Preview, then to the document date. Shift+Tab at the first stop leaves the document. Use Move Up/Down in the section panel to reorder sections.')],[],document.querySelector('[data-editor-help]'));
 }
 function showMessage(message){banner.hidden=false;banner.replaceChildren(document.createTextNode(message));}
 function showErrors(errors){banner.hidden=!errors.length;if(errors.length)banner.replaceChildren(el('strong',{},tr('โปรดตรวจสอบข้อมูลก่อนพิมพ์หรือดาวน์โหลด','Review these fields before printing or downloading')),el('ul',{},errors.map(error=>el('li',{},button(`${error.label}: ${error.message}`,()=>focusField(editor,fieldsInOrder(editor).find(f=>f.node.attrs.id===error.id)))))));}

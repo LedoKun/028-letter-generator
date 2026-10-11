@@ -10,7 +10,8 @@ mkdirSync('docs/samples/current',{recursive:true});mkdirSync('pdf-results',{recu
 function raster(file,prefix,page=1){execFileSync('pdftoppm',['-r','144','-f',String(page),'-singlefile',file,prefix]);const raw=readFileSync(prefix+'.ppm'),match=raw.toString('ascii',0,60).match(/^P6\s+(\d+)\s+(\d+)\s+255\s/);assert.ok(match);return {width:Number(match[1]),height:Number(match[2]),data:raw.subarray(match[0].length)};}
 function words(file,page=1){const xml=execFileSync('pdftotext',['-f',String(page),'-l',String(page),'-bbox',file,'-'],{encoding:'utf8'});return [...xml.matchAll(/<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">([\s\S]*?)<\/word>/g)].map(m=>({x:Number(m[1]),y:Number(m[2]),right:Number(m[3]),bottom:Number(m[4]),text:m[5]}));}
 function compare(a,b,region,mask){assert.equal(a.width,b.width);assert.equal(a.height,b.height);let differing=0;for(let y=region[0];y<region[1];y++)for(let x=0;x<a.width;x++){if(mask?.(x,y))continue;const pos=(y*a.width+x)*3;if(a.data[pos]!==b.data[pos]||a.data[pos+1]!==b.data[pos+1]||a.data[pos+2]!==b.data[pos+2])differing++;}return differing;}
-function logoHeight(file,page=1){const rows=execFileSync('pdfimages',['-list',file],{encoding:'utf8'}).split('\n').map(line=>line.trim().split(/\s+/)),image=rows.find(row=>row[0]===String(page)&&row[2]==='image');assert.ok(image,'Missing PDF logo');return Number(image[4])*72/Number(image[13]);}
+function pdfImages(file,page=1){return execFileSync('pdfimages',['-list',file],{encoding:'utf8'}).split('\n').map(line=>line.trim().split(/\s+/)).filter(row=>row[0]===String(page)&&row[2]==='image');}
+function logoHeight(file,page=1){const image=pdfImages(file,page)[0];assert.ok(image,'Missing PDF logo');return Number(image[4])*72/Number(image[13]);}
 try{
  await new Promise(async(resolve,reject)=>{const deadline=Date.now()+5000;while(Date.now()<deadline){try{const r=await fetch('http://localhost:4176');if(r.ok)return resolve();}catch{}await new Promise(r=>setTimeout(r,50));}reject(new Error('PDF test server did not start'));});
  const referencePage=await browser.newPage({timezoneId:'Asia/Bangkok'});await referencePage.clock.install({time:new Date('2026-10-10T03:00:00Z')});await referencePage.goto('http://localhost:4176');
@@ -20,7 +21,7 @@ try{
  referenceSource=referenceSource.replace("const LOGO_URL = '/media/logo/logo.png';","const LOGO_URL = '/media/logo/028-logo.png';");
  referenceSource=referenceSource.replace('window.PdfGenerator =','window.ReferencePdfGenerator =');await referencePage.addScriptTag({content:referenceSource});
  const referenceBytes=await referencePage.evaluate(async()=>[...new Uint8Array(await(await ReferencePdfGenerator.generateBlob({type:'Typography reference',content:[{text:'Reference'}]})).arrayBuffer())]);
- const referenceFile='pdf-results/approved-reference.pdf';writeFileSync(referenceFile,Buffer.from(referenceBytes));const approvedImage=raster(referenceFile,'pdf-results/approved-reference'),referenceWords=words(referenceFile),pageLabel=referenceWords.find(w=>w.text==='Page:'&&w.y>700);assert.ok(pageLabel);await referencePage.close();
+ const referenceFile='pdf-results/approved-reference.pdf';writeFileSync(referenceFile,Buffer.from(referenceBytes));const approvedImage=raster(referenceFile,'pdf-results/approved-reference'),referenceWords=words(referenceFile),pageLabel=referenceWords.find(w=>w.text==='Page:'&&w.y>700),footerTop=Math.min(...referenceWords.filter(word=>word.y>700).map(word=>word.y));assert.ok(pageLabel);await referencePage.close();
  for(const [sample,path]of Object.entries({...routes,'medical-history':'medical-certificate','referral-wording':'referral'}))for(const language of ['th','en']){
   const type=sample==='medical-history'?'medical':sample==='referral-wording'?'referral':sample,historyOnly=sample==='medical-history',compact=sample==='referral-wording';
   const context=await browser.newContext({timezoneId:'Asia/Bangkok'}),page=await context.newPage();
@@ -76,12 +77,13 @@ try{
   for(let index=1;index<=pageCount;index++){
    const actual=raster(file,`pdf-results/current-${type}-${language}-${index}`,index);
    const header=compare(approvedImage,actual,[0,Math.floor(33*144/25.4)]);
-   const mask=(x,y)=>x>=pageLabel.right*2-1&&y>=pageLabel.y*2-2&&y<=pageLabel.bottom*2+2;
+   const mask=(x,y)=>x>=pageLabel.right*2-1&&y>=pageLabel.y*2-2&&y<=pageLabel.bottom*2+2||x>=(595.28-13*72/25.4-120)*2-1&&y>=footerTop*2-4&&y<=(footerTop+28)*2+1;
    const footer=compare(approvedImage,actual,[Math.ceil((297-30)*144/25.4),actual.height],mask);
    assert.ok(Math.abs(logoHeight(file,index)-legacyLogoHeight)<0.2,'New clinic logo height differs from the legacy height');
+   const footerLogo=pdfImages(file,index).find(image=>image[3]==='5300'&&image[4]==='1182');assert.ok(footerLogo,'Missing original footer logo');assert.ok(Number(footerLogo[4])*72/Number(footerLogo[13])<=28,'Footer logo exceeds the available height');assert.ok(Math.abs(Number(footerLogo[3])*72/Number(footerLogo[12])-120)<0.2,'Footer logo is not proportional at the intended width');
    assert.equal(header,0,`${type}-${language} page ${index}: header differs from approved typography`);assert.equal(footer,0,`${type}-${language} page ${index}: footer differs from approved typography`);
   }
-  rows.push({type,sample,language,pages:pageCount,searchable:true,approvedLogoPixelsIdentical:true,logoHeightMatchesLegacy:true,logoHeightPoints:Math.round(logoHeight(file)*100)/100,headerMatchesApprovedTypography:true,footerMatchesApprovedTypography:true,signatureMatchesRequestedLayout:true,signatureGapPoints:Math.round(signatureGapPoints*100)/100,nonDestructive:true,sha256:createHash('sha256').update(Buffer.from(bytes)).digest('hex')});console.log(`${sample}-${language}: ${pageCount} pages; approved header/footer, replacement logo height and signature verified`);await context.close();
+  rows.push({type,sample,language,pages:pageCount,searchable:true,approvedLogoPixelsIdentical:true,logoHeightMatchesLegacy:true,logoHeightPoints:Math.round(logoHeight(file)*100)/100,headerMatchesApprovedTypography:true,footerMatchesApprovedTypography:true,originalFooterLogoIncluded:true,footerTextAndHeightUnchanged:true,signatureMatchesRequestedLayout:true,signatureGapPoints:Math.round(signatureGapPoints*100)/100,nonDestructive:true,sha256:createHash('sha256').update(Buffer.from(bytes)).digest('hex')});console.log(`${sample}-${language}: ${pageCount} pages; header/footer, original footer logo and unchanged footer height verified`);await context.close();
  }
  writeFileSync('docs/pdf-regression-results.json',JSON.stringify({generatedAt:new Date().toISOString(),printedAt:'2026-10-10T03:00:00Z',samples:rows},null,2)+'\n');
 }finally{await browser.close();server.kill();}

@@ -8,7 +8,7 @@ export const REFERRAL_POINTS={clinical:['hiv','syphilis','mpox','hbv','hcvActive
 export const referralPoint=id=>Object.entries(REFERRAL_POINTS).find(([,ids])=>ids.includes(id))?.[0]||'details';
 export function sectionDefaults(id,language='th'){
  const date=parseClinicalDate(today()).iso;
- return id==='hiv'||id==='pickup'?{'pickup.date':date,'pickup.days':'60'}:id==='syphilis'?{'syphilis.start':date,'syphilis.regimen':'Benzathine'}:id==='lab'?{'attachments.lab':label(['ผลตรวจทางห้องปฏิบัติการล่าสุด','Latest laboratory results'],language)}:{};
+ return id==='hiv'||id==='pickup'?{'pickup.date':date,'pickup.days':'60'}:id==='syphilis'?{'syphilis.start':date,'syphilis.regimen':'Benzathine'}:id==='examination'?{'examination.date':date}:id==='lab'?{'attachments.lab':label(['ผลตรวจทางห้องปฏิบัติการล่าสุด','Latest laboratory results'],language)}:{};
 }
 export function writer(language) {
  const T=(th,en)=>({type:'text',text:label([th,en],language)||'\u200B',marks:[{type:'templateText',attrs:{th,en}}]});

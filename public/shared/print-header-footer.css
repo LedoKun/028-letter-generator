@@ -94,6 +94,17 @@
 .footer-address-english {
     white-space: nowrap;
 }
+.footer-content {
+    position: relative;
+    padding-right: 128pt;
+}
+.footer-logo {
+    position: absolute;
+    right: 0;
+    top: 2pt;
+    width: 120pt;
+    height: auto;
+}
 
 .footer-page-number-container {
     font-size: 8pt;

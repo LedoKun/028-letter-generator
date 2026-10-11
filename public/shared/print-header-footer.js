@@ -24,10 +24,13 @@
 
         var footerHTML = `
             <div class="page-footer-running-container thai-font">
+                <div class="footer-content">
                 <div>ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี 124/16 ถนนกรุงธนบุรี แขวงบางลำภูล่าง เขตคลองสาน กรุงเทพฯ 10600</div>
                 <div class="footer-address-english">Public Health Center 28 Krung Thon Buri 124/16 Krung Thon Buri Road, Khlong San, Bangkok 10600, Thailand</div>
                 <div>โทร / Tel: +66 (0) 96 797 1610, +66 (0) 96 323 1696 - อีเมล / Email: 028tbclinic@gmail.com</div>
                 <div class="footer-page-number-container">Date format: DD/MM/YYYY &middot; พิมพ์เมื่อ / Printed on: <span class="printed-on-datetime"></span> &middot; <span class="page-info-label">หน้า / Page:</span> <span class="page-number-display"></span></div>
+                <img src="../media/logo/logo.png" alt="Health Department logo" class="footer-logo">
+                </div>
             </div>`;
 
         // Find or create header element
