@@ -5,9 +5,9 @@
     "firefox"
   ],
   "stats": {
-    "startTime": "2026-10-11T07:39:10.715Z",
-    "duration": 153354.535,
-    "expected": 245,
+    "startTime": "2026-10-11T10:46:33.868Z",
+    "duration": 173657.895,
+    "expected": 271,
     "skipped": 1,
     "unexpected": 0,
     "flaky": 0
@@ -15,7 +15,7 @@
   "skipped": [
     "Firefox: Chromium-specific composition protocol test; the Chromium case passed"
   ],
-  "casesPerProject": 123,
+  "casesPerProject": 136,
   "source": "Latest full npm run test:browser",
-  "revision": "Date-skipping autofocus, automatic keyboard choices, floating menus, date/ID hints and limits, grouped spacing and Preview/date Tab loop"
+  "revision": "Signature leading blank line and shared keyboard navigation/selection for fields and insertion buttons"
 }

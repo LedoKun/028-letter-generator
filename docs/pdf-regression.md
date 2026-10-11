@@ -14,6 +14,8 @@ Thai body text now uses native word segmentation and empty inline runs to give p
 
 Every sample also verifies the requested closing and plain physician name on the same final page, at least 40 pt between their text bounds for signing, and absence of signature/name labels and dotted lines. These measured checks complement the 44 pt blank paragraph defined by the templates.
 
+All four default signatures now include one empty paragraph before ขอแสดงความนับถือ / Yours faithfully, as well as the original 44 pt signing space after it. The leading paragraph is part of the protected-from-splitting body signature group, with 8 pt after-spacing; it does not change the official footer. Unit/browser checks verify its presence in Thai/English and PDF conversion. Insertion buttons participate in keyboard navigation but remain excluded from PDF content.
+
 The regular PDF body is text; only deliberately inserted pictures and the original logo are images. Editor highlighting and dropdown controls are not exported. Pictures use local decoded pixels, retain aspect ratio and occupy one unbreakable PDF block with an optional caption. Image insertion/export and removal/Undo are also tested in the browser.
 
 Editor and PDF page counts may differ because empty optional phrases are visible while editing and disappear on export, and browser/pdfmake line metrics differ. No claim of pixel-perfect body-layout parity is made. PDF preview is the final layout check. Native operating-system print dialogues and physical printers were not automated.

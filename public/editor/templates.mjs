@@ -153,7 +153,7 @@ export function createDocument(template,language='th',doctor={}){
  if(template==='referral')body.push(group('closing',[insertionPoint('closing','Add a closing request','closing',null,['admission','financial'])]));
  if(template!=='medical')body.push(P([T('หากท่านต้องการข้อมูลเพิ่มเติม กรุณาติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรี','Please contact Public Health Centre 28, Krung Thon Buri, should you require any further information.')],{role:'closing',spacingBefore:8}));
  if(template==='referral')body.push(group('enclosures',[groupHeading('เอกสารแนบ','Enclosures',REFERRAL_POINTS.enclosures),buildSection('lab',language),insertionPoint('enclosures','Add enclosures','closing',null,REFERRAL_POINTS.enclosures)]));
- body.push(group('signature',[P([T('ขอแสดงความนับถือ','Yours faithfully,')],{role:'signature'}),P([],{spacingAfter:44,role:'signatureSpace'}),P([physician()]),P([G('doctor.license',[T('เลขที่ใบอนุญาตประกอบวิชาชีพเวชกรรม ','Medical licence number: '),F('doctor.license')])])]));
+ body.push(group('signature',[P([],{spacingAfter:8,role:'signatureLead'}),P([T('ขอแสดงความนับถือ','Yours faithfully,')],{role:'signature'}),P([],{spacingAfter:44,role:'signatureSpace'}),P([physician()]),P([G('doctor.license',[T('เลขที่ใบอนุญาตประกอบวิชาชีพเวชกรรม ','Medical licence number: '),F('doctor.license')])])]));
  return {type:'doc',content:[{type:'sessionData',attrs:{template,language,values,archives:{},fieldArchives:{},omitted:[]}},...body]};
 }
 function referralPurpose(language){

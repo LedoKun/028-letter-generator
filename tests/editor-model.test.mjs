@@ -248,11 +248,11 @@ test('removing the last other-history field hides the clinical-summary heading w
 });
 for(const template of Object.keys(TEMPLATE_NAMES))for(const language of ['th','en'])test(`shared plain signature and blank signing space: ${template}/${language}`,()=>{
  const doc=make(template,language),signature=doc.content.find(node=>node.type==='clinicalGroup'&&node.attrs.id==='signature');
- assert.ok(signature);assert.equal(signature.content.length,4);assert.equal(signature.content[1].attrs.spacingAfter,44);
+ assert.ok(signature);assert.equal(signature.content.length,5);assert.equal(signature.content[0].attrs.role,'signatureLead');assert.equal(signature.content[0].attrs.spacingAfter,8);assert.equal(signature.content[2].attrs.spacingAfter,44);
  const text=output(doc),closing=language==='th'?'ขอแสดงความนับถือ':'Yours faithfully,',tail=text.slice(text.lastIndexOf(closing));
  assert.equal(tail,language==='th'?'ขอแสดงความนับถือนพ. ทดสอบเลขที่ใบอนุญาตประกอบวิชาชีพเวชกรรม ว.12345':'Yours faithfully,TEST DOCTORMedical licence number: ว.12345');
  assert.doesNotMatch(tail,/Signature:|Name:|ลงชื่อ|\(|\)|___|\.\.\./);
- const stack=toPdf(doc).find(node=>node.unbreakable&&pdfText(node).includes(closing));assert.ok(stack);assert.ok(stack.stack.some(node=>node.text===''&&node.margin[3]===44));
+ const stack=toPdf(doc).find(node=>node.unbreakable&&pdfText(node).includes(closing));assert.ok(stack);assert.equal(stack.stack[0].text,'');assert.equal(stack.stack[0].margin[3],8);assert.ok(stack.stack.some(node=>node.text===''&&node.margin[3]===44));
 });
 test('English doctor prefix is contextual and never duplicated or stored in patient-session values',()=>{
  for(const name of ['TEST DOCTOR','Dr TEST DOCTOR','Dr. TEST DOCTOR'])for(const template of ['medical','referral']){

@@ -42,7 +42,7 @@ export function toPdf(doc) {
   if(node.type==='clinicalSection'||node.type==='clinicalGroup') {
    if(node.attrs.id==='art'){const item=children.find(child=>child.type==='bulletList')?.content?.[0];if(item&&!meaningful(blocks(item.content.slice(1),true)))return [];}
    const output=blocks(children,inList),body=blocks(children.filter(c=>c.type!=='heading'),inList);
-   if(node.type==='clinicalGroup'&&node.attrs.id==='signature'&&children.length===4&&children.every(child=>child.type==='paragraph')&&output.flatMap(n=>n.text||[]).map(run=>run.text).join('').length<400)return [{stack:output,unbreakable:true}];
+   if(node.type==='clinicalGroup'&&node.attrs.id==='signature'&&[4,5].includes(children.length)&&children.every(child=>child.type==='paragraph')&&output.flatMap(n=>n.text||[]).map(run=>run.text).join('').length<400)return [{stack:output,unbreakable:true}];
    return meaningful(body)||node.attrs.diagnosis&&meaningful(output)?output:[];
   }
   if(node.type==='medicationRow'){

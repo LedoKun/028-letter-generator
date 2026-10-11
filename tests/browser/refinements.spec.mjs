@@ -48,7 +48,7 @@ for(const language of ['th','en']){
   await open(page,'referral',language);await expect(field(page,'attachments.lab').locator('.field-content')).toHaveText(language==='th'?'ผลตรวจทางห้องปฏิบัติการล่าสุด':'Latest laboratory results');
   const other=language==='th'?'en':'th';await page.getByLabel('Letter language',{exact:true}).selectOption(other);await expect(field(page,'attachments.lab').locator('.field-content')).toHaveText(other==='th'?'ผลตรวจทางห้องปฏิบัติการล่าสุด':'Latest laboratory results');
   await field(page,'attachments.lab').click();expect(await page.evaluate(()=>{const e=clinical.editor;return e.state.doc.textBetween(e.state.selection.from,e.state.selection.to);})).toBe(other==='th'?'ผลตรวจทางห้องปฏิบัติการล่าสุด':'Latest laboratory results');
-  await page.keyboard.insertText('Clinician-edited laboratory results');await page.keyboard.press('Tab');expect(await page.evaluate(()=>clinical.editor.state.selection.$from.parent.attrs.id)).toBe(other==='th'?'doctor.th':'doctor.en');
+  await page.keyboard.insertText('Clinician-edited laboratory results');await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'Add enclosures',exact:true})).toBeFocused();await page.keyboard.press('Tab');expect(await page.evaluate(()=>clinical.editor.state.selection.$from.parent.attrs.id)).toBe(other==='th'?'doctor.th':'doctor.en');
   await page.getByLabel('Letter language',{exact:true}).selectOption(language);await expect(field(page,'attachments.lab').locator('.field-content')).toHaveText('Clinician-edited laboratory results');expect(await pdfText(page)).toContain('Clinician-edited laboratory results');
   await page.getByRole('button',{name:'Remove Laboratory results enclosure occurrence',exact:true}).click();expect(await pdfText(page)).not.toContain('Clinician-edited laboratory results');await page.getByRole('button',{name:'Restore occurrence: Laboratory results enclosure',exact:true}).click();await expect(field(page,'attachments.lab').locator('.field-content')).toHaveText('Clinician-edited laboratory results');
  });
@@ -81,5 +81,5 @@ test('travel certificate has no closing-request insertion point and retains medi
 test('editor bullet spacing uses 2 pt while the signing space remains 44 pt',async({page})=>{
  await open(page,'referral','en');await page.evaluate(()=>{clinical.addSections(['hiv','syphilis']);clinical.setValue('hiv.napId','1234567890');});const first=page.locator('[data-section-id="syphilis"] > ul > li > p').first();
  expect(await first.evaluate(n=>parseFloat(getComputedStyle(n).marginBottom))).toBeCloseTo(2*96/72,2);expect(await first.locator('..').evaluate(n=>parseFloat(getComputedStyle(n).marginBottom))).toBe(0);
- expect(await page.locator('[data-clinical-group="signature"] p').nth(1).evaluate(n=>parseFloat(getComputedStyle(n).marginBottom))).toBeCloseTo(44*96/72,2);
+ expect(await page.locator('[data-clinical-group="signature"] p').nth(2).evaluate(n=>parseFloat(getComputedStyle(n).marginBottom))).toBeCloseTo(44*96/72,2);
 });

@@ -41,9 +41,13 @@ export const ClinicalGroup=Node.create({name:'clinicalGroup',group:'block',conte
 export const MedicationRow=Node.create({priority:50,name:'medicationRow',group:'block',content:'paragraph+',defining:true,addAttributes(){return {id:{default:''},kind:{default:'art'}};},renderHTML({node}){return ['ul',{'data-medication-row':node.attrs.id,'data-kind':node.attrs.kind,class:'medication-row'},['li',{},0]];}});
 export const BodyText=Node.create({priority:50,name:'bodyText',group:'block',content:'block+',defining:true,renderHTML(){return ['div',{'data-letter-body':'',class:'letter-body'},0];}});
 export const PageBreak=Node.create({name:'pageBreak',group:'block',atom:true,renderHTML(){return ['div',{'data-page-break':'',class:'manual-page-break',contenteditable:'false','aria-label':'Manual page break'}];}});
-export const InsertionPoint=Node.create({name:'insertionPoint',group:'block',atom:true,selectable:false,addAttributes(){return {id:{default:'clinical'},hint:{default:'Add clinical information'},kind:{default:'blocks'},section:{default:null},allowed:{default:null}};},renderHTML({node}){return ['div',{class:'block-insertion','data-insertion-point':node.attrs.id,contenteditable:'false'},['button',{type:'button'},'+ '+node.attrs.hint]];},addNodeView(){return ({node,getPos})=>{
+export const InsertionPoint=Node.create({name:'insertionPoint',group:'block',atom:true,selectable:false,addAttributes(){return {id:{default:'clinical'},hint:{default:'Add clinical information'},kind:{default:'blocks'},section:{default:null},allowed:{default:null}};},renderHTML({node}){return ['div',{class:'block-insertion','data-insertion-point':node.attrs.id,contenteditable:'false'},['button',{type:'button'},'+ '+node.attrs.hint]];},addNodeView(){return ({node,editor,getPos})=>{
  const dom=document.createElement('div'),button=document.createElement('button');dom.className='block-insertion';dom.contentEditable='false';dom.dataset.insertionPoint=node.attrs.id;button.type='button';button.textContent='+ '+node.attrs.hint;button.setAttribute('aria-label',node.attrs.hint);dom.append(button);
- button.addEventListener('click',()=>document.dispatchEvent(new CustomEvent('insertblocks',{detail:{...node.attrs,pos:getPos()}})));return {dom,stopEvent:()=>true,ignoreMutation:()=>true};
+ const open=automatic=>document.dispatchEvent(new CustomEvent('insertblocks',{detail:{...node.attrs,pos:getPos(),automatic}}));
+ button.addEventListener('click',()=>open(false));
+ button.addEventListener('focus',()=>{if(!button.suppressChoices&&node.attrs.kind!=='medicine')open(true);});
+ button.addEventListener('keydown',event=>{if(event.isComposing||editor.view.composing||event.ctrlKey||event.metaKey)return;if(event.key==='Tab'&&!event.altKey&&moveField(editor,event.shiftKey)){event.preventDefault();event.stopPropagation();}else if(event.altKey&&event.key==='ArrowDown'&&node.attrs.kind!=='medicine'){event.preventDefault();open(false);}});
+ return {dom,stopEvent:()=>true,ignoreMutation:()=>true};
 };}});
 export const Picture=Node.create({name:'picture',group:'block',atom:true,draggable:true,addAttributes(){return {src:{default:''},naturalWidth:{default:1},naturalHeight:{default:1},width:{default:100},alt:{default:'Inserted picture'},caption:{default:''}};},renderHTML({node}){
  return ['figure',{class:'picture-node','data-picture':''},['img',{src:node.attrs.src,alt:node.attrs.alt,style:`width:${pictureWidthPercent(node.attrs)}%;height:auto`}],...(node.attrs.caption?[['figcaption',{class:'picture-caption'},node.attrs.caption]]:[])];
@@ -70,11 +74,17 @@ export function activeField(editor) {
  for(let d=$from.depth;d>0;d--)if($from.node(d).type.name==='field')return {node:$from.node(d),pos:$from.before(d)};
  return null;
 }
-export function fieldsInOrder(editor) {
+export function tabStops(editor) {
  const out=[];editor.state.doc.descendants((node,pos)=>{
   if(node.attrs.hidden)return false;
-  if(node.type.name==='field') {if(!definition(node.attrs.id)?.readonly)out.push({node,pos});return false;}
+  if(node.type.name==='field'||node.type.name==='insertionPoint') {if(node.type.name==='insertionPoint'||!definition(node.attrs.id)?.readonly)out.push({node,pos});return false;}
  });return out;
+}
+export function fieldsInOrder(editor){return tabStops(editor).filter(entry=>entry.node.type.name==='field');}
+export function focusStop(editor,entry,choices=true){
+ if(entry?.node.type.name!=='insertionPoint'){focusField(editor,entry,choices);return;}
+ const button=editor.view.nodeDOM(entry.pos)?.querySelector('button');if(!button)return;
+ button.suppressChoices=!choices;button.focus();button.scrollIntoView({block:'nearest',inline:'nearest'});button.suppressChoices=false;
 }
 export function focusField(editor,entry,choices=true) {
  if(!entry){editor.view.focus();return;}
@@ -97,11 +107,11 @@ export function commitField(editor,entry=activeField(editor)) {
  updateSession(editor,s=>{const value=s.values[id];if(value?.editing)s.values[id]={...value,value:normalise(id,value.value,s.language),editing:false};return s;});
 }
 export function moveField(editor,back=false) {
- const active=activeField(editor);if(!active||editor.view.composing)return false;
- commitField(editor,active);
- const fields=fieldsInOrder(editor),index=fields.findIndex(f=>f.node.attrs.occurrence===active.node.attrs.occurrence),next=fields[index+(back?-1:1)];
+ if(editor.view.composing)return false;const point=document.activeElement?.closest?.('[data-insertion-point]'),field=activeField(editor);
+ if(!point&&!field)return false;commitField(editor,field);
+ const stops=tabStops(editor),index=stops.findIndex(entry=>point?entry.node.type.name==='insertionPoint'&&entry.node.attrs.id===point.dataset.insertionPoint:entry.node.type.name==='field'&&entry.node.attrs.occurrence===field.node.attrs.occurrence),next=stops[index+(back?-1:1)];
  if(!next){if(back)return false;document.querySelector('[data-pdf-preview]')?.focus();return true;}
- focusField(editor,next);return true;
+ focusStop(editor,next);return true;
 }
 export const FieldBehaviour=Extension.create({
  name:'fieldBehaviour',

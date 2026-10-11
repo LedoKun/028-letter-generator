@@ -1,55 +1,49 @@
 {
-  "testedAt": "2026-10-11T07:47:42.869Z",
+  "testedAt": "2026-10-11T10:50:21.291Z",
   "image": "letter-generator:editor-check",
-  "imageId": "sha256:66db6bdf64c876eddda246e85ff808bd8f80a431c05ad5909d0b13ba5f07cdfc",
+  "imageId": "sha256:9adf55cb8941a4f8bbbe66c62e6093b513fcd4104b7038c9620b288c47566065",
   "platform": "linux/amd64",
   "port": 4180,
   "routes": [
     {
       "type": "referral",
       "loaded": true,
-      "commonSignature": true,
       "bothLanguages": true,
-      "initialFocusSkipsDate": true
+      "leadingSignatureLine": true
     },
     {
       "type": "medical",
       "loaded": true,
-      "commonSignature": true,
       "bothLanguages": true,
-      "initialFocusSkipsDate": true
+      "leadingSignatureLine": true
     },
     {
       "type": "medication",
       "loaded": true,
-      "commonSignature": true,
       "bothLanguages": true,
-      "initialFocusSkipsDate": true
+      "leadingSignatureLine": true
     },
     {
       "type": "freeform",
       "loaded": true,
-      "commonSignature": true,
       "bothLanguages": true,
-      "initialFocusSkipsDate": true
+      "leadingSignatureLine": true
     }
   ],
-  "initialFocusSkipsDate": true,
-  "keyboardChoices": true,
-  "floatingDropdowns": true,
-  "dateAndIdEntryLimits": true,
-  "previewTabLoop": true,
   "offlineReload": true,
-  "patientStateDiscardedOnReload": true,
+  "keyboardBlockInsertion": true,
+  "firstAddedFieldFocus": true,
+  "fieldlessBlockNavigation": true,
+  "medicineTabDoesNotCreateRows": true,
   "offlineTemplateSwitching": true,
   "offlinePdf": {
     "errors": [],
-    "bytes": 591321,
+    "bytes": 590725,
     "unchanged": true
   },
-  "offlineTreatmentOnlyPdf": {
+  "offlineMedicalPdf": {
     "errors": [],
-    "bytes": 588518,
+    "bytes": 587149,
     "unchanged": true
   },
   "externalRequests": 0,

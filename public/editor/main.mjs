@@ -7,7 +7,7 @@ import { EditorState } from '@tiptap/pm/state';
 import { TEMPLATE_NAMES, definition, label } from './fields.mjs';
 import { INSERT_BLOCKS, createDocument, buildBlock, medicationRow, referralPoint, sectionDefaults } from './templates.mjs';
 import { hydrate, sessionOf, valueOf, displayValue, normalise, recalculate, validateDocument, walk } from './model.mjs';
-import { SessionData, TemplateText, Field, Phrase, ClinicalSection, ClinicalGroup, MedicationRow, BodyText, PageBreak, Picture, InsertionPoint, LayoutAttributes, FieldBehaviour, activeField, fieldsInOrder, focusField, focusInitialField, moveField, updateSession, commitField } from './nodes.mjs';
+import { SessionData, TemplateText, Field, Phrase, ClinicalSection, ClinicalGroup, MedicationRow, BodyText, PageBreak, Picture, InsertionPoint, LayoutAttributes, FieldBehaviour, activeField, fieldsInOrder, focusField, focusStop, focusInitialField, moveField, updateSession, commitField } from './nodes.mjs';
 import { PatientSession, patchSession } from './session.mjs';
 import { Pagination, PAGE } from './pagination.mjs';
 import { officialHeader, officialFooter } from './official.mjs';
@@ -61,7 +61,7 @@ function renderToolbar(){
  button('→',()=>indent(1),{'aria-label':tr('เพิ่มการเยื้อง','Increase indent'),onmousedown:e=>e.preventDefault()}),button('←',()=>indent(-1),{'aria-label':tr('ลดการเยื้อง','Decrease indent'),onmousedown:e=>e.preventDefault()}),
  selectControl(tr('ระยะห่างย่อหน้า','Paragraph spacing'),[['5',tr('ระยะห่าง 5 pt','Spacing 5 pt')],['8','8 pt'],['12','12 pt']],v=>editor.chain().focus().updateAttributes(editor.isActive('heading')?'heading':'paragraph',{spacingAfter:Number(v)}).run()),
  button('Insert Block',blockDialog),button('Insert Picture',choosePicture),button(tr('ขึ้นหน้าใหม่','Page Break'),insertPageBreak,{title:tr('ขึ้นหน้าใหม่หลังย่อหน้าปัจจุบัน','Start a new page after the current paragraph')})]);
- host.replaceChildren(main,controls,el('p',{class:'shortcut-hint'},'Tab → Next field / Preview | Shift+Tab → Previous field | ↑/↓ → Choices | Enter → Select | Ctrl/Cmd+Z → Undo'));
+ host.replaceChildren(main,controls,el('p',{class:'shortcut-hint'},'Tab → Next field / Add… / Preview | Shift+Tab → Previous | ↑/↓ → Choices | Enter → Select | Ctrl/Cmd+Z → Undo'));
 }
 function indent(delta){const type=editor.isActive('heading')?'heading':'paragraph';editor.chain().focus().updateAttributes(type,{indent:Math.max(0,Math.min(8,(editor.getAttributes(type).indent||0)+delta))}).run();}
 function renderPages(next){layout=next;if(!pagesLayer)return;
@@ -148,7 +148,7 @@ function addSections(ids,fresh=false,anchorId=null){
  }
  editor.view.dispatch(transaction);
  const added=new Set(nodes.map(node=>node.attrs.id));
- const first=fieldsInOrder(editor).find(field=>{const $pos=editor.state.doc.resolve(field.pos+1);for(let depth=$pos.depth;depth>0;depth--)if($pos.node(depth).type.name==='clinicalSection'&&added.has($pos.node(depth).attrs.id))return true;return false;});focusField(editor,first);
+ const first=fieldsInOrder(editor).find(field=>{const $pos=editor.state.doc.resolve(field.pos+1);for(let depth=$pos.depth;depth>0;depth--)if($pos.node(depth).type.name==='clinicalSection'&&added.has($pos.node(depth).attrs.id))return true;return false;});focusField(editor,first);return !!first;
 }
 function removeSection(entry){const s=structuredClone(sessionOf(editor.state.doc));s.archives[entry.node.attrs.id]=entry.node.toJSON();editor.view.dispatch(patchSession(closeHistory(editor.state.tr).setMeta('sessionUpdate',true),s).delete(entry.pos,entry.pos+entry.node.nodeSize));}
 function moveEntry(entry,delta,type){
@@ -225,39 +225,51 @@ function dropdown(title,content,actions=[],anchor=null){
  const outside=event=>{if(!node.contains(event.target)&&!anchor.contains(event.target))node.close(false);};
  const outsideFocus=event=>{if(!node.contains(event.target)&&!editor.view.dom.contains(event.target))node.close(false);};
  const observer=new ResizeObserver(position);
- node.close=(focus=true)=>{observer.disconnect();window.removeEventListener('scroll',position,true);window.removeEventListener('resize',position);document.removeEventListener('pointerdown',outside,true);document.removeEventListener('focusin',outsideFocus);anchor.removeAttribute('aria-controls');anchor.removeAttribute('aria-expanded');node.remove();if(focus)focusField(editor,fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===occurrence),false);};
+ node.close=(focus=true)=>{observer.disconnect();window.removeEventListener('scroll',position,true);window.removeEventListener('resize',position);document.removeEventListener('pointerdown',outside,true);document.removeEventListener('focusin',outsideFocus);anchor.removeAttribute('aria-controls');anchor.removeAttribute('aria-expanded');node.remove();if(focus){const point=anchor.dataset.insertionPoint&&locations('insertionPoint').find(p=>p.node.attrs.id===anchor.dataset.insertionPoint);focusStop(editor,point||fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===occurrence),false);}};
  app.append(node);position();observer.observe(node);window.addEventListener('scroll',position,true);window.addEventListener('resize',position);document.addEventListener('pointerdown',outside,true);document.addEventListener('focusin',outsideFocus);node.querySelector('input,button')?.focus();return node;
+}
+function keyboardChoices(modal,list,search,choose,finish,multi=true,anchor=null){
+ let index=-1,toggled=false;
+ const highlight=()=>{[...list.children].forEach((row,i)=>{row.classList.toggle('is-current-choice',i===index);row.setAttribute('aria-current',String(i===index));row.id||=`${modal.id}-choice-${i}`;});if(index>=0){const row=list.children[index];row?.scrollIntoView({block:'nearest'});(document.activeElement===editor.view.dom?editor.view.dom:search).setAttribute('aria-activedescendant',row.id);}};
+ search.addEventListener('input',()=>{index=-1;toggled=false;highlight();});
+ list.addEventListener('change',event=>{index=[...list.children].findIndex(row=>row.contains(event.target));toggled=true;highlight();});
+ modal.handleKey=event=>{
+  if((event.target.closest?.('button')&&event.target!==anchor||event.target.matches?.('input')&&!list.contains(event.target)&&event.target!==search)&&['Enter',' '].includes(event.key))return false;
+  if(['ArrowDown','ArrowUp'].includes(event.key)){const count=list.children.length;if(count){index=index<0?(event.key==='ArrowDown'?0:count-1):(index+(event.key==='ArrowDown'?1:-1)+count)%count;toggled=false;highlight();}return true;}
+  const input=list.children[index]?.querySelector('input');
+  if(event.key===' '&&multi&&input){choose(input,!input.checked);toggled=true;return true;}
+  if(event.key==='Enter'||event.key==='Tab'){if(input&&!event.shiftKey&&!toggled)choose(input,true);return finish(event.key==='Tab',event.shiftKey);}
+  return false;
+ };
 }
 function choiceDialog(entry,automatic=false){
  const existing=document.querySelector('.editor-dropdown');if(existing?.dataset.occurrence===entry.node.attrs.occurrence){if(!automatic)existing.querySelector('input')?.focus();return;}
  const id=entry.node.attrs.id,def=definition(id),value=valueOf(sessionOf(editor.state.doc),id),multi=def.type==='multi',selected=new Set((Array.isArray(value)?value:[value]).filter(value=>!multi||String(value).trim())),list=el('div',{class:'catalogue-list'}),search=el('input',{class:'catalogue-search',placeholder:tr('ค้นหา','Search'),'aria-label':tr('ค้นหาตัวเลือก','Search options')});
  if(!def.options)return;
  focusField(editor,entry,false);
- const options=[...def.options,...(!multi?[{value:'',labels:['เว้นว่าง','Leave blank']}]:[])];let index=-1,changed=false,toggled=false,visible=[];
+ const options=[...def.options,...(!multi?[{value:'',labels:['เว้นว่าง','Leave blank']}]:[])];let changed=false;
  const choose=(value,checked=true)=>{if(!multi)selected.clear();if(checked)selected.add(value);else selected.delete(value);if(id==='mpox.risks'&&checked){if(value==='noneKnown'){selected.clear();selected.add(value);}else selected.delete('noneKnown');}changed=true;};
- const highlight=()=>{[...list.children].forEach((row,i)=>{row.classList.toggle('is-current-choice',i===index);row.setAttribute('aria-current',String(i===index));});if(index>=0){list.children[index]?.scrollIntoView({block:'nearest'});const target=document.activeElement===editor.view.dom?editor.view.dom:search;target.setAttribute('aria-activedescendant',list.children[index].id);}};
  const checks=()=>list.querySelectorAll('[data-choice-value]').forEach(input=>{input.checked=selected.has(input.dataset.choiceValue);});
- const draw=()=>{visible=options.filter(o=>o.labels.join(' ').toLowerCase().includes(search.value.toLowerCase())||o.value.toLowerCase().includes(search.value.toLowerCase()));list.replaceChildren(...visible.map((o,i)=>el('label',{class:'field-choice',id:`choice-${entry.node.attrs.occurrence}-${i}`},[el('input',{type:multi?'checkbox':'radio',name:'choice','data-choice-value':o.value,checked:selected.has(o.value),onchange:e=>{index=i;toggled=true;choose(o.value,e.target.checked);checks();highlight();}}),label(o.labels,language)])));highlight();};
- search.addEventListener('input',()=>{index=-1;draw();});draw();let modal;
+ const draw=()=>{list.replaceChildren(...options.filter(o=>o.labels.join(' ').toLowerCase().includes(search.value.toLowerCase())||o.value.toLowerCase().includes(search.value.toLowerCase())).map(o=>el('label',{class:'field-choice'},[el('input',{type:multi?'checkbox':'radio',name:'choice','data-choice-value':o.value,checked:selected.has(o.value),onchange:e=>{choose(o.value,e.target.checked);checks();}}),label(o.labels,language)])));};
+ search.addEventListener('input',draw);draw();let modal;
  const finish=(advance=false,back=false)=>{if(changed)setValue(id,multi?[...selected]:[...selected][0]||'');else commitField(editor);modal.close(false);const current=fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===entry.node.attrs.occurrence);focusField(editor,current,false);return advance?moveField(editor,back):true;};
  const actions=[button('Clear value',()=>{setValue(id,'');modal.close();}),button('Remove this occurrence',()=>{modal.close(false);removeFields(id,entry);})];
  actions.unshift(button('Apply selection',()=>{changed=true;finish();},{class:'primary'}));
  modal=dropdown(label(def.labels,'en'),[search,el('p',{class:'choice-hint'},'↑/↓ Choose · Enter Apply · Tab Apply and next'+(multi?' · Space Toggle multiple choices':'')),list],actions,editor.view.nodeDOM(entry.pos));
  modal.dataset.occurrence=entry.node.attrs.occurrence;modal.id='field-options-'+entry.node.attrs.occurrence;const field=editor.view.nodeDOM(entry.pos);field.setAttribute('aria-expanded','true');field.setAttribute('aria-controls',modal.id);
- modal.handleKey=event=>{
-  if(event.target.closest?.('button')&&['Enter',' '].includes(event.key))return false;
-  if(['ArrowDown','ArrowUp'].includes(event.key)){if(visible.length){index=index<0?(event.key==='ArrowDown'?0:visible.length-1):(index+(event.key==='ArrowDown'?1:-1)+visible.length)%visible.length;toggled=false;highlight();}return true;}
-  if(event.key===' '&&multi&&index>=0){choose(visible[index].value,!selected.has(visible[index].value));toggled=true;checks();return true;}
-  if(event.key==='Enter'||event.key==='Tab'){if(index>=0&&!event.shiftKey&&!toggled)choose(visible[index].value);return finish(event.key==='Tab',event.shiftKey);}
-  return false;
- };
+ keyboardChoices(modal,list,search,(input,checked)=>{choose(input.dataset.choiceValue,checked);checks();},finish,multi);
  if(automatic)editor.view.focus();
 }
 function blockDialog(context={}){
+ const existing=document.querySelector('.editor-dropdown');if(context.id&&existing?.dataset.insertionId===context.id){if(!context.automatic)existing.querySelector('input')?.focus();return;}
  const s=sessionOf(editor.state.doc),selected=new Set(),list=el('div',{class:'catalogue-list'}),search=el('input',{class:'catalogue-search',placeholder:tr('ค้นหาหัวข้อ เช่น HIV, ยา, วัณโรค','Search blocks, e.g. patient, CD4, medication'),'aria-label':tr('ค้นหาหัวข้อ','Search blocks')}),fresh=el('input',{type:'checkbox'});
- const draw=()=>{list.replaceChildren(...Object.values(INSERT_BLOCKS).filter(section=>section.documents.includes(s.template)&&!findSection(section.id)&&(!context.allowed||context.allowed.includes(section.id))&&(context.kind!=='closing'||section.closing)&&[section.id,...section.labels].join(' ').toLowerCase().includes(search.value.toLowerCase())).map(section=>el('label',{},[el('input',{type:'checkbox','data-section-choice':section.id,checked:selected.has(section.id),onchange:e=>e.target.checked?selected.add(section.id):selected.delete(section.id)}),el('span',{},[label(section.labels,language),s.archives[section.id]?el('small',{},'Restores the previous values and wording'):null])])));document.dispatchEvent(new Event('clinical-layout'));};
+ const draw=()=>{list.replaceChildren(...Object.values(INSERT_BLOCKS).filter(section=>section.documents.includes(s.template)&&!findSection(section.id)&&(!context.allowed||context.allowed.includes(section.id))&&(context.kind!=='closing'||section.closing)&&[section.id,...section.labels].join(' ').toLowerCase().includes(search.value.toLowerCase())).map(section=>el('label',{class:'field-choice'},[el('input',{type:'checkbox','data-section-choice':section.id,checked:selected.has(section.id),onchange:e=>e.target.checked?selected.add(section.id):selected.delete(section.id)}),el('span',{},[label(section.labels,language),s.archives[section.id]?el('small',{},'Restores the previous values and wording'):null])])));};
  search.addEventListener('input',draw);draw();let modal;const point=locations('insertionPoint').find(p=>p.node.attrs.id===context.id);
- modal=dropdown('Insert Block',[search,list,el('label',{class:'field-choice'},[fresh,'Start selected blocks afresh (clears their shared values)'])],[button(ui('add'),()=>{modal.close(false);addSections([...selected],fresh.checked,context.id);},{class:'primary'})],point?editor.view.nodeDOM(point.pos):null);
+ const finish=(advance=false,back=false)=>{modal.close(false);if(!back&&selected.size&&addSections([...selected],fresh.checked,context.id))return true;const current=point&&locations('insertionPoint').find(p=>p.node.attrs.id===context.id);focusStop(editor,current||activeField(editor),false);return advance?moveField(editor,back):true;};
+ modal=dropdown('Insert Block',[search,el('p',{class:'choice-hint'},'↑/↓ Choose · Space Toggle multiple blocks · Enter/Tab Add and continue'),list,el('label',{class:'field-choice'},[fresh,'Start selected blocks afresh (clears their shared values)'])],[button(ui('add'),()=>finish(),{class:'primary'})],point?editor.view.nodeDOM(point.pos):null);
+ modal.id='block-options-'+crypto.randomUUID();if(point)modal.dataset.insertionId=context.id;
+ keyboardChoices(modal,list,search,(input,checked)=>{input.checked=checked;if(checked)selected.add(input.dataset.sectionChoice);else selected.delete(input.dataset.sectionChoice);},finish,true,point&&editor.view.nodeDOM(point.pos)?.querySelector('button'));
+ if(context.automatic&&point)focusStop(editor,point,false);
 }
 function afterCurrentParagraph(){const {$from}=editor.state.selection;for(let d=$from.depth;d>0;d--)if($from.node(d).isTextblock)return $from.after(d);return editor.state.selection.to;}
 function choosePicture(){
@@ -277,8 +289,8 @@ function pictureTools(node,pos){
 }
 function insertPageBreak(){const {$from}=editor.state.selection;let pos=editor.state.doc.content.size;for(let d=$from.depth;d>0;d--)if($from.node(d).isTextblock){pos=$from.after(d);break;}editor.commands.insertContentAt(pos,{type:'pageBreak'});editor.commands.focus();}
 function shortcutHelp(){
- const shortcuts=[['↑ / ↓','Highlight a choice'],['Enter','Apply a highlighted choice, or close without changing the value'],['Space','Toggle a highlighted option in a multiple-choice list'],['Alt+↓','Search choices for the selected field'],['Tab','Apply a choice and move to the next placeholder'],['Shift+Tab','Previous placeholder'],['Ctrl/Cmd+Z',ui('undo')],['Ctrl/Cmd+Shift+Z / Ctrl+Y',ui('redo')],['Ctrl/Cmd+B','Bold'],['Ctrl/Cmd+I','Italic'],['Ctrl/Cmd+U','Underline'],['Ctrl/Cmd+P',ui('print')],['Escape','Close contextual overlays']];
- dropdown(ui('help'),[el('table',{class:'shortcuts-table'},el('tbody',{},shortcuts.map(([key,text])=>el('tr',{},[el('td',{},el('kbd',{},key)),el('td',{},text)])))),el('p',{},'The last placeholder tabs to PDF Preview. Tab from Preview returns to the first field, including the document date. Shift+Tab at the first field leaves the document. Use Move Up/Down in the section panel to reorder sections.')]);
+ const shortcuts=[['↑ / ↓','Highlight a field choice or block'],['Enter','Apply a choice, add selected blocks, or close an unselected menu'],['Space','Toggle multiple choices/blocks; activate Add medicine'],['Alt+↓','Search choices for the selected field or insertion button'],['Tab','Next field or Add button; add selected blocks and focus their first field'],['Shift+Tab','Previous field or Add button'],['Ctrl/Cmd+Z',ui('undo')],['Ctrl/Cmd+Shift+Z / Ctrl+Y',ui('redo')],['Ctrl/Cmd+B','Bold'],['Ctrl/Cmd+I','Italic'],['Ctrl/Cmd+U','Underline'],['Ctrl/Cmd+P',ui('print')],['Escape','Close contextual overlays']];
+ dropdown(ui('help'),[el('table',{class:'shortcuts-table'},el('tbody',{},shortcuts.map(([key,text])=>el('tr',{},[el('td',{},el('kbd',{},key)),el('td',{},text)])))),el('p',{},'Tab follows fields and Add buttons in document order. Selected blocks focus their first new field; unselected menus are skipped. The last stop tabs to PDF Preview, then to the document date. Shift+Tab at the first stop leaves the document. Use Move Up/Down in the section panel to reorder sections.')]);
 }
 function showMessage(message){banner.hidden=false;banner.replaceChildren(document.createTextNode(message));}
 function showErrors(errors){banner.hidden=!errors.length;if(errors.length)banner.replaceChildren(el('strong',{},tr('โปรดตรวจสอบข้อมูลก่อนพิมพ์หรือดาวน์โหลด','Review these fields before printing or downloading')),el('ul',{},errors.map(error=>el('li',{},button(`${error.label}: ${error.message}`,()=>focusField(editor,fieldsInOrder(editor).find(f=>f.node.attrs.id===error.id)))))));}

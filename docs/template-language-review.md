@@ -59,7 +59,7 @@ Choice values retain all 17 ART entries, three syphilis regimens, mpox symptoms/
 
 Original selected-language physician validation is retained for referrals, with optional licence there. Applicable regimen/duration/symptom/risk/Other/date/time validation remains. Explicit pick-up date omission permits duration-only output; it does not indicate no collection occurred. Original Other-attachment selection can print a generic other-documents enclosure without a description. Unnamed included medicines and missing required Other details block final export.
 
-All four documents use local Sarabun, bold centred 16 pt titles, 11 pt body text, the authorised 9 pt clinic-name lines and 6.5 pt institutional/footer text. The common signature is **Yours faithfully, / ขอแสดงความนับถือ**, 44 pt of blank signing space, the entered plain physician name and the licence number. No signature/name labels, dotted line or physician-name parentheses are added. Existing recognised English doctor titles are not duplicated. British “Public Health Centre 28, Krung Thon Buri” is editable-body wording only; the official letterhead remains unchanged.
+All four documents use local Sarabun, bold centred 16 pt titles, 11 pt body text, the authorised 9 pt clinic-name lines and 6.5 pt institutional/footer text. The common signature has one blank paragraph before **Yours faithfully, / ขอแสดงความนับถือ**, then 44 pt of blank signing space, the entered plain physician name and the licence number. No signature/name labels, dotted line or physician-name parentheses are added. Existing recognised English doctor titles are not duplicated. British “Public Health Centre 28, Krung Thon Buri” is editable-body wording only; the official letterhead remains unchanged.
 
 ## Financial assistance
 

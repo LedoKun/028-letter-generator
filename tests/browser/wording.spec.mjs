@@ -51,8 +51,10 @@ for(const language of ['th','en']){
   const signature=page.locator('[data-clinical-group="signature"]');
   await expect(signature).toContainText(language==='th'?'ขอแสดงความนับถือ':'Yours faithfully,');
   await expect(signature).not.toContainText('Signature:');await expect(signature).not.toContainText('Name:');await expect(signature).not.toContainText('ลงชื่อ');
-  expect(await signature.locator('p').count()).toBe(4);
-  expect(await signature.locator('p').nth(1).evaluate(node=>parseFloat(getComputedStyle(node).marginBottom))).toBeCloseTo(44*96/72,2);
+  expect(await signature.locator('p').count()).toBe(5);
+  await expect(signature.locator('p').first()).toHaveAttribute('role','signatureLead');
+  expect(await signature.locator('p').first().evaluate(node=>parseFloat(getComputedStyle(node).marginBottom))).toBeCloseTo(8*96/72,2);
+  expect(await signature.locator('p').nth(2).evaluate(node=>parseFloat(getComputedStyle(node).marginBottom))).toBeCloseTo(44*96/72,2);
   const body=await pdfText(page),closing=language==='th'?'ขอแสดงความนับถือ':'Yours faithfully,';
   expect(body.slice(body.lastIndexOf(closing))).toBe(language==='th'?'ขอแสดงความนับถือนพ. ทดสอบ ระบบเลขที่ใบอนุญาตประกอบวิชาชีพเวชกรรม 12345':'Yours faithfully,TEST DOCTORMedical licence number: 12345');
  });
