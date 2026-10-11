@@ -5,9 +5,9 @@
     "firefox"
   ],
   "stats": {
-    "startTime": "2026-10-10T18:05:40.511Z",
-    "duration": 187869.559,
-    "expected": 215,
+    "startTime": "2026-10-11T07:39:10.715Z",
+    "duration": 153354.535,
+    "expected": 245,
     "skipped": 1,
     "unexpected": 0,
     "flaky": 0
@@ -15,7 +15,7 @@
   "skipped": [
     "Firefox: Chromium-specific composition protocol test; the Chromium case passed"
   ],
-  "casesPerProject": 108,
+  "casesPerProject": 123,
   "source": "Latest full npm run test:browser",
-  "revision": "Thai ART adherence label, restricted medical-certificate menu and native Thai PDF word wrapping"
+  "revision": "Date-skipping autofocus, automatic keyboard choices, floating menus, date/ID hints and limits, grouped spacing and Preview/date Tab loop"
 }

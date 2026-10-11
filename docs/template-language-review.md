@@ -42,6 +42,8 @@ Latest laboratory results / ผลตรวจทางห้องปฏิบ�
 
 ## Other documents and conditional meaning
 
+The ergonomics revision changes spacing, not clinical wording: patient identification, summary/enclosures headings, examination/treatment/leave paragraphs and closing requests use 8 pt before their groups. The subject has 8 pt after it. Nested clinical bullet rows retain 2 pt spacing and the signing space retains 44 pt. These margins are supported in both the editor and PDF output; no extra headings or clinical statements are inserted.
+
 | Document / item | Wording and safeguards |
 | --- | --- |
 | Medical Certificate | The title always stays Medical Certificate / ใบรับรองแพทย์, including treatment-only letters and Undo/Redo. Manual title edits are preserved. The supplied “I, Dr … hereby certify …” opening and plain examination/findings/diagnosis/leave/treatment paragraphs are retained. The Thai physical-examination claim appears only with an included examination and valid date. |

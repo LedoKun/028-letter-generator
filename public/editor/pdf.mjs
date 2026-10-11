@@ -33,7 +33,7 @@ export function toPdf(doc) {
   if(['paragraph','heading'].includes(node.type)) {
    const text=inline(node),combined=text.map(n=>n.text).join('');
    if(!combined.trim())return node.attrs?.spacingAfter>5?[{text:'',margin:[0,0,0,node.attrs.spacingAfter]}]:[];
-   const title=node.type==='heading';return [{text,alignment:node.attrs?.textAlign||'left',bold:title||undefined,fontSize:title?(node.attrs.level===1?16:11):11,lineHeight:1.05,margin:[(node.attrs?.indent||0)*12,title?4:0,0,node.attrs?.spacingAfter??(inList?2:5)]}];
+   const title=node.type==='heading';return [{text,alignment:node.attrs?.textAlign||'left',bold:title||undefined,fontSize:title?(node.attrs.level===1?16:11):11,lineHeight:1.05,margin:[(node.attrs?.indent||0)*12,node.attrs?.spacingBefore??(title?4:0),0,node.attrs?.spacingAfter??(inList?2:5)]}];
   }
   if(['bulletList','orderedList'].includes(node.type)) {
    const items=children.filter(supported).map(child=>({stack:blocks(child.content||[],true)})).filter(item=>meaningful(item.stack));

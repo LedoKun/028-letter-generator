@@ -1,7 +1,7 @@
 import { Node, Mark, Extension } from '@tiptap/core';
 import { Plugin, TextSelection } from '@tiptap/pm/state';
 import { definition, label } from './fields.mjs';
-import { sessionOf, displayValue, normalise, fieldError, fieldRequirements, conditionActive, recalculate, templateProse, formatFieldInput } from './model.mjs';
+import { sessionOf, displayValue, normalise, fieldError, fieldRequirements, conditionActive, recalculate, templateProse, formatFieldInput, inputFitsField } from './model.mjs';
 import { patchSession } from './session.mjs';
 import { pictureWidthPercent } from './pictures.mjs';
 import { closeHistory } from '@tiptap/pm/history';
@@ -25,7 +25,8 @@ export const Field=Node.create({
    dom.dataset.status=n.attrs.status;dom.dataset.required=String(n.attrs.required);dom.hidden=n.attrs.hidden;
    dom.classList.toggle('invalid',!!n.attrs.error);dom.dataset.empty=String(!n.textContent.replace(/\u200B/g,''));
    dom.setAttribute('role','textbox');dom.setAttribute('aria-label',label(def?.labels||[n.attrs.id,n.attrs.id],'en'));
-   dom.setAttribute('aria-invalid',String(!!n.attrs.error));dom.setAttribute('aria-required',String(n.attrs.required));dom.setAttribute('aria-readonly',String(!!def?.readonly));dom.title=n.attrs.error||dom.getAttribute('aria-label');
+   dom.setAttribute('aria-invalid',String(!!n.attrs.error));dom.setAttribute('aria-required',String(n.attrs.required));dom.setAttribute('aria-readonly',String(!!def?.readonly));dom.title=[n.attrs.error,def?.inputHint||dom.getAttribute('aria-label')].filter(Boolean).join('\n');
+   if(def?.inputHint){dom.setAttribute('aria-description',def.inputHint);dom.dataset.maxLength=def.maxLength;contentDOM.setAttribute('inputmode','numeric');}
    contentDOM.dataset.label=dom.getAttribute('aria-label');
    if(control)control.setAttribute('aria-label','Choices for '+dom.getAttribute('aria-label'));
    remove.setAttribute('aria-label','Remove '+dom.getAttribute('aria-label')+' occurrence');remove.title='Remove this occurrence; its value stays in the patient session';
@@ -62,7 +63,7 @@ export const Picture=Node.create({name:'picture',group:'block',atom:true,draggab
 };}});
 export const LayoutAttributes=Extension.create({name:'layoutAttributes',addGlobalAttributes(){return [{types:['paragraph','heading','listItem'],attributes:{
  guard:{default:[]},condition:{default:null},hidden:{default:false,renderHTML:a=>a.hidden?{hidden:true}:{}},role:{default:null},style:{default:null},
- indent:{default:0,renderHTML:a=>({'style':`margin-left:${a.indent*12}pt`})},spacingAfter:{default:null,renderHTML:a=>a.spacingAfter===null?{}:({'style':`margin-bottom:${a.spacingAfter}pt`})}
+ indent:{default:0,renderHTML:a=>({'style':`margin-left:${a.indent*12}pt`})},spacingBefore:{default:null,renderHTML:a=>a.spacingBefore===null?{}:({'style':`margin-top:${a.spacingBefore}pt`})},spacingAfter:{default:null,renderHTML:a=>a.spacingAfter===null?{}:({'style':`margin-bottom:${a.spacingAfter}pt`})}
  }}];}});
 export function activeField(editor) {
  const { $from }=editor.state.selection;
@@ -75,11 +76,13 @@ export function fieldsInOrder(editor) {
   if(node.type.name==='field') {if(!definition(node.attrs.id)?.readonly)out.push({node,pos});return false;}
  });return out;
 }
-export function focusField(editor,entry) {
+export function focusField(editor,entry,choices=true) {
  if(!entry){editor.view.focus();return;}
  editor.chain().setTextSelection({from:entry.pos+1,to:entry.pos+entry.node.nodeSize-1}).scrollIntoView().run();editor.view.focus();
  const dom=editor.view.nodeDOM(entry.pos);dom?.scrollIntoView({block:'nearest',inline:'nearest'});
+ if(choices&&definition(entry.node.attrs.id)?.options)document.dispatchEvent(new CustomEvent('fieldchoices',{detail:{occurrence:entry.node.attrs.occurrence,automatic:true}}));
 }
+export function focusInitialField(editor){focusField(editor,fieldsInOrder(editor).find(field=>field.node.attrs.id!=='document.date'));}
 export function updateSession(editor,fn,meta={}) {
  const next=fn(structuredClone(sessionOf(editor.state.doc)));
  if(JSON.stringify(next)===JSON.stringify(sessionOf(editor.state.doc))&&!meta.force)return;
@@ -93,18 +96,18 @@ export function commitField(editor,entry=activeField(editor)) {
  if(!sessionOf(editor.state.doc).values[id]?.editing)return;
  updateSession(editor,s=>{const value=s.values[id];if(value?.editing)s.values[id]={...value,value:normalise(id,value.value,s.language),editing:false};return s;});
 }
-function moveField(editor,back) {
+export function moveField(editor,back=false) {
  const active=activeField(editor);if(!active||editor.view.composing)return false;
  commitField(editor,active);
  const fields=fieldsInOrder(editor),index=fields.findIndex(f=>f.node.attrs.occurrence===active.node.attrs.occurrence),next=fields[index+(back?-1:1)];
- if(!next)return false;
+ if(!next){if(back)return false;document.querySelector('[data-pdf-preview]')?.focus();return true;}
  focusField(editor,next);return true;
 }
 export const FieldBehaviour=Extension.create({
  name:'fieldBehaviour',
  addKeyboardShortcuts(){return {
   'Mod-a':()=>{const entry=activeField(this.editor);if(!entry)return false;focusField(this.editor,entry);return true;},
-  'Alt-ArrowDown':()=>{const entry=activeField(this.editor);if(!entry)return false;document.dispatchEvent(new CustomEvent('fieldchoices',{detail:{occurrence:entry.node.attrs.occurrence}}));return true;},
+  'Alt-ArrowDown':()=>{const entry=activeField(this.editor);if(!entry||!definition(entry.node.attrs.id)?.options)return false;document.dispatchEvent(new CustomEvent('fieldchoices',{detail:{occurrence:entry.node.attrs.occurrence}}));return true;},
   Tab:()=>moveField(this.editor,false),'Shift-Tab':()=>moveField(this.editor,true),
   Enter:()=>{const f=activeField(this.editor);if(!f)return false;if(definition(f.node.attrs.id)?.type==='multiline')return this.editor.commands.setHardBreak();commitField(this.editor,f);return moveField(this.editor,false);},
  };},
@@ -117,7 +120,11 @@ export const FieldBehaviour=Extension.create({
     handlePaste(view,event){
      const text=event.clipboardData?.getData('text/plain');if(!text){event.preventDefault();return true;}
      const field=activeField(editor);
-     if(field){const content=text.split(/\r?\n/).flatMap((line,i)=>[...(i?[view.state.schema.nodes.hardBreak.create()]:[]),...(line?[view.state.schema.text(line)]:[])]);view.dispatch(view.state.tr.replaceWith(view.state.selection.from,view.state.selection.to,content));}
+     if(field&&definition(field.node.attrs.id)?.maxLength){
+      const {from,to}=view.state.selection,start=field.pos+1,current=field.node.textContent.replace(/\u200B/g,''),raw=current.slice(0,from-start)+text+current.slice(to-start),formatted=formatFieldInput(field.node.attrs.id,raw);
+      if(!inputFitsField(field.node.attrs.id,raw)||!inputFitsField(field.node.attrs.id,formatted)){document.dispatchEvent(new CustomEvent('fieldinputlimit',{detail:{id:field.node.attrs.id}}));return true;}
+      view.dispatch(view.state.tr.replaceWith(start,start+field.node.content.size,formatted?view.state.schema.text(formatted,field.node.firstChild?.marks||[]):[]));
+     }else if(field){const content=text.split(/\r?\n/).flatMap((line,i)=>[...(i?[view.state.schema.nodes.hardBreak.create()]:[]),...(line?[view.state.schema.text(line)]:[])]);view.dispatch(view.state.tr.replaceWith(view.state.selection.from,view.state.selection.to,content));}
      else editor.commands.insertContent(text.split(/\r?\n/).map(line=>({type:'paragraph',content:line?[{type:'text',text:line}]:[]})));
      return true;
     },
@@ -134,6 +141,7 @@ export const FieldBehaviour=Extension.create({
     },beforeinput(view,event){const f=activeField(editor);if(!f||event.isComposing||view.composing)return false;const {from,to}=view.state.selection;if(event.inputType==='insertText'&&event.data!==null){
  event.preventDefault();if(definition(f.node.attrs.id)?.readonly)return true;
  const start=f.pos+1,current=f.node.textContent.replace(/\u200B/g,''),left=Math.min(from-start,current.length),right=Math.min(to-start,current.length),raw=current.slice(0,left)+event.data+current.slice(right),formatted=formatFieldInput(f.node.attrs.id,raw);
+ if(!inputFitsField(f.node.attrs.id,raw)||!inputFitsField(f.node.attrs.id,formatted))return true;
  if(formatted===raw)view.dispatch(view.state.tr.insertText(event.data,from,to));
  else {const digitCount=raw.slice(0,left+event.data.length).replace(/\D/g,'').length;let caret=0,count=0;while(caret<formatted.length&&count<digitCount){if(/\d/.test(formatted[caret]))count++;caret++;}while(/[-/]/.test(formatted[caret]||' '))caret++;const tr=view.state.tr.replaceWith(start,start+f.node.content.size,view.state.schema.text(formatted,f.node.firstChild?.marks||[]));tr.setSelection(TextSelection.create(tr.doc,start+caret));view.dispatch(tr);}
  return true;
@@ -201,6 +209,7 @@ export const FieldBehaviour=Extension.create({
     const active=activeField(editor);document.querySelectorAll('.clinical-field.is-focused').forEach(el=>el.classList.remove('is-focused'));
     if(active){editor.view.nodeDOM(active.pos)?.classList.add('is-focused');editor.view.dom.setAttribute('aria-activedescendant',`field-${active.node.attrs.occurrence}`);}else editor.view.dom.removeAttribute('aria-activedescendant');
     const occurrence=active?.node.attrs.occurrence;
+    if(occurrence!==previousField&&active&&definition(active.node.attrs.id)?.options)queueMicrotask(()=>{if(!editor.isDestroyed&&editor.view.hasFocus()&&!editor.view.composing&&activeField(editor)?.node.attrs.occurrence===occurrence)document.dispatchEvent(new CustomEvent('fieldchoices',{detail:{occurrence,automatic:true}}));});
     if(previousField&&previousField!==occurrence&&!editor.view.composing){const previous=fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===previousField);previousField=occurrence;if(previous)queueMicrotask(()=>{if(!editor.isDestroyed)commitField(editor,previous);});}
     previousField=occurrence;
    }};},

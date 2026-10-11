@@ -7,7 +7,7 @@ import { EditorState } from '@tiptap/pm/state';
 import { TEMPLATE_NAMES, definition, label } from './fields.mjs';
 import { INSERT_BLOCKS, createDocument, buildBlock, medicationRow, referralPoint, sectionDefaults } from './templates.mjs';
 import { hydrate, sessionOf, valueOf, displayValue, normalise, recalculate, validateDocument, walk } from './model.mjs';
-import { SessionData, TemplateText, Field, Phrase, ClinicalSection, ClinicalGroup, MedicationRow, BodyText, PageBreak, Picture, InsertionPoint, LayoutAttributes, FieldBehaviour, activeField, fieldsInOrder, focusField, updateSession, commitField } from './nodes.mjs';
+import { SessionData, TemplateText, Field, Phrase, ClinicalSection, ClinicalGroup, MedicationRow, BodyText, PageBreak, Picture, InsertionPoint, LayoutAttributes, FieldBehaviour, activeField, fieldsInOrder, focusField, focusInitialField, moveField, updateSession, commitField } from './nodes.mjs';
 import { PatientSession, patchSession } from './session.mjs';
 import { Pagination, PAGE } from './pagination.mjs';
 import { officialHeader, officialFooter } from './official.mjs';
@@ -34,6 +34,7 @@ function doctorPreferences(){
 }
 function saveDoctorPreferences(){const s=sessionOf(editor.state.doc);try{localStorage.setItem('sharedDoctorInfo',JSON.stringify({sharedDoctorNameThai:valueOf(s,'doctor.th'),sharedDoctorNameEnglish:valueOf(s,'doctor.en'),sharedMedicalLicense:valueOf(s,'doctor.license')}));}catch{}}
 function setLanguage(next){
+ document.querySelector('.editor-dropdown')?.close(false);
  language=next;document.documentElement.lang='en';
  try{localStorage.setItem('documentLanguage',language);}catch{}
  if(editor){commitField(editor);updateSession(editor,s=>{for(const [id,labels]of Object.entries({'document.title':{th:'บันทึกข้อความ',en:'Medical Notes'},'document.addressee':{th:'เจ้าหน้าที่ผู้เกี่ยวข้อง',en:s.template==='referral'?'To Whom It May Concern':'Whom It May Concern'},'attachments.lab':{th:'ผลตรวจทางห้องปฏิบัติการล่าสุด',en:'Latest laboratory results'}}))if(s.values[id]?.status==='default')s.values[id].value=labels[language];return {...s,language};});editor.setOptions({editorProps:{attributes:{...editor.options.editorProps.attributes,lang:language}}});renderToolbar();renderSidebar();}
@@ -50,7 +51,7 @@ function renderToolbar(){
  const main=el('div',{class:'main-tools'},[
  el('div',{class:'main-left'},[templateSelector(),letterLanguageSelector()]),toolbarBrand(),el('div',{class:'main-actions'},[
  button('↶',()=>editor.chain().focus().undo().run(),{title:ui('undo')+' (Ctrl/Cmd+Z)','aria-label':ui('undo')}),button('↷',()=>editor.chain().focus().redo().run(),{title:ui('redo')+' (Ctrl/Cmd+Shift+Z)','aria-label':ui('redo')}),
- button(ui('clear'),clearForm,{class:'danger'}),button(ui('preview'),()=>exportDocument('preview')),button(ui('print'),()=>exportDocument('print')),button(ui('download'),()=>exportDocument('download'),{class:'primary'}),button('?',shortcutHelp,{'aria-label':ui('help'),title:ui('help')})])]);
+ button(ui('clear'),clearForm,{class:'danger'}),button(ui('preview'),()=>exportDocument('preview'),{'data-pdf-preview':'',onkeydown:event=>{if(event.key==='Tab'&&!event.shiftKey&&!event.ctrlKey&&!event.metaKey&&!event.altKey){event.preventDefault();const fields=fieldsInOrder(editor);focusField(editor,fields.find(field=>field.node.attrs.id==='document.date')||fields[0]);}}}),button(ui('print'),()=>exportDocument('print')),button(ui('download'),()=>exportDocument('download'),{class:'primary'}),button('?',shortcutHelp,{'aria-label':ui('help'),title:ui('help')})])]);
  const controls=el('div',{class:'format-tools'},[
  format('B','toggleBold',tr('ตัวหนา','Bold')+' (Ctrl/Cmd+B)'),format('I','toggleItalic',tr('ตัวเอียง','Italic')+' (Ctrl/Cmd+I)'),format('U','toggleUnderline',tr('ขีดเส้นใต้','Underline')+' (Ctrl/Cmd+U)'),
  selectControl(tr('ขนาดตัวอักษร','Font size'),[['','pt'],...['8.5','9','10','11','12','14','16','18'].map(n=>[n,n])],n=>{if(n)editor.chain().focus().setFontSize(n+'pt').run();}),
@@ -60,7 +61,7 @@ function renderToolbar(){
  button('→',()=>indent(1),{'aria-label':tr('เพิ่มการเยื้อง','Increase indent'),onmousedown:e=>e.preventDefault()}),button('←',()=>indent(-1),{'aria-label':tr('ลดการเยื้อง','Decrease indent'),onmousedown:e=>e.preventDefault()}),
  selectControl(tr('ระยะห่างย่อหน้า','Paragraph spacing'),[['5',tr('ระยะห่าง 5 pt','Spacing 5 pt')],['8','8 pt'],['12','12 pt']],v=>editor.chain().focus().updateAttributes(editor.isActive('heading')?'heading':'paragraph',{spacingAfter:Number(v)}).run()),
  button('Insert Block',blockDialog),button('Insert Picture',choosePicture),button(tr('ขึ้นหน้าใหม่','Page Break'),insertPageBreak,{title:tr('ขึ้นหน้าใหม่หลังย่อหน้าปัจจุบัน','Start a new page after the current paragraph')})]);
- host.replaceChildren(main,controls,el('p',{class:'shortcut-hint'},tr('Tab → ช่องถัดไป | Shift+Tab → ช่องก่อนหน้า | Ctrl/Cmd+Z → ย้อนกลับ','Tab → Next field | Shift+Tab → Previous field | Ctrl/Cmd+Z → Undo')));
+ host.replaceChildren(main,controls,el('p',{class:'shortcut-hint'},'Tab → Next field / Preview | Shift+Tab → Previous field | ↑/↓ → Choices | Enter → Select | Ctrl/Cmd+Z → Undo'));
 }
 function indent(delta){const type=editor.isActive('heading')?'heading':'paragraph';editor.chain().focus().updateAttributes(type,{indent:Math.max(0,Math.min(8,(editor.getAttributes(type).indent||0)+delta))}).run();}
 function renderPages(next){layout=next;if(!pagesLayer)return;
@@ -91,7 +92,7 @@ async function openTemplate(template,reset=false){
   try{localStorage.setItem('documentLanguage',language);}catch{}
   editor.setOptions({editorProps:{attributes:{...editor.options.editorProps.attributes,lang:language}}});
   patientMemory.capture(sessionOf(editor.state.doc));patientMemory.remember(editor.state,baseline);dirty=patientMemory.dirty(editor.state,baseline);banner.hidden=true;renderToolbar();renderSidebar();
-  if(saved)editor.view.focus();else focusField(editor,fieldsInOrder(editor)[0]);return;
+  if(saved)editor.view.focus();else focusInitialField(editor);return;
  }
  app.replaceChildren(el('p',{class:'editor-loading',role:'status'},tr('กำลังเปิดเอกสาร…','Opening your document…')));
  await document.fonts.ready;if(version!==opening)return;
@@ -105,9 +106,9 @@ async function openTemplate(template,reset=false){
    SessionData,TemplateText,Field,Phrase,ClinicalSection,ClinicalGroup,MedicationRow,BodyText,PageBreak,Picture,InsertionPoint,TextStyle,FontSize,TextAlign.configure({types:['heading','paragraph']}),LayoutAttributes,FieldBehaviour.extend({priority:1000}),Pagination.configure({onLayout:renderPages})],
   content:templateContent(template),
   editorProps:{attributes:{role:'textbox','aria-label':tr('เนื้อหาเอกสารที่แก้ไขได้','Editable document body'),'aria-multiline':'true',lang:language,spellcheck:'false'}},
-  onCreate:({editor:e})=>{updateSession(e,s=>s,{addToHistory:false,force:true});baseline=e.state.doc;patientMemory.capture(sessionOf(e.state.doc));patientMemory.remember(e.state,baseline);dirty=false;focusField(e,fieldsInOrder(e)[0]);renderSidebar();},
+  onCreate:({editor:e})=>{updateSession(e,s=>s,{addToHistory:false,force:true});baseline=e.state.doc;patientMemory.capture(sessionOf(e.state.doc));patientMemory.remember(e.state,baseline);dirty=false;focusInitialField(e);renderSidebar();},
   onUpdate:({editor:e,transaction})=>{patientMemory.capture(sessionOf(e.state.doc),sessionOf(transaction.before));if(baseline?.type){patientMemory.remember(e.state,baseline);dirty=patientMemory.dirty(e.state,baseline);}if(editor){saveDoctorPreferences();renderSidebar();}},
-  onSelectionUpdate:()=>{if(editor)renderFieldPanel();},
+  onSelectionUpdate:()=>{if(editor){renderFieldPanel();const menu=document.querySelector('.editor-dropdown');if(menu?.dataset.occurrence&&menu.dataset.occurrence!==activeField(editor)?.node.attrs.occurrence)menu.close(false);}},
  });
  window.clinical.editor=editor;renderToolbar();renderPages({pages:1,stable:true});renderSidebar();
 }
@@ -201,6 +202,7 @@ function renderFieldPanel(){if(!editor||!fieldPanel)return;if(editor.state.selec
  for(const [occurrence,record]of Object.entries(s.fieldArchives||{}))fieldPanel.append(button('Restore occurrence: '+label(definition(record.id).labels,'en'),()=>restoreField(occurrence)));
  if(!entry){fieldPanel.append(el('p',{},tr('คลิกช่องที่มีสี หรือใช้ Tab เพื่อกรอกข้อมูล','Select a highlighted field, or use Tab to continue.')));return;}
  const id=entry.node.attrs.id,def=definition(id);fieldPanel.append(el('strong',{},label(def.labels,'en')),el('p',{},entry.node.attrs.error||(entry.node.attrs.status==='override'?tr('ปรับแก้เอง ค่าจะไม่ถูกคำนวณทับจนกว่าจะกดคำนวณใหม่','Manual override; automatic recalculation is paused.'):entry.node.attrs.status==='calculated'?tr('ค่านี้คำนวณอัตโนมัติและยังแก้ไขได้','Calculated value; you can still edit it.'):tr('ข้อมูลในช่องจะถูกเลือกทั้งหมดเมื่อใช้ Tab','Tab selects the entire value for replacement.'))));
+ if(def.inputHint)fieldPanel.append(el('p',{},def.inputHint));
  if(def.options)fieldPanel.append(button(tr('เลือกจากรายการ','Choose from catalogue'),()=>choiceDialog(entry)));
  const actions=el('div',{class:'panel-actions'},[
  button(tr('ล้างค่า','Clear value'),()=>setValue(id,'')),
@@ -219,17 +221,37 @@ function dropdown(title,content,actions=[],anchor=null){
  const entry=activeField(editor);anchor=anchor||(entry&&editor.view.nodeDOM(entry.pos))||(locations('insertionPoint').find(p=>p.node.attrs.id==='clinical')&&editor.view.nodeDOM(locations('insertionPoint').find(p=>p.node.attrs.id==='clinical').pos))||document.querySelector('#toolbar');
  const node=el('section',{class:'editor-dropdown',role:'region','aria-label':title},[el('h2',{},title),...content,el('div',{class:'dialog-actions'},[button(ui('close'),()=>node.close()),...actions])]);
  node.contentEditable='false';const occurrence=anchor.dataset.occurrence;
- node.close=(focus=true)=>{node.remove();document.dispatchEvent(new Event('clinical-layout'));if(focus)focusField(editor,fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===occurrence));};
- anchor.append(node);document.dispatchEvent(new Event('clinical-layout'));node.querySelector('input,button')?.focus();return node;
+ const position=()=>{const rect=anchor.getBoundingClientRect(),width=Math.min(420,window.innerWidth-24);node.style.width=width+'px';const height=node.offsetHeight,below=window.innerHeight-rect.bottom-12;node.style.left=Math.max(12,Math.min(rect.left,window.innerWidth-width-12))+'px';node.style.top=Math.max(12,Math.min(below>=height?rect.bottom+6:rect.top-height-6,window.innerHeight-height-12))+'px';};
+ const outside=event=>{if(!node.contains(event.target)&&!anchor.contains(event.target))node.close(false);};
+ const outsideFocus=event=>{if(!node.contains(event.target)&&!editor.view.dom.contains(event.target))node.close(false);};
+ const observer=new ResizeObserver(position);
+ node.close=(focus=true)=>{observer.disconnect();window.removeEventListener('scroll',position,true);window.removeEventListener('resize',position);document.removeEventListener('pointerdown',outside,true);document.removeEventListener('focusin',outsideFocus);anchor.removeAttribute('aria-controls');anchor.removeAttribute('aria-expanded');node.remove();if(focus)focusField(editor,fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===occurrence),false);};
+ app.append(node);position();observer.observe(node);window.addEventListener('scroll',position,true);window.addEventListener('resize',position);document.addEventListener('pointerdown',outside,true);document.addEventListener('focusin',outsideFocus);node.querySelector('input,button')?.focus();return node;
 }
-function choiceDialog(entry){
+function choiceDialog(entry,automatic=false){
+ const existing=document.querySelector('.editor-dropdown');if(existing?.dataset.occurrence===entry.node.attrs.occurrence){if(!automatic)existing.querySelector('input')?.focus();return;}
  const id=entry.node.attrs.id,def=definition(id),value=valueOf(sessionOf(editor.state.doc),id),multi=def.type==='multi',selected=new Set((Array.isArray(value)?value:[value]).filter(value=>!multi||String(value).trim())),list=el('div',{class:'catalogue-list'}),search=el('input',{class:'catalogue-search',placeholder:tr('ค้นหา','Search'),'aria-label':tr('ค้นหาตัวเลือก','Search options')});
- const options=def.options?[...(!multi?[{value:'',labels:['เว้นว่าง','Leave blank']}]:[]),...def.options]:[];
- const draw=()=>{list.replaceChildren(...options.filter(o=>o.labels.join(' ').toLowerCase().includes(search.value.toLowerCase())||o.value.toLowerCase().includes(search.value.toLowerCase())).map(o=>el('label',{class:'field-choice'},[el('input',{type:multi?'checkbox':'radio',name:'choice','data-choice-value':o.value,checked:selected.has(o.value),onchange:e=>{if(!multi)selected.clear();if(e.target.checked)selected.add(o.value);else selected.delete(o.value);if(id==='mpox.risks'){if(o.value==='noneKnown'&&e.target.checked){selected.clear();selected.add('noneKnown');}else if(e.target.checked)selected.delete('noneKnown');draw();}}}),label(o.labels,language)])));document.dispatchEvent(new Event('clinical-layout'));};
- search.addEventListener('input',draw);draw();let modal;
+ if(!def.options)return;
+ focusField(editor,entry,false);
+ const options=[...def.options,...(!multi?[{value:'',labels:['เว้นว่าง','Leave blank']}]:[])];let index=-1,changed=false,toggled=false,visible=[];
+ const choose=(value,checked=true)=>{if(!multi)selected.clear();if(checked)selected.add(value);else selected.delete(value);if(id==='mpox.risks'&&checked){if(value==='noneKnown'){selected.clear();selected.add(value);}else selected.delete('noneKnown');}changed=true;};
+ const highlight=()=>{[...list.children].forEach((row,i)=>{row.classList.toggle('is-current-choice',i===index);row.setAttribute('aria-current',String(i===index));});if(index>=0){list.children[index]?.scrollIntoView({block:'nearest'});const target=document.activeElement===editor.view.dom?editor.view.dom:search;target.setAttribute('aria-activedescendant',list.children[index].id);}};
+ const checks=()=>list.querySelectorAll('[data-choice-value]').forEach(input=>{input.checked=selected.has(input.dataset.choiceValue);});
+ const draw=()=>{visible=options.filter(o=>o.labels.join(' ').toLowerCase().includes(search.value.toLowerCase())||o.value.toLowerCase().includes(search.value.toLowerCase()));list.replaceChildren(...visible.map((o,i)=>el('label',{class:'field-choice',id:`choice-${entry.node.attrs.occurrence}-${i}`},[el('input',{type:multi?'checkbox':'radio',name:'choice','data-choice-value':o.value,checked:selected.has(o.value),onchange:e=>{index=i;toggled=true;choose(o.value,e.target.checked);checks();highlight();}}),label(o.labels,language)])));highlight();};
+ search.addEventListener('input',()=>{index=-1;draw();});draw();let modal;
+ const finish=(advance=false,back=false)=>{if(changed)setValue(id,multi?[...selected]:[...selected][0]||'');else commitField(editor);modal.close(false);const current=fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===entry.node.attrs.occurrence);focusField(editor,current,false);return advance?moveField(editor,back):true;};
  const actions=[button('Clear value',()=>{setValue(id,'');modal.close();}),button('Remove this occurrence',()=>{modal.close(false);removeFields(id,entry);})];
- if(def.options)actions.unshift(button('Apply selection',()=>{setValue(id,multi?[...selected]:[...selected][0]||'');modal.close();},{class:'primary'}));
- modal=dropdown(label(def.labels,'en'),def.options?[search,list]:[el('p',{},'Edit this field directly in the document.')],actions,editor.view.nodeDOM(entry.pos));
+ actions.unshift(button('Apply selection',()=>{changed=true;finish();},{class:'primary'}));
+ modal=dropdown(label(def.labels,'en'),[search,el('p',{class:'choice-hint'},'↑/↓ Choose · Enter Apply · Tab Apply and next'+(multi?' · Space Toggle multiple choices':'')),list],actions,editor.view.nodeDOM(entry.pos));
+ modal.dataset.occurrence=entry.node.attrs.occurrence;modal.id='field-options-'+entry.node.attrs.occurrence;const field=editor.view.nodeDOM(entry.pos);field.setAttribute('aria-expanded','true');field.setAttribute('aria-controls',modal.id);
+ modal.handleKey=event=>{
+  if(event.target.closest?.('button')&&['Enter',' '].includes(event.key))return false;
+  if(['ArrowDown','ArrowUp'].includes(event.key)){if(visible.length){index=index<0?(event.key==='ArrowDown'?0:visible.length-1):(index+(event.key==='ArrowDown'?1:-1)+visible.length)%visible.length;toggled=false;highlight();}return true;}
+  if(event.key===' '&&multi&&index>=0){choose(visible[index].value,!selected.has(visible[index].value));toggled=true;checks();return true;}
+  if(event.key==='Enter'||event.key==='Tab'){if(index>=0&&!event.shiftKey&&!toggled)choose(visible[index].value);return finish(event.key==='Tab',event.shiftKey);}
+  return false;
+ };
+ if(automatic)editor.view.focus();
 }
 function blockDialog(context={}){
  const s=sessionOf(editor.state.doc),selected=new Set(),list=el('div',{class:'catalogue-list'}),search=el('input',{class:'catalogue-search',placeholder:tr('ค้นหาหัวข้อ เช่น HIV, ยา, วัณโรค','Search blocks, e.g. patient, CD4, medication'),'aria-label':tr('ค้นหาหัวข้อ','Search blocks')}),fresh=el('input',{type:'checkbox'});
@@ -255,8 +277,8 @@ function pictureTools(node,pos){
 }
 function insertPageBreak(){const {$from}=editor.state.selection;let pos=editor.state.doc.content.size;for(let d=$from.depth;d>0;d--)if($from.node(d).isTextblock){pos=$from.after(d);break;}editor.commands.insertContentAt(pos,{type:'pageBreak'});editor.commands.focus();}
 function shortcutHelp(){
- const shortcuts=[['Alt+↓',tr('ตัวเลือกของช่องที่เลือก','Choices for the selected field')],['Tab',tr('ช่องถัดไป','Next placeholder')],['Shift+Tab',tr('ช่องก่อนหน้า','Previous placeholder')],['Ctrl/Cmd+Z',ui('undo')],['Ctrl/Cmd+Shift+Z / Ctrl+Y',ui('redo')],['Ctrl/Cmd+B',tr('ตัวหนา','Bold')],['Ctrl/Cmd+I',tr('ตัวเอียง','Italic')],['Ctrl/Cmd+U',tr('ขีดเส้นใต้','Underline')],['Ctrl/Cmd+P',ui('print')],['Escape',tr('ปิดหน้าต่างเครื่องมือ','Close contextual overlays')]];
- dropdown(ui('help'),[el('table',{class:'shortcuts-table'},el('tbody',{},shortcuts.map(([key,text])=>el('tr',{},[el('td',{},el('kbd',{},key)),el('td',{},text)])))),el('p',{},tr('ที่ช่องแรกหรือช่องสุดท้าย Tab จะออกจากเอกสาร ใช้ปุ่มขึ้น/ลงในแถบหัวข้อเพื่อจัดลำดับ','Tab leaves the field sequence at either boundary. Use Move Up/Down in the section panel to reorder sections.'))]);
+ const shortcuts=[['↑ / ↓','Highlight a choice'],['Enter','Apply a highlighted choice, or close without changing the value'],['Space','Toggle a highlighted option in a multiple-choice list'],['Alt+↓','Search choices for the selected field'],['Tab','Apply a choice and move to the next placeholder'],['Shift+Tab','Previous placeholder'],['Ctrl/Cmd+Z',ui('undo')],['Ctrl/Cmd+Shift+Z / Ctrl+Y',ui('redo')],['Ctrl/Cmd+B','Bold'],['Ctrl/Cmd+I','Italic'],['Ctrl/Cmd+U','Underline'],['Ctrl/Cmd+P',ui('print')],['Escape','Close contextual overlays']];
+ dropdown(ui('help'),[el('table',{class:'shortcuts-table'},el('tbody',{},shortcuts.map(([key,text])=>el('tr',{},[el('td',{},el('kbd',{},key)),el('td',{},text)])))),el('p',{},'The last placeholder tabs to PDF Preview. Tab from Preview returns to the first field, including the document date. Shift+Tab at the first field leaves the document. Use Move Up/Down in the section panel to reorder sections.')]);
 }
 function showMessage(message){banner.hidden=false;banner.replaceChildren(document.createTextNode(message));}
 function showErrors(errors){banner.hidden=!errors.length;if(errors.length)banner.replaceChildren(el('strong',{},tr('โปรดตรวจสอบข้อมูลก่อนพิมพ์หรือดาวน์โหลด','Review these fields before printing or downloading')),el('ul',{},errors.map(error=>el('li',{},button(`${error.label}: ${error.message}`,()=>focusField(editor,fieldsInOrder(editor).find(f=>f.node.attrs.id===error.id)))))));}
@@ -284,10 +306,11 @@ async function exportDocument(action){
 }
 function clearForm(){if(dirty&&!confirm('Clear all patient information, pictures and edits in every retained template? Doctor preferences and the selected template/language are kept.'))return;const template=sessionOf(editor.state.doc).template;saveDoctorPreferences();patientMemory.clear();dirty=false;openTemplate(template,true);}
 window.clinical={editor:null,payload,setValue,addSections,switchTemplate:navigate,get layout(){return layout;},get dirty(){return dirty;}};
-document.addEventListener('fieldchoices',event=>{if(!editor)return;const entry=fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===event.detail.occurrence);if(entry)choiceDialog(entry);});
+document.addEventListener('fieldchoices',event=>{if(!editor)return;const entry=fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===event.detail.occurrence);if(entry)choiceDialog(entry,event.detail.automatic);});
+document.addEventListener('fieldinputlimit',event=>showMessage('The pasted value exceeds this field’s input limit. The existing value was kept. '+definition(event.detail.id).inputHint));
 document.addEventListener('fieldremove',event=>{if(!editor)return;const entry=locations('field').find(f=>f.node.attrs.occurrence===event.detail.occurrence);if(entry){document.querySelector('.editor-dropdown')?.close(false);removeFields(entry.node.attrs.id,entry);editor.view.focus();}});
-document.addEventListener('insertblocks',event=>{if(!editor)return;const point=event.detail;if(point.kind==='medicine'){addMedication(point.section,{art:'art',otherMedications:'otherMed',travelMedications:'travel'}[point.section]);const field=activeField(editor);if(field&&definition(field.node.attrs.id)?.options)choiceDialog(field);}else blockDialog(point);});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.querySelector('.editor-dropdown')){document.querySelector('.editor-dropdown').close();}});
+document.addEventListener('insertblocks',event=>{if(!editor)return;const point=event.detail;if(point.kind==='medicine')addMedication(point.section,{art:'art',otherMedications:'otherMed',travelMedications:'travel'}[point.section]);else blockDialog(point);});
+document.addEventListener('keydown',event=>{const menu=document.querySelector('.editor-dropdown');if(!menu||event.isComposing||editor?.view.composing)return;if(event.key==='Escape'){event.preventDefault();event.stopPropagation();menu.close();}else if(!event.ctrlKey&&!event.metaKey&&!event.altKey&&(menu.contains(event.target)||editor?.view.dom.contains(event.target))&&menu.handleKey?.(event)){event.preventDefault();event.stopPropagation();}},true);
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
 window.addEventListener('popstate',()=>{currentPath=location.pathname;openTemplate(templateAtPath(currentPath));});
 document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='p'&&editor&&!document.querySelector('dialog[open]')){event.preventDefault();exportDocument('print');}});

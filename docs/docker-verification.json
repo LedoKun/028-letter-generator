@@ -1,7 +1,7 @@
 {
-  "testedAt": "2026-10-10T18:08:17.641Z",
+  "testedAt": "2026-10-11T07:47:42.869Z",
   "image": "letter-generator:editor-check",
-  "imageId": "sha256:9e1d5c6274723325eb0d425a515c8ea97a45c201d89e5a30943f2abf732f7fd1",
+  "imageId": "sha256:66db6bdf64c876eddda246e85ff808bd8f80a431c05ad5909d0b13ba5f07cdfc",
   "platform": "linux/amd64",
   "port": 4180,
   "routes": [
@@ -9,44 +9,47 @@
       "type": "referral",
       "loaded": true,
       "commonSignature": true,
-      "bothLanguages": true
+      "bothLanguages": true,
+      "initialFocusSkipsDate": true
     },
     {
       "type": "medical",
       "loaded": true,
       "commonSignature": true,
-      "bothLanguages": true
+      "bothLanguages": true,
+      "initialFocusSkipsDate": true
     },
     {
       "type": "medication",
       "loaded": true,
       "commonSignature": true,
-      "bothLanguages": true
+      "bothLanguages": true,
+      "initialFocusSkipsDate": true
     },
     {
       "type": "freeform",
       "loaded": true,
       "commonSignature": true,
-      "bothLanguages": true
+      "bothLanguages": true,
+      "initialFocusSkipsDate": true
     }
   ],
-  "defaultReferral": true,
-  "singleMedicalCertificateTitle": true,
-  "editableLabEnclosure": true,
-  "restrictedMedicalMenu": true,
-  "thaiArtAdherenceLabel": true,
-  "freeformBodyClickTyping": true,
+  "initialFocusSkipsDate": true,
+  "keyboardChoices": true,
+  "floatingDropdowns": true,
+  "dateAndIdEntryLimits": true,
+  "previewTabLoop": true,
   "offlineReload": true,
   "patientStateDiscardedOnReload": true,
   "offlineTemplateSwitching": true,
   "offlinePdf": {
     "errors": [],
-    "bytes": 590662,
+    "bytes": 591321,
     "unchanged": true
   },
   "offlineTreatmentOnlyPdf": {
     "errors": [],
-    "bytes": 588289,
+    "bytes": 588518,
     "unchanged": true
   },
   "externalRequests": 0,

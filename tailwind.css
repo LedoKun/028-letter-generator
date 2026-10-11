@@ -294,3 +294,4 @@
 .clinical-group[data-clinical-group="signature"]{display:block}
 
 .tiptap li{margin-bottom:0}.tiptap li>p{margin-bottom:2pt}.tiptap ul,.tiptap ol{margin-bottom:2pt}
+.editor-dropdown{position:fixed;z-index:30;margin:0;min-width:0;max-width:calc(100vw - 24px);max-height:min(480px,calc(100vh - 24px));overflow:auto;box-shadow:0 8px 28px #173c4c30}.editor-dropdown .catalogue-list{max-height:min(260px,40vh);overflow:auto}.choice-hint{font-size:11px;color:#57727e;margin:0 0 6px}.field-choice.is-current-choice{background:#dfedf2;outline:1px solid #4e94ab;outline-offset:-1px}

@@ -113,4 +113,10 @@ for(const field of Object.values(FIELDS)) {
  if(/^hiv\.(initialCD4|latestVL)/.test(field.id))field.documents=['referral','freeform'],field.sections=['hiv',field.id.startsWith('hiv.initialCD4')?'cd4':'viralLoad'];
  field.validation=({date:'Gregorian date; complete date except optional DOB',partialDate:'Valid date with original precision',monthYear:'Valid month/year',integer:'Whole number, zero or greater',number:'Non-negative number',percent:'0–100 per cent',nationalId:'13 digits, optional separators',napId:'5–20 digits, optional separator',time:'Valid 24-hour time',choice:'Catalogue option',multi:'Catalogue options; conditional other detail'})[field.type]||'Plain text; HTML is never evaluated';
  if(field.legacyText)field.validation='Original free-text clinical value; qualifiers are retained';
+ if(['date','partialDate','monthYear'].includes(field.type)){
+  field.maxLength=field.type==='monthYear'?7:10;field.maxDigits=field.type==='monthYear'?6:8;
+  field.inputHint=`${field.type==='monthYear'?'MM/YYYY':'DD/MM/YYYY'}. CE/BE years are detected automatically. Type digits; you do not need to enter "/". Maximum ${field.maxDigits} digits.`;
+  if(field.type==='partialDate'||field.id==='patient.dob')field.inputHint+=' A year or month/year is also accepted.';
+ }
+ if(field.type==='nationalId'){field.maxLength=17;field.maxDigits=13;field.inputHint='National ID: 1-2345-67890-12-3 (13 digits). Hyphens are added automatically; enter digits only.';}
 }

@@ -182,3 +182,7 @@ export function formatFieldInput(id,raw) {
  }
  return text;
 }
+export function inputFitsField(id,value){
+ const def=definition(id),text=String(value).replace(/\u200B/g,'');
+ return !def?.maxLength||text.length<=def.maxLength&&text.replace(/\D/g,'').length<=def.maxDigits;
+}

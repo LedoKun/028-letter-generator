@@ -22,7 +22,7 @@ export function writer(language) {
  const G=(id,content,condition=null,printCondition=null)=>({type:'phrase',attrs:{guard:[id],condition,printCondition},content});
  const line=(id,th,en,suffixTh='',suffixEn='',condition=null,printCondition=null)=>P([G(id,[B(th,en),F(id),...(suffixTh||suffixEn?[T(suffixTh,suffixEn)]:[])],condition,printCondition)]);
  const dateLine=(id,th,en,partialTh,partialEn)=>{const prefix=D(id,th,en,partialTh,partialEn);prefix.marks.push({type:'bold'});return P([G(id,[prefix,F(id),T('','.')])]);};
- const H=(th,en)=>({type:'heading',attrs:{level:2},content:[T(th,en)]});
+ const H=(th,en)=>({type:'heading',attrs:{level:2,spacingBefore:8},content:[T(th,en)]});
  return {T,R,M,D,Q,B,F,P,G,line,dateLine,H};
 }
 export const insertionPoint=(id,hint,kind='blocks',section=null,allowed=null)=>({type:'insertionPoint',attrs:{id,hint,kind,section,allowed}});
@@ -101,6 +101,7 @@ export function buildSection(id,language){
  else if(id==='tbTreatment'){content.push(P([G('treatment.tbDate',[T('ผู้ป่วยได้รับการรักษาวัณโรคจนครบกำหนดการรักษาเป็นที่เรียบร้อยแล้ว เมื่อวันที่ ','The patient successfully completed a course of treatment for tuberculosis on '),F('treatment.tbDate'),T('','.')])]));}
  else if(id==='comments'){content.push(line('doctor.comments','ความเห็นเพิ่มเติม ','Other comments: '));}
  else if(id==='attendance'){content.push(line('examination.date','ขอรับรองว่าผู้ป่วยมารับการตรวจรักษาที่ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี เมื่อวันที่ ','I confirm that the patient attended Public Health Centre 28, Krung Thon Buri, for medical assessment on ','','.'));}
+ if(['admission','financial','examination','leave','syphilisTreatment','tbTreatment','comments','attendance'].includes(id)&&content[0]?.type==='paragraph')content[0].attrs={...content[0].attrs,spacingBefore:8};
  const disease=SECTIONS[id].disease;
  return {type:'clinicalSection',attrs:{id,diagnosis:disease&&id!=='otherHistory'},content:disease?id==='otherHistory'?bullets(content):[{type:'bulletList',content:[{type:'listItem',content:[P([B(...SECTIONS[id].labels)]),...bullets(content)]}]}]:['oi','pickup'].includes(id)?bullets(content):content.length?content:[P([])]};
 }
@@ -118,7 +119,7 @@ export function createDocument(template,language='th',doctor={}){
  const {T,R,M,B,F,P,G,line,H}=writer(language),physician=()=>({...F(language==='th'?'doctor.th':'doctor.en'),attrs:{id:language==='th'?'doctor.th':'doctor.en',languageBound:true}});
  const introduction=()=>({...T('ข้าพเจ้า ','I, Dr '),marks:[{type:'templateText',attrs:{th:'ข้าพเจ้า ',en:'I, Dr ',doctorId:'doctor.en',withoutTitleEn:'I, '}}]});
  const group=(id,content)=>({type:'clinicalGroup',attrs:{id},content});
- const groupHeading=(th,en,ids)=>({...H(th,en),attrs:{level:2,condition:['oneOfSections',ids]}});
+ const groupHeading=(th,en,ids)=>({...H(th,en),attrs:{level:2,spacingBefore:8,condition:['oneOfSections',ids]}});
  const values={'document.date':{value:parseClinicalDate(today()).iso,status:'default'}};
  for(const[id,value]of Object.entries(doctor))if(id.startsWith('doctor.'))values[id]={value,status:'preference'};
  const body=[P([T('วันที่ ','Date: '),F('document.date')],{textAlign:'right'})];
@@ -129,7 +130,7 @@ export function createDocument(template,language='th',doctor={}){
  if(template==='referral'){
   values['referral.purposes']={value:['continuedCare'],status:'default'};
   const subject=R('เรื่อง ส่งตัวผู้ป่วยเพื่อรับการตรวจวินิจฉัยและดูแลรักษาต่อ','Re: Patient referral for ongoing clinical assessment and management','เรื่อง สรุปประวัติการรักษา','Re: Medical summary');subject.marks.push({type:'bold'});
-  body.push(P([subject]),P([introduction(),physician(),G('doctor.license',[T(' ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ',' (Medical Licence Number: '),F('doctor.license'),T('',')')]),R(' ขอส่งตัวผู้ป่วยรายนี้เพื่อ ',', am writing to refer the patient detailed below for ',' ขอส่งสรุปประวัติการรักษาของผู้ป่วยรายนี้เพื่อประกอบการดูแลรักษาต่อ',', provide the following medical summary to support continuity of care'),...referralPurpose(language),R(' โดยมีรายละเอียดดังต่อไปนี้','. Details are provided below.',' โดยมีรายละเอียดดังต่อไปนี้','.') ]));
+  body.push(P([subject],{spacingAfter:8}),P([introduction(),physician(),G('doctor.license',[T(' ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ',' (Medical Licence Number: '),F('doctor.license'),T('',')')]),R(' ขอส่งตัวผู้ป่วยรายนี้เพื่อ ',', am writing to refer the patient detailed below for ',' ขอส่งสรุปประวัติการรักษาของผู้ป่วยรายนี้เพื่อประกอบการดูแลรักษาต่อ',', provide the following medical summary to support continuity of care'),...referralPurpose(language),R(' โดยมีรายละเอียดดังต่อไปนี้','. Details are provided below.',' โดยมีรายละเอียดดังต่อไปนี้','.') ]));
  }
  if(template==='medical')body.push(P([introduction(),physician(),G('doctor.license',[T(' ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ',', medical licence number '),F('doctor.license')]),M(' ขอรับรองข้อมูลทางการแพทย์ของผู้ป่วยดังต่อไปนี้',', hereby certify the medical information for the patient detailed below.',' ขอรับรองประวัติการรักษาของผู้ป่วยดังต่อไปนี้',', hereby certify the medical information for the patient detailed below.',' ได้ตรวจร่างกาย')]));
  if(template==='freeform')body.push({type:'bodyText',content:[P([])]});
@@ -139,7 +140,7 @@ export function createDocument(template,language='th',doctor={}){
   if(template==='referral'){
    Object.assign(values,Object.fromEntries(Object.entries(sectionDefaults('lab',language)).map(([id,value])=>[id,{value,status:'default'}])));
    body.push(group('summary',[
-    {...H('สรุปประวัติการเจ็บป่วยและการรักษา','Clinical Summary and Treatment History'),attrs:{level:2,condition:['hasClinical']}},
+    {...H('สรุปประวัติการเจ็บป่วยและการรักษา','Clinical Summary and Treatment History'),attrs:{level:2,spacingBefore:8,condition:['hasClinical']}},
     group('clinical',[insertionPoint('clinical','Add a diagnosis or treatment history','blocks',null,REFERRAL_POINTS.clinical)])
    ]),group('medications',[]));
   }
@@ -150,7 +151,7 @@ export function createDocument(template,language='th',doctor={}){
   if(template==='medical')body.push(insertionPoint('clinical','Add examination, treatment or medical leave','blocks',null,['examination','leave','syphilisTreatment','tbTreatment']));
  }
  if(template==='referral')body.push(group('closing',[insertionPoint('closing','Add a closing request','closing',null,['admission','financial'])]));
- if(template!=='medical')body.push(P([T('หากท่านต้องการข้อมูลเพิ่มเติม กรุณาติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรี','Please contact Public Health Centre 28, Krung Thon Buri, should you require any further information.')],{role:'closing'}));
+ if(template!=='medical')body.push(P([T('หากท่านต้องการข้อมูลเพิ่มเติม กรุณาติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรี','Please contact Public Health Centre 28, Krung Thon Buri, should you require any further information.')],{role:'closing',spacingBefore:8}));
  if(template==='referral')body.push(group('enclosures',[groupHeading('เอกสารแนบ','Enclosures',REFERRAL_POINTS.enclosures),buildSection('lab',language),insertionPoint('enclosures','Add enclosures','closing',null,REFERRAL_POINTS.enclosures)]));
  body.push(group('signature',[P([T('ขอแสดงความนับถือ','Yours faithfully,')],{role:'signature'}),P([],{spacingAfter:44,role:'signatureSpace'}),P([physician()]),P([G('doctor.license',[T('เลขที่ใบอนุญาตประกอบวิชาชีพเวชกรรม ','Medical licence number: '),F('doctor.license')])])]));
  return {type:'doc',content:[{type:'sessionData',attrs:{template,language,values,archives:{},fieldArchives:{},omitted:[]}},...body]};
@@ -188,5 +189,6 @@ export function buildBlock(id,language,template='referral'){
   const visit=node=>{if(node.type==='paragraph'){let match=false;const find=n=>{if(n.type==='field'&&n.attrs.id.startsWith(prefix))match=true;(n.content||[]).forEach(find);};find(node);if(match)content.push(node);}else (node.content||[]).forEach(visit);};visit(buildSection('hiv',language));
  }
  if(!content.length)throw new Error('Unsupported block');
+ if(id==='identification')content[0].attrs={...content[0].attrs,spacingBefore:8};
  return {type:'clinicalSection',attrs:{id},content:['cd4','viralLoad'].includes(id)?bullets(content):content};
 }

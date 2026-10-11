@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {FIELDS,definition,legacyFieldMap,TEMPLATE_NAMES} from '../public/editor/fields.mjs';
 import {createDocument,buildSection,medicationRow,SECTIONS,INSERT_BLOCKS,buildBlock,FINANCIAL,referralPoint,sectionDefaults,REFERRAL_POINTS} from '../public/editor/templates.mjs';
 import {parseClinicalDate,displayDate,calculateAge,addCalendarDays,inclusiveDays,today} from '../public/editor/dates.mjs';
-import {hydrate,sessionOf,walk,valueOf,displayValue,normalise,recalculate,validateDocument,fieldRequirements,visibleFields,formatFieldInput,templateProse,fieldError} from '../public/editor/model.mjs';
+import {hydrate,sessionOf,walk,valueOf,displayValue,normalise,recalculate,validateDocument,fieldRequirements,visibleFields,formatFieldInput,templateProse,fieldError,inputFitsField} from '../public/editor/model.mjs';
 import {toPdf} from '../public/editor/pdf.mjs';
 globalThis.window={};await import('../public/shared/pdf-generator.js');
 function make(template='referral',language='en',values={},sections=[]) {
@@ -115,6 +115,18 @@ test('restored fields retain partial formatting and multiline values',()=>{
 
 for(const [id,raw,expected]of [['document.date','09102026','09/10/2026'],['document.date','2026','2026'],['hiv.initialCD4Date','10/2569','10/2569'],['tpt.ongoing.start','102026','10/2026'],['patient.nationalId','1234567890123','1-2345-67890-12-3'],['patient.nationalId','123456','1-2345-6'],['hiv.napId','1234567890','1234-567890'],['hiv.napId','1234','1234'],['patient.name','09102026','09102026']])test(`automatic formatting for ${id}: ${raw}`,()=>assert.equal(formatFieldInput(id,raw),expected));
 test('formatting does not discard invalid or excessive data',()=>{for(const [id,raw]of [['patient.nationalId','12345678901234'],['hiv.napId','123456789012345678901'],['patient.nationalId','ABC123'],['patient.dob','INVALID DATE']])assert.equal(formatFieldInput(id,raw),raw);});
+test('date and National ID entry limits preserve exact and partial-date precision',()=>{
+ for(const [id,value,allowed]of [['document.date','10/10/2569',true],['document.date','10102569',true],['document.date','101025690',false],['document.date','01/01/20260',false],['patient.dob','BAD DATE',true],['patient.dob','VERY LONG INVALID DATE',false],['hiv.initialCD4Date','10/2569',true],['hiv.initialCD4Date','2026',true],['tpt.completed.start','092026',true],['tpt.completed.start','09/2569',true],['tpt.completed.start','0920260',false],['patient.nationalId','1-2345-67890-12-3',true],['patient.nationalId','12345678901234',false],['patient.name','Ordinary prose remains unlimited',true]])assert.equal(inputFitsField(id,value),allowed,`${id}: ${value}`);
+ for(const field of Object.values(FIELDS).filter(field=>['date','partialDate','monthYear'].includes(field.type))){assert.match(field.inputHint,/CE\/BE/);assert.match(field.inputHint,/do not need to enter "\/"/);assert.equal(field.maxLength,field.type==='monthYear'?7:10);}
+ assert.match(FIELDS['patient.nationalId'].inputHint,/1-2345-67890-12-3/);assert.equal(FIELDS['patient.nationalId'].maxDigits,13);
+});
+test('template group spacing survives PDF export without changing compact bullets or signing space',()=>{
+ const doc=make('referral','en',{'hiv.napId':'1234567890'},['hiv','admission','financial']),pdf=toPdf(doc);
+ const summary=pdf.find(node=>pdfText(node)==='Clinical Summary and Treatment History');assert.equal(summary.margin[1],8);
+ const financial=pdf.find(node=>pdfText(node)===FINANCIAL[1]);assert.equal(financial.margin[1],8);
+ const patient=pdf.find(node=>pdfText(node).startsWith('Full name:'));assert.equal(patient.margin[1],8);
+ assert.equal(pdf.find(node=>node.ul).margin[3],2);assert.ok(pdf.find(node=>node.unbreakable).stack.some(node=>node.margin?.[3]===44));
+});
 test('new blocks include complete related field groups',()=>{
  const expected={identification:['patient.name','patient.dob','patient.age','patient.passport','patient.nationalId'],cd4:['hiv.initialCD4','hiv.initialCD4Percent','hiv.initialCD4Date'],viralLoad:['hiv.latestVL','hiv.latestVLDate'],physician:['doctor.en','doctor.license'],referralPurpose:['referral.purposes','referral.customPurpose']};
  for(const[id,fields]of Object.entries(expected)){const actual=[];walk(buildBlock(id,'en','referral'),n=>{if(n.type==='field')actual.push(n.attrs.id);});for(const field of fields)assert.ok(actual.includes(field),`${id} missing ${field}`);assert.ok(INSERT_BLOCKS[id]);}

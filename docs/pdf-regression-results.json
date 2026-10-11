@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-10T18:08:38.138Z",
+  "generatedAt": "2026-10-11T07:29:07.418Z",
   "printedAt": "2026-10-10T03:00:00Z",
   "samples": [
     {
@@ -14,7 +14,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "cd42b772c746ddfd2b4e433c50b5dc521156715495a64c2718e7c3c7b504a694"
+      "sha256": "760e4585f3c67e55fc60ca2da2edf432a2415d639ee429fb6396eae938fcf7a2"
     },
     {
       "type": "referral",
@@ -28,7 +28,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "c9e983a83931494aab84f32ec50ceef5d1af90c39beba4af65f7134d4aaa3980"
+      "sha256": "0178ea2589b9e22a1045d0425fa43bb8f7fa9eb995deaa481be65a6f3087dc01"
     },
     {
       "type": "medical",
@@ -42,7 +42,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "7ef37fe746b4169d1a38a11317dac80cb0e7c6d71eb83740cc203e044372ab78"
+      "sha256": "85bb8f2975e8a89126c36713f348f971cce3ea93d104cb6d5a09cdc233872fc6"
     },
     {
       "type": "medical",
@@ -56,7 +56,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "3c0ae540b03f20e1c2ec6269d28e0932eb557953f8e2a91c4e2bf917f3596abe"
+      "sha256": "3d7326e8dc1ce5fd4d211e2ff57ba77e2609a0272749ac3fe4e2de0c7bc2a102"
     },
     {
       "type": "medication",
@@ -70,7 +70,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "4271a136133e2d2f58611475308cf33012b052dd881cfbf8b965c8fa7af26c73"
+      "sha256": "c7d687365891797746838e5410c61019f44c0aa4d76db4bba35c78990aad91f2"
     },
     {
       "type": "medication",
@@ -84,7 +84,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "c2ebdc9ab2bc6c1bbd54aaf545600495d3326ab1d932af5a5af2278cd1e25b11"
+      "sha256": "6b42fe9c6ba8b54a61ae113d69b113f59708632b97c0c0598d76c19f1d831a09"
     },
     {
       "type": "freeform",
@@ -98,7 +98,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "7ff5a21c924214f78869e6d0a5536573e494ef45a7d6e66d9f7b74bb3728152b"
+      "sha256": "340baed3797ca0195b4a21bcc3f9196d563196b5ca69071f11b2cd7c930f4e00"
     },
     {
       "type": "freeform",
@@ -112,7 +112,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "5552a55fa392adae07e997843c1d8904b557cad1f81b5296cdd2ce4e0258a43f"
+      "sha256": "8a4305065392465a5341cdddaad63edbadaed63070942c3eae026251c8189d78"
     },
     {
       "type": "medical",
@@ -126,7 +126,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "c11732b4ece5eecacf2656f99676e2a43a661491fd2c77cdeb6656e0b7682c11"
+      "sha256": "48cdd9dbcbe70fa695575e50d4e66f20c685b19ea9e55afa12bee9684462b729"
     },
     {
       "type": "medical",
@@ -140,7 +140,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "640088daa1f9058ebd55d589cb5e64b40b088071d8d98f1da4ccf6af7c392f64"
+      "sha256": "06672c79dc6e0426e77197e099b518ca7290c97882f97c09e3e66469485aa8d2"
     },
     {
       "type": "referral",
@@ -154,7 +154,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "97ce0153fd7dd0f93fd4078158c7376b4eca0cf50dd202e3baa4bc13493ec48a"
+      "sha256": "1d23f8ad52fada32c516478da0f3df778a7b2e14ecd71a637eb691681755256b"
     },
     {
       "type": "referral",
@@ -168,7 +168,7 @@
       "signatureMatchesRequestedLayout": true,
       "signatureGapPoints": 64.73,
       "nonDestructive": true,
-      "sha256": "a6033953b08e85ad14a85695f95914373c5f9780abe65835cba5d86847fb379b"
+      "sha256": "5097c82cd9e36715ed3cb383da387bfce8d1c7390f45223fd85b1c35f1634616"
     }
   ]
 }
