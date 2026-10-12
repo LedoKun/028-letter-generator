@@ -8,8 +8,8 @@ const source = fs.readFileSync(
     'utf8'
 );
 
-test('PDF body uses the approved readable size and shared font', () => {
-    assert.match(source, /fontSize:\s*11/);
+test('PDF body uses the compact size and shared font', () => {
+    assert.match(source, /defaultStyle:\s*\{\s*font:\s*THAI_FONT,\s*fontSize:\s*10,/);
     assert.match(source, /lineHeight:\s*1\.05/);
     assert.match(source, /margin:\s*\[0,\s*0,\s*0,\s*0\.75\]/);
 });

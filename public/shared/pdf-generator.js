@@ -296,7 +296,7 @@
             },
             defaultStyle: {
                 font: THAI_FONT,
-                fontSize: 11,
+                fontSize: 10,
                 lineHeight: 1.05
             },
             styles: {

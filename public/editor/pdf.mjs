@@ -38,10 +38,10 @@ export function toPdf(doc) {
    const title=node.type==='heading',margin=[(node.attrs?.indent||0)*12,node.attrs?.spacingBefore??(title?4:0),0,node.attrs?.spacingAfter??(inList?2:5)];
    if(!combined.trim()&&!combined.includes('\n')){
     if(node.attrs?.prosePlaceholder&&emptyProse(node))return [];
-    if(!title&&emptyProse(node)&&!node.attrs?.role)return [{text:'\u00A0',fontSize:11,lineHeight:1.05,margin}];
+    if(!title&&emptyProse(node)&&!node.attrs?.role)return [{text:'\u00A0',fontSize:10,lineHeight:1.05,margin}];
     return node.attrs?.spacingAfter>5?[{text:'',margin:[0,0,0,node.attrs.spacingAfter]}]:[];
    }
-   return [{text,alignment:node.attrs?.textAlign||'left',bold:title||undefined,fontSize:title?(node.attrs.level===1?16:11):11,lineHeight:1.05,margin}];
+   return [{text,alignment:node.attrs?.textAlign||'left',bold:title||undefined,fontSize:title&&node.attrs.level===1?16:10,lineHeight:1.05,margin}];
   }
   if(['bulletList','orderedList'].includes(node.type)) {
    const items=children.filter(supported).map(child=>({stack:blocks(child.content||[],true)})).filter(item=>meaningful(item.stack));
