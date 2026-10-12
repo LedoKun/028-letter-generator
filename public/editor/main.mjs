@@ -6,7 +6,7 @@ import { closeHistory } from '@tiptap/pm/history';
 import { EditorState } from '@tiptap/pm/state';
 import { TEMPLATE_NAMES, definition, label } from './fields.mjs';
 import { INSERT_BLOCKS, createDocument, buildBlock, medicationRow, referralPoint, sectionDefaults, availableBlocks } from './templates.mjs';
-import { hydrate, sessionOf, valueOf, displayValue, normalise, recalculate, validateDocument, walk } from './model.mjs';
+import { hydrate, sessionOf, valueOf, displayValue, normalise, recalculate, validateDocument, walk, newId } from './model.mjs';
 import { SessionData, TemplateText, Field, Phrase, ClinicalSection, ClinicalGroup, MedicationRow, BodyText, PageBreak, Picture, InsertionPoint, LayoutAttributes, FieldBehaviour, activeField, fieldsInOrder, focusField, focusStop, focusInitialField, moveField, updateSession, commitField } from './nodes.mjs';
 import { PatientSession, patchSession } from './session.mjs';
 import { Pagination, PAGE } from './pagination.mjs';
@@ -91,7 +91,7 @@ function templateContent(template,inherit=true){
   const source=patientMemory.documents.get('referral')?.state.doc||editor.state.doc,sourceSession=sessionOf(source),medicines=[];
   source.descendants(node=>{if(node.type.name==='medicationRow'&&['art','otherMed'].includes(node.attrs.kind)){const name=displayValue(sourceSession,`${node.attrs.kind}.${node.attrs.id}.name`);if(name)medicines.push(name);}});
   if(medicines.length){const section=doc.content.find(n=>n.attrs?.id==='travelMedications');section.content=section.content.filter(n=>n.type!=='medicationRow');
-   for(const name of medicines){const id=crypto.randomUUID(),choice=definition('travel.name').options.find(option=>option.value===name||option.labels.includes(name));s.values[`travel.${id}.name`]={value:choice?.value||'OTHER',status:'inherited'};if(!choice)s.values[`travel.${id}.other`]={value:name,status:'inherited'};section.content.splice(section.content.length-1,0,medicationRow('travel',id,language));}
+   for(const name of medicines){const id=newId(),choice=definition('travel.name').options.find(option=>option.value===name||option.labels.includes(name));s.values[`travel.${id}.name`]={value:choice?.value||'OTHER',status:'inherited'};if(!choice)s.values[`travel.${id}.other`]={value:name,status:'inherited'};section.content.splice(section.content.length-1,0,medicationRow('travel',id,language));}
   }
  }
  return hydrate(doc);
@@ -173,7 +173,7 @@ function moveEntry(entry,delta,type){
  const target=parent.child(targetIndex);let targetPos=$pos.start();for(let i=0;i<targetIndex;i++)targetPos+=parent.child(i).nodeSize;
  const tr=closeHistory(editor.state.tr).delete(entry.pos,entry.pos+entry.node.nodeSize);tr.insert(delta<0?targetPos:targetPos+target.nodeSize-entry.node.nodeSize,entry.node);editor.view.dispatch(tr);
 }
-function addMedication(sectionId,kind){const section=findSection(sectionId);if(!section)return;const row=medicationRow(kind,crypto.randomUUID(),language),point=locations('insertionPoint').find(p=>p.node.attrs.id==='medicine:'+sectionId),position=point?.pos??section.pos+section.node.nodeSize-1;editor.view.dispatch(closeHistory(editor.state.tr).insert(position,nodeFromJson(row)));focusField(editor,fieldsInOrder(editor).find(f=>f.pos>=position));}
+function addMedication(sectionId,kind){const section=findSection(sectionId);if(!section)return;const row=medicationRow(kind,newId(),language),point=locations('insertionPoint').find(p=>p.node.attrs.id==='medicine:'+sectionId),position=point?.pos??section.pos+section.node.nodeSize-1;editor.view.dispatch(closeHistory(editor.state.tr).insert(position,nodeFromJson(row)));focusField(editor,fieldsInOrder(editor).find(f=>f.pos>=position));}
 function removeRow(entry){const s=structuredClone(sessionOf(editor.state.doc));s.archives[`row:${entry.node.attrs.kind}:${entry.node.attrs.id}`]=entry.node.toJSON();editor.view.dispatch(patchSession(closeHistory(editor.state.tr).setMeta('sessionUpdate',true),s).delete(entry.pos,entry.pos+entry.node.nodeSize));}
 function restoreRows(sectionId,kind){const section=findSection(sectionId),s=sessionOf(editor.state.doc);const archived=Object.entries(s.archives).filter(([key])=>key.startsWith(`row:${kind}:`));const existing=new Set(locations('medicationRow').map(x=>x.node.attrs.id));const rows=archived.map(([,row])=>row).filter(row=>!existing.has(row.attrs.id)),point=locations('insertionPoint').find(p=>p.node.attrs.id==='medicine:'+sectionId);if(section&&rows.length)editor.view.dispatch(closeHistory(editor.state.tr).insert(point?.pos??section.pos+section.node.nodeSize-1,rows.map(nodeFromJson)));}
 function renderSidebar(){if(!editor||!sidebar)return;lastField='';renderFieldPanel();const s=sessionOf(editor.state.doc);
@@ -282,7 +282,7 @@ function blockDialog(context={}){
  search.addEventListener('input',draw);draw();let modal;const point=locations('insertionPoint').find(p=>p.node.attrs.id===context.id);
  const finish=(advance=false,back=false)=>{modal.close(false);if(!back&&selected.size&&addSections([...selected],fresh.checked,context.id))return true;const current=point&&locations('insertionPoint').find(p=>p.node.attrs.id===context.id);focusStop(editor,current||activeField(editor),false);return advance||current?.node.attrs.hidden?moveField(editor,back,current):true;};
  modal=dropdown('Insert Block',[search,el('p',{class:'choice-hint'},'↑/↓ Choose · Space Toggle multiple blocks · Enter/Tab Add and continue'),list,el('label',{class:'field-choice'},[fresh,'Start selected blocks afresh (clears their shared values)'])],[button(ui('add'),()=>finish(),{class:'primary'})],point?editor.view.nodeDOM(point.pos):null);
- modal.id='block-options-'+crypto.randomUUID();if(point)modal.dataset.insertionId=context.id;
+ modal.id='block-options-'+newId();if(point)modal.dataset.insertionId=context.id;
  keyboardChoices(modal,list,search,(input,checked)=>{input.checked=checked;if(checked)selected.add(input.dataset.sectionChoice);else selected.delete(input.dataset.sectionChoice);},finish,true,point&&editor.view.nodeDOM(point.pos)?.querySelector('button'));
  if(context.automatic&&point)focusStop(editor,point,false);
 }

@@ -3,6 +3,11 @@ import { parseClinicalDate, displayDate, calculateAge, addCalendarDays, inclusiv
 export const sessionOf = doc => doc.content?.[0]?.attrs || doc.firstChild?.attrs;
 export function walk(node,fn) { fn(node);for(const child of node.content||[])walk(child,fn); }
 export const valueOf = (session,id) => session.values[id]?.value ?? '';
+export function newId(){
+ const crypto=globalThis.crypto;
+ if(typeof crypto.randomUUID==='function')return crypto.randomUUID();
+ return Array.from(crypto.getRandomValues(new Uint8Array(16)),byte=>byte.toString(16).padStart(2,'0')).join('');
+}
 export function conditionActive(condition,session) {
  if(!condition)return true;
  const [op,id,expected]=condition,v=valueOf(session,id);
@@ -148,7 +153,7 @@ export function hydrate(doc) {
  const out=structuredClone(doc),session=sessionOf(out);
  const clean=node=>{
   if(node.type==='field') {
-   node.attrs={occurrence:globalThis.crypto.randomUUID(),...node.attrs};
+   node.attrs={occurrence:newId(),...node.attrs};
    const text=displayValue(session,node.attrs.id),current=(node.content||[]).map(n=>n.type==='hardBreak'?'\n':n.text||'').join('').replace(/\u200B/g,'');
    if(!node.content?.length||current!==text){const marks=node.content?.[0]?.marks;node.content=(text||'\u200B').split('\n').flatMap((line,i)=>[...(i?[{type:'hardBreak'}]:[]),...(line?[{type:'text',text:line,...(marks?{marks}:{})}]:[])]);}
   } else if(node.content)node.content=node.content.filter(n=>n&&!(n.type==='text'&&!n.text)).map(clean);

@@ -1,7 +1,7 @@
 import { Node, Mark, Extension } from '@tiptap/core';
 import { Plugin, TextSelection } from '@tiptap/pm/state';
 import { definition, label } from './fields.mjs';
-import { sessionOf, displayValue, normalise, fieldError, fieldRequirements, conditionActive, recalculate, templateProse, formatFieldInput, inputFitsField } from './model.mjs';
+import { sessionOf, displayValue, normalise, fieldError, fieldRequirements, conditionActive, recalculate, templateProse, formatFieldInput, inputFitsField, newId } from './model.mjs';
 import { patchSession } from './session.mjs';
 import { pictureWidthPercent } from './pictures.mjs';
 import { availableBlocks } from './templates.mjs';
@@ -182,7 +182,7 @@ export const FieldBehaviour=Extension.create({
      if(node.type.name==='field') {
       const id=node.attrs.languageBound?(session.language==='th'?'doctor.th':'doctor.en'):node.attrs.id;
       const record=session.values[id],hidden=session.omitted.includes(id),text=record?.editing?String(record.value):displayValue(session,id);
-      const attrs={...node.attrs,id,occurrence:node.attrs.occurrence||crypto.randomUUID(),hidden,status:record?.status||'empty',error:fieldError(id,record?.value,session),required:required.has(id)};
+      const attrs={...node.attrs,id,occurrence:node.attrs.occurrence||newId(),hidden,status:record?.status||'empty',error:fieldError(id,record?.value,session),required:required.has(id)};
       edits.push({pos,node,attrs,text});return false;
      }
      if(['phrase','paragraph','heading','listItem'].includes(node.type.name)) {

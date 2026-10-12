@@ -1,6 +1,6 @@
 # Implementation verification
 
-Verified on 11 October 2026 against the local working tree. Engineering checks are complete. Earlier local Docker validation is retained and was not repeated for this revision; clinical editorial approval has not been obtained.
+Originally verified on 11 October 2026; LAN HTTP compatibility was additionally verified on 12 October 2026 against the local working tree. Engineering checks are complete. Earlier local Docker validation is retained and was not repeated for this revision; clinical editorial approval has not been obtained.
 
 ## Implemented behaviour
 
@@ -47,7 +47,7 @@ The format toolbar now has zoom buttons, a horizontal keyboard-accessible range 
 
 | Check | Executed result | Evidence |
 | --- | --- | --- |
-| `npm test` | 183 passed; 0 failed; 0 skipped | Node unit/integration tests |
+| `npm test` | 185 passed; 0 failed; 0 skipped | Node unit/integration tests |
 | `npm run test:browser` | 351 passed; 1 skipped; 0 failed or flaky | [Browser results](browser-verification.json); 176 cases per project in Chromium and Firefox; latest full regression includes footer height matching and zoom |
 | `npm run test:pdf` | 12 samples passed, covering 30 PDF pages | [PDF results](pdf-regression-results.json); [current samples](samples/current) |
 | Earlier logo/offline browser recheck | 18 passed on the final build | [Browser results](browser-verification.json); all templates/languages, height/proportions and offline PDFs in Chromium/Firefox |
@@ -68,6 +68,14 @@ Every PDF page passed A4 size, searchable Thai/English text, approved replacemen
 The authorised typography reference uses Sarabun, 9 pt clinic-name lines and 6.5 pt institutional/footer text. The user-authorised English name, supplied clinic header logo and original-logo footer addition are applied. Other wording, contact details, margins, rules and printed-date/page-number formats are preserved. Header/footer regression checks every current page against that reference, with independent logo-height comparison to the original PDFs.
 
 The Docker smoke test loads all four types, checks both letter languages and the common signature/title, installs the service worker, disconnects the network, reloads without restoring a patient, switches documents offline and generates non-destructive referral and treatment-only PDFs. The latest Docker smoke checks the leading signature paragraph on every route in both languages, keyboard insertion into referral and medical-certificate blocks, first-added-field focus, fieldless closing requests and medicine commands that do not create rows on Tab, with non-destructive PDF generation offline. [Editor screenshot](editor-screenshot.png) records the light interface. The temporary QA container is removed after verification; the user's legacy server is preserved.
+
+## LAN HTTP compatibility verification
+
+The reported partially drawn UI was reproduced on the published image over a non-loopback HTTP address: `isSecureContext` was false, `crypto.randomUUID` was undefined, and initial field hydration failed before toolbar/page construction. Localhost checks had exposed the API and therefore missed the problem.
+
+One shared ID helper uses the native UUID method when present, otherwise 128 bits from `getRandomValues()`. All five creation sites now use it. No dependency, global polyfill, clinical calculation or patient persistence was added.
+
+On 12 October, all 185 unit tests and 46 targeted Chromium/Firefox browser cases passed. A Docker image was rebuilt as `letter-generator:http-id-fix` and 16 genuine non-loopback HTTP scenarios passed: four templates × two languages × two browsers, with initial focus, visible toolbar/pages, applicable insertion/medicine workflows, valid PDF Preview/Download including the footer logo, preserved document state and no page errors or failed static-asset requests. Preview-blob cancellation when its iframe is closed is excluded from static-asset failure checks. [Container results](docker-http-verification.json) and [diagnosis](container-http-troubleshooting.md) record the evidence. The existing published/user container was left untouched; the QA container was removed after checking.
 
 ## Review limits
 

@@ -65,6 +65,14 @@ docker run --rm -p 4000:4000 letter-generator
 
 Open `http://localhost:4000`. Node performs the build; the final container serves static files with Caddy. The existing multi-architecture workflow remains available.
 
+## LAN HTTP troubleshooting
+
+The editor and PDF generation support plain HTTP on a LAN address. Browser `crypto.randomUUID()` requires a secure context, so document IDs use `crypto.getRandomValues()` when the native UUID method is unavailable. This applies to initial fields, inserted placeholders, block menus, medicines and template reuse.
+
+If an older image shows a partial screen with no toolbar/pages and `globalThis.crypto.randomUUID is not a function`, rebuild from the fixed source or pull the rebuilt image once it has been published, then recreate the container. The image tag alone does not update an already-running container. Offline service-worker caching still requires HTTPS or localhost.
+
+[Diagnosis and executed container checks](docs/container-http-troubleshooting.md)
+
 ## Verification
 
 ```bash
