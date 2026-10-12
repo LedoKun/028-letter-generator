@@ -1,4 +1,4 @@
-import { sessionOf, displayValue, valueOf, conditionActive, templateProse } from './model.mjs';
+import { sessionOf, displayValue, valueOf, conditionActive, templateProse, hasManualContent, emptyProse } from './model.mjs';
 const thaiWords=new Intl.Segmenter('th',{granularity:'word'});
 function present(id,session){const v=valueOf(session,id);return !session.omitted.includes(id)&&(!session.availableFields||session.availableFields.includes(id)||session.converted?.includes(id))&&!!(Array.isArray(v)?v.length:String(v).trim());}
 export function toPdf(doc) {
@@ -8,7 +8,10 @@ export function toPdf(doc) {
   // Empty runs let pdfmake wrap Thai words without inserting printable characters.
   return /[\u0E00-\u0E7F]/.test(run.text)?Array.from(thaiWords.segment(run.text),({segment})=>[{...styled,text:segment},{text:''}]).flat():[styled];
  });
- const supported=node=>!node.attrs?.hidden&&conditionActive(node.attrs?.condition,session)&&conditionActive(node.attrs?.printCondition,session)&&(node.attrs?.guard||[]).every(id=>present(id,session));
+ const supported=node=>{
+  const guards=node.attrs?.guard||[];
+  return !node.attrs?.hidden&&conditionActive(node.attrs?.condition,session)&&conditionActive(node.attrs?.printCondition,session)&&guards.every(id=>!session.omitted.includes(id))&&(guards.every(id=>present(id,session))||hasManualContent(node));
+ };
  const inline=(node,marks=[])=>{
   if(!supported(node))return [];
   const all=[...marks,...(node.marks||[])],options={};
@@ -24,7 +27,7 @@ export function toPdf(doc) {
   }
   return (node.content||[]).flatMap(child=>inline(child,all));
  };
- const meaningful=items=>items.some(n=>n.text?.some?.(t=>String(t.text||'').trim())||n.stack?.length||n.ul?.length||n.ol?.length||n.pageBreak);
+ const meaningful=items=>items.some(n=>n.text==='\u00A0'||n.text?.some?.(t=>String(t.text||'').trim()||t.text.includes('\n'))||n.stack?.length||n.ul?.length||n.ol?.length||n.pageBreak);
  const blocks=(nodes,inList=false)=>nodes.flatMap(node=>{
   if(!supported(node)||['sessionData','insertionPoint'].includes(node.type))return [];
   const children=node.content||[];
@@ -32,22 +35,27 @@ export function toPdf(doc) {
   if(node.type==='pageBreak')return [{text:'',pageBreak:'before'}];
   if(['paragraph','heading'].includes(node.type)) {
    const text=inline(node),combined=text.map(n=>n.text).join('');
-   if(!combined.trim())return node.attrs?.spacingAfter>5?[{text:'',margin:[0,0,0,node.attrs.spacingAfter]}]:[];
-   const title=node.type==='heading';return [{text,alignment:node.attrs?.textAlign||'left',bold:title||undefined,fontSize:title?(node.attrs.level===1?16:11):11,lineHeight:1.05,margin:[(node.attrs?.indent||0)*12,node.attrs?.spacingBefore??(title?4:0),0,node.attrs?.spacingAfter??(inList?2:5)]}];
+   const title=node.type==='heading',margin=[(node.attrs?.indent||0)*12,node.attrs?.spacingBefore??(title?4:0),0,node.attrs?.spacingAfter??(inList?2:5)];
+   if(!combined.trim()&&!combined.includes('\n')){
+    if(node.attrs?.prosePlaceholder&&emptyProse(node))return [];
+    if(!title&&emptyProse(node)&&!node.attrs?.role)return [{text:'\u00A0',fontSize:11,lineHeight:1.05,margin}];
+    return node.attrs?.spacingAfter>5?[{text:'',margin:[0,0,0,node.attrs.spacingAfter]}]:[];
+   }
+   return [{text,alignment:node.attrs?.textAlign||'left',bold:title||undefined,fontSize:title?(node.attrs.level===1?16:11):11,lineHeight:1.05,margin}];
   }
   if(['bulletList','orderedList'].includes(node.type)) {
    const items=children.filter(supported).map(child=>({stack:blocks(child.content||[],true)})).filter(item=>meaningful(item.stack));
    return items.length?[{[node.type==='bulletList'?'ul':'ol']:items,margin:[12,0,0,2],...(node.type==='orderedList'?{start:node.attrs?.start||1}:{})}]:[];
   }
   if(node.type==='clinicalSection'||node.type==='clinicalGroup') {
-   if(node.attrs.id==='art'){const item=children.find(child=>child.type==='bulletList')?.content?.[0];if(item&&!meaningful(blocks(item.content.slice(1),true)))return [];}
+   if(node.attrs.id==='art'){const item=children.find(child=>child.type==='bulletList')?.content?.[0];if(item&&!hasManualContent(node)&&!meaningful(blocks(item.content.slice(1),true)))return [];}
    const output=blocks(children,inList),body=blocks(children.filter(c=>c.type!=='heading'),inList);
    if(node.type==='clinicalGroup'&&node.attrs.id==='signature'&&[4,5].includes(children.length)&&children.every(child=>child.type==='paragraph')&&output.flatMap(n=>n.text||[]).map(run=>run.text).join('').length<400)return [{stack:output,unbreakable:true}];
-   return meaningful(body)||node.attrs.diagnosis&&meaningful(output)?output:[];
+   return meaningful(body)||(node.attrs.diagnosis||children.some(child=>child.type==='heading'&&supported(child)&&hasManualContent(child)))&&meaningful(output)?output:[];
   }
   if(node.type==='medicationRow'){
    const kind=node.attrs.kind,id=node.attrs.id;
-   if(!present(`${kind}.${id}.name`,session))return [];
+   if(!present(`${kind}.${id}.name`,session)&&!hasManualContent(node))return [];
    const content=blocks(children,true);return content.length?[{ul:content.map(item=>({stack:[item]})),margin:[12,0,0,2]}]:[];
   }
   return blocks(children,inList);

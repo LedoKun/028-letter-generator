@@ -26,6 +26,7 @@ export function writer(language) {
  return {T,R,M,D,Q,B,F,P,G,line,dateLine,H};
 }
 export const insertionPoint=(id,hint,kind='blocks',section=null,allowed=null)=>({type:'insertionPoint',attrs:{id,hint,kind,section,allowed}});
+const proseParagraph=()=>({type:'paragraph',attrs:{prosePlaceholder:true},content:[]});
 function bullets(content,type='bulletList'){
  const output=[];let list;
  for(const node of content){
@@ -65,7 +66,7 @@ export function buildSection(id,language){
   content.push(P([G('hiv.initialCD4Percent',[B('ร้อยละ CD4 เมื่อมารับบริการครั้งแรก ','CD4 percentage at first visit: '),F('hiv.initialCD4Percent'),T('%','%'),G('hiv.initialCD4Date',[measured(),F('hiv.initialCD4Date')])])],{condition:['percentOnly']}));
   content.push(line('hiv.adherence','ART adherence ','The patient reported ART adherence of ','','.'));
   content.push(P([G('hiv.latestVL',[T('ผลตรวจ HIV VL ล่าสุดเท่ากับ ','The latest HIV VL was '),F('hiv.latestVL'),T(' copies/mL',' copies/mL'),G('hiv.latestVLDate',[D('hiv.latestVLDate',' ตรวจเมื่อวันที่ ',', measured on ',' ตรวจเมื่อ ',', measured in '),F('hiv.latestVLDate')]),T('','.')])]));
-  content.push(buildSection('art',language),insertionPoint('hiv.optional','Add TMX/SMP 80/400 mg','section','hiv',['oi']),buildSection('pickup',language));
+  content.push(buildSection('art',language),proseParagraph(),insertionPoint('hiv.optional','Add TMX/SMP 80/400 mg','section','hiv',['oi']),proseParagraph(),buildSection('pickup',language));
  }else if(id==='syphilis'){
   content.push(dateLine('syphilis.start','เริ่มการรักษาโรคซิฟิลิสเมื่อวันที่ ','Treatment for syphilis commenced on ','เริ่มการรักษาเมื่อ ','Treatment commenced in '),line('syphilis.regimen','ได้รับการรักษาด้วย ','The prescribed treatment regimen is ','','.'));
   const schedule=[1,2,3].map(n=>line(`syphilis.dose${n}`,`กำหนดฉีด Benzathine penicillin G เข็มที่ ${n} `,`Scheduled Benzathine penicillin G dose ${n} on `));
@@ -87,8 +88,8 @@ export function buildSection(id,language){
  else if(id==='pickup'){
   content.push(P([G('pickup.date',[T('ผู้ป่วยรับยาครั้งล่าสุดเมื่อวันที่ ','The patient last collected medication on '),F('pickup.date'),G('pickup.days',[T(' โดยมียาเพียงพอสำหรับ ',', with a '),F('pickup.days'),T(' วัน','-day supply')]),T('','.')])]),P([G('pickup.days',[T('ผู้ป่วยได้รับยาเพียงพอสำหรับ ','A '),F('pickup.days'),T(' วัน','-day medication supply was provided.')],['fieldEmpty','pickup.date'])]));
  }else if(['art','otherMedications','travelMedications'].includes(id)){
-  if(id==='art')content.push({type:'bulletList',content:[{type:'listItem',content:[P([B(...SECTIONS[id].labels)],{role:'sectionLabel'}),insertionPoint('medicine:'+id,'Add medicine','medicine',id)]}]});
-  else {heading();content.push(insertionPoint('medicine:'+id,'Add medicine','medicine',id));}
+  if(id==='art')content.push({type:'bulletList',content:[{type:'listItem',content:[P([B(...SECTIONS[id].labels)],{role:'sectionLabel'}),proseParagraph(),insertionPoint('medicine:'+id,'Add medicine','medicine',id),proseParagraph()]}]});
+  else {heading();content.push(proseParagraph(),insertionPoint('medicine:'+id,'Add medicine','medicine',id),proseParagraph());}
  }else if(id==='admission'){content.push(P([T('จึงเรียนมาเพื่อโปรดพิจารณารับผู้ป่วยรายนี้เข้ารับการรักษาในโรงพยาบาลของท่าน','We would be grateful if you would consider admitting this patient for further hospital care.')]));}
  else if(id==='financial'){content.push(P([T(...FINANCIAL)]));}
  else if(id==='lab'){content.push(...bullets([P([G('attachments.lab',[F('attachments.lab')])])],language==='th'?'orderedList':'bulletList'));}
@@ -134,7 +135,7 @@ export function createDocument(template,language='th',doctor={}){
   body.push(P([subject],{spacingAfter:8}),P([introduction(),physician(),G('doctor.license',[T(' ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ',' (Medical Licence Number: '),F('doctor.license'),T('',')')]),R(' ขอส่งตัวผู้ป่วยรายนี้เพื่อ ',', am writing to refer the patient detailed below for ',' ขอส่งสรุปประวัติการรักษาของผู้ป่วยรายนี้เพื่อประกอบการดูแลรักษาต่อ',', provide the following medical summary to support continuity of care'),...referralPurpose(language),R(' โดยมีรายละเอียดดังต่อไปนี้','. Details are provided below.',' โดยมีรายละเอียดดังต่อไปนี้','.') ]));
  }
  if(template==='medical')body.push(P([introduction(),physician(),G('doctor.license',[T(' ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ',', medical licence number '),F('doctor.license')]),M(' ขอรับรองข้อมูลทางการแพทย์ของผู้ป่วยดังต่อไปนี้',', hereby certify the medical information for the patient detailed below.',' ขอรับรองประวัติการรักษาของผู้ป่วยดังต่อไปนี้',', hereby certify the medical information for the patient detailed below.',' ได้ตรวจร่างกาย')]));
- if(template==='freeform')body.push({type:'bodyText',content:[P([])]});
+ if(template==='freeform')body.push({type:'bodyText',content:[proseParagraph()]});
  else{
   const identity=buildBlock('identification',language,template).content;
   if(template==='referral')body.push(group('details',identity));else body.push(...identity);
@@ -142,18 +143,18 @@ export function createDocument(template,language='th',doctor={}){
    Object.assign(values,Object.fromEntries(Object.entries(sectionDefaults('lab',language)).map(([id,value])=>[id,{value,status:'default'}])));
    body.push(group('summary',[
     {...H('สรุปประวัติการเจ็บป่วยและการรักษา','Clinical Summary and Treatment History'),attrs:{level:2,spacingBefore:8,condition:['hasClinical']}},
-    group('clinical',[insertionPoint('clinical','Add a diagnosis or treatment history','blocks',null,REFERRAL_POINTS.clinical)])
+    group('clinical',[proseParagraph(),insertionPoint('clinical','Add a diagnosis or treatment history','blocks',null,REFERRAL_POINTS.clinical),proseParagraph()])
    ]),group('medications',[]));
   }
   if(template==='medication'){
    body.push(P([T('หนังสือรับรองฉบับนี้ขอรับรองว่าผู้ป่วยรายนี้อยู่ระหว่างการดูแลรักษาที่ศูนย์บริการสาธารณสุข 28 กรุงธนบุรี และมีความจำเป็นต้องนำยารายการต่อไปนี้ติดตัวเพื่อใช้ในการรักษาระหว่างการเดินทาง','This is to certify that the patient named above is currently under the care of Public Health Center 28 Krung Thon Buri and is required to carry the medications listed below for personal therapeutic use during travel.')]));
    const medicines=buildSection('travelMedications',language);medicines.content.splice(1,0,medicationRow('travel','1',language));body.push(medicines);
   }
-  if(template==='medical')body.push(insertionPoint('clinical','Add examination, treatment or medical leave','blocks',null,['examination','leave','syphilisTreatment','tbTreatment']));
+  if(template==='medical')body.push(proseParagraph(),insertionPoint('clinical','Add examination, treatment or medical leave','blocks',null,['examination','leave','syphilisTreatment','tbTreatment']),proseParagraph());
  }
- if(template==='referral')body.push(group('closing',[insertionPoint('closing','Add a closing request','closing',null,['admission','financial'])]));
+ if(template==='referral')body.push(group('closing',[proseParagraph(),insertionPoint('closing','Add a closing request','closing',null,['admission','financial']),proseParagraph()]));
  if(template!=='medical')body.push(P([T('หากท่านต้องการข้อมูลเพิ่มเติม กรุณาติดต่อศูนย์บริการสาธารณสุข 28 กรุงธนบุรี','Please contact Public Health Center 28 Krung Thon Buri, should you require any further information.')],{role:'closing',spacingBefore:8}));
- if(template==='referral')body.push(group('enclosures',[groupHeading('เอกสารแนบ','Enclosures',REFERRAL_POINTS.enclosures),buildSection('lab',language),insertionPoint('enclosures','Add enclosures','closing',null,REFERRAL_POINTS.enclosures)]));
+ if(template==='referral')body.push(group('enclosures',[groupHeading('เอกสารแนบ','Enclosures',REFERRAL_POINTS.enclosures),buildSection('lab',language),proseParagraph(),insertionPoint('enclosures','Add enclosures','closing',null,REFERRAL_POINTS.enclosures),proseParagraph()]));
  body.push(group('signature',[P([],{spacingAfter:8,role:'signatureLead'}),P([T('ขอแสดงความนับถือ','Yours faithfully,')],{role:'signature'}),P([],{spacingAfter:44,role:'signatureSpace'}),P([physician()]),P([G('doctor.license',[T('เลขที่ใบอนุญาตประกอบวิชาชีพเวชกรรม ','Medical licence number: '),F('doctor.license')])])]));
  return {type:'doc',content:[{type:'sessionData',attrs:{template,language,values,archives:{},fieldArchives:{},omitted:[]}},...body]};
 }

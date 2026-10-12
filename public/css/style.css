@@ -1259,11 +1259,6 @@
   scroll-margin-top: 220px;
   scroll-margin-bottom: 100px;
 }
-.letter-body>p:only-child:has(>br.ProseMirror-trailingBreak:only-child)::before {
-  content: 'เนื้อหาหนังสือ / Letter body';
-  color: #8a9fa8;
-  pointer-events: none;
-}
 .official-header>div {
   line-height: 1.4;
   padding-bottom: 2pt;
@@ -1460,9 +1455,6 @@
   padding: 6px;
   border-radius: 4px;
 }
-.letter-body>p:only-child:has(>br.ProseMirror-trailingBreak:only-child)::before {
-  content: 'Start writing your letter here...';
-}
 .official-header img {
   background: #fff;
 }
@@ -1585,7 +1577,7 @@
 .picture-node.ProseMirror-selectednode {
   outline-color: #4897b0;
 }
-.manual-page-break::before,.letter-body>p:only-child:has(>br.ProseMirror-trailingBreak:only-child)::before {
+.manual-page-break::before {
   color: #78919c;
 }
 .tiptap ul.medication-row {
@@ -1638,6 +1630,37 @@
 .block-insertion>button:focus-visible {
   outline: 2px solid #28869b;
   outline-offset: 2px;
+}
+.tiptap p[data-paragraph-prompt] {
+  position: relative;
+  min-height: 16px;
+  margin: 0;
+  border-radius: 3px;
+  outline: 1px dashed #c6d5dc;
+  background: #f9fcfd;
+  cursor: text;
+  font: 11px/16px 'Sarabun',sans-serif;
+}
+.tiptap p[data-paragraph-prompt]::before {
+  content: 'Click to add a paragraph…';
+  position: absolute;
+  left: 5px;
+  color: #637f8c;
+  font: inherit;
+  pointer-events: none;
+}
+.tiptap:lang(th) p[data-paragraph-prompt]::before {
+  content: 'คลิกเพื่อเพิ่มย่อหน้า…';
+}
+.letter-body>p[data-paragraph-prompt]::before {
+  content: 'Start writing your letter here...';
+}
+.tiptap p[data-paragraph-prompt]:hover {
+  outline-color: #28869b;
+  background: #f0f8fb;
+}
+.tiptap p[data-paragraph-prompt]+.block-insertion,.block-insertion:has(+p[data-paragraph-prompt]) {
+  margin: 0;
 }
 .official-footer {
   padding-right: 188pt;

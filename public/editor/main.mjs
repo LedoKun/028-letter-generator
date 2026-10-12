@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { TextStyle, FontSize } from '@tiptap/extension-text-style';
 import TextAlign from '@tiptap/extension-text-align';
 import { closeHistory } from '@tiptap/pm/history';
-import { EditorState } from '@tiptap/pm/state';
+import { EditorState, TextSelection } from '@tiptap/pm/state';
 import { TEMPLATE_NAMES, definition, label } from './fields.mjs';
 import { INSERT_BLOCKS, createDocument, buildBlock, medicationRow, referralPoint, sectionDefaults, availableBlocks } from './templates.mjs';
 import { hydrate, sessionOf, valueOf, displayValue, normalise, recalculate, validateDocument, walk, newId } from './model.mjs';
@@ -60,7 +60,7 @@ function renderToolbar(){
  format('•','toggleBulletList',tr('รายการหัวข้อย่อย','Bulleted list')),format('1.','toggleOrderedList',tr('รายการลำดับเลข','Numbered list')),
  button('→',()=>indent(1),{'aria-label':tr('เพิ่มการเยื้อง','Increase indent'),onmousedown:e=>e.preventDefault()}),button('←',()=>indent(-1),{'aria-label':tr('ลดการเยื้อง','Decrease indent'),onmousedown:e=>e.preventDefault()}),
  selectControl(tr('ระยะห่างย่อหน้า','Paragraph spacing'),[['5',tr('ระยะห่าง 5 pt','Spacing 5 pt')],['8','8 pt'],['12','12 pt']],v=>editor.chain().focus().updateAttributes(editor.isActive('heading')?'heading':'paragraph',{spacingAfter:Number(v)}).run()),
- button('Insert Block',blockDialog),button('Insert Picture',choosePicture),button(tr('ขึ้นหน้าใหม่','Page Break'),insertPageBreak,{title:tr('ขึ้นหน้าใหม่หลังย่อหน้าปัจจุบัน','Start a new page after the current paragraph')}),
+ button('Insert Block',blockDialog),button('Insert Paragraph',insertParagraph,{title:'Add a paragraph after the current paragraph'}),button('Insert Picture',choosePicture),button(tr('ขึ้นหน้าใหม่','Page Break'),insertPageBreak,{title:tr('ขึ้นหน้าใหม่หลังย่อหน้าปัจจุบัน','Start a new page after the current paragraph')}),
  el('div',{class:'zoom-controls',role:'group','aria-label':'Document zoom'},[
   button('−',()=>setZoom(zoom-10),{'aria-label':'Zoom out',title:'Zoom out','data-zoom-out':'',disabled:zoom===50,onmousedown:event=>event.preventDefault()}),
   el('input',{type:'range',min:50,max:200,step:10,value:zoom,'aria-label':'Document zoom','aria-valuetext':zoom+'%',oninput:event=>setZoom(event.target.value)}),
@@ -128,6 +128,7 @@ async function openTemplate(template,reset=false){
  window.clinical.editor=editor;renderToolbar();renderPages({pages:1,stable:true});renderSidebar();
 }
 function locations(type){const out=[];editor.state.doc.descendants((node,pos)=>{if(node.type.name===type)out.push({node,pos});});return out;}
+function insertionPosition(point){if(!point)return;const before=editor.state.doc.resolve(point.pos).nodeBefore;return point.pos-(before?.attrs.prosePlaceholder?before.nodeSize:0);}
 function findSection(id){return locations('clinicalSection').find(entry=>entry.node.attrs.id===id);}
 function closingPosition(){let pos=editor.state.doc.content.size,signature=pos;editor.state.doc.descendants((node,p)=>{if(node.attrs.role==='closing')pos=Math.min(pos,p);if(node.attrs.role==='signature'||node.type.name==='clinicalGroup'&&node.attrs.id==='signature')signature=Math.min(signature,p);});return Math.min(pos,signature);}
 function nodeFromJson(json){return editor.schema.nodeFromJSON(hydrate({type:'doc',content:[{type:'sessionData',attrs:sessionOf(editor.state.doc)},json]}).content[1]);}
@@ -147,16 +148,16 @@ function addSections(ids,fresh=false,anchorId=null){
  patchSession(transaction.setMeta('sessionUpdate',true),next);
  for(const entry of relocated.sort((a,b)=>b.pos-a.pos))transaction.delete(entry.pos,entry.pos+entry.node.nodeSize);
  const mainPoint=locations('insertionPoint').find(p=>p.node.attrs.id==='clinical'),closingPoint=locations('insertionPoint').find(p=>p.node.attrs.id==='closing');
- const body=locations('bodyText')[0],position=closingPoint?.pos??closingPosition(),normalPosition=point?.pos??mainPoint?.pos??(body?body.pos+body.node.nodeSize-1:position);
+ const body=locations('bodyText')[0],position=insertionPosition(closingPoint)??closingPosition(),normalPosition=insertionPosition(point)??insertionPosition(mainPoint)??(body?body.pos+body.node.nodeSize-1:position);
  let normal=nodes.filter(n=>!INSERT_BLOCKS[n.attrs.id].closing);const closing=nodes.filter(n=>INSERT_BLOCKS[n.attrs.id].closing),nested=normal.filter(n=>['art','oi','pickup'].includes(n.attrs.id)),pendingHiv=normal.find(n=>n.attrs.id==='hiv'),hivPoint=locations('insertionPoint').find(p=>p.node.attrs.id==='hiv.optional');
  if(nested.length&&(pendingHiv||hivPoint)){
-  if(pendingHiv)walk(pendingHiv,parent=>{const index=parent.content?.findIndex(n=>n.attrs?.id==='hiv.optional');if(index>=0)parent.content.splice(index,0,...nested);});
-  else transaction.insert(hivPoint.pos,nested.map(nodeFromJson));
+  if(pendingHiv)walk(pendingHiv,parent=>{const index=parent.content?.findIndex(n=>n.attrs?.id==='hiv.optional');if(index>=0)parent.content.splice(index-(parent.content[index-1]?.attrs?.prosePlaceholder?1:0),0,...nested);});
+  else transaction.insert(transaction.mapping.map(insertionPosition(hivPoint)),nested.map(nodeFromJson));
   normal=normal.filter(n=>!nested.includes(n));
  }
  if(s.template==='referral'){
   const grouped=new Map();for(const node of [...normal,...closing]){const id=referralPoint(node.attrs.id);if(!grouped.has(id))grouped.set(id,[]);grouped.get(id).push(node);}
-  for(const [id,items]of grouped){const group=locations('clinicalGroup').find(p=>p.node.attrs.id===id),destination=locations('insertionPoint').find(p=>p.node.attrs.id===id)?.pos??(group?group.pos+group.node.nodeSize-1:position);transaction.insert(transaction.mapping.map(destination),items.map(nodeFromJson));}
+  for(const [id,items]of grouped){const group=locations('clinicalGroup').find(p=>p.node.attrs.id===id),destination=insertionPosition(locations('insertionPoint').find(p=>p.node.attrs.id===id))??(group?group.pos+group.node.nodeSize-1:position);transaction.insert(transaction.mapping.map(destination),items.map(nodeFromJson));}
  }else{
   if(normal.length)transaction.insert(transaction.mapping.map(normalPosition),normal.map(nodeFromJson));
   if(closing.length)transaction.insert(transaction.mapping.map(position),closing.map(nodeFromJson));
@@ -173,9 +174,9 @@ function moveEntry(entry,delta,type){
  const target=parent.child(targetIndex);let targetPos=$pos.start();for(let i=0;i<targetIndex;i++)targetPos+=parent.child(i).nodeSize;
  const tr=closeHistory(editor.state.tr).delete(entry.pos,entry.pos+entry.node.nodeSize);tr.insert(delta<0?targetPos:targetPos+target.nodeSize-entry.node.nodeSize,entry.node);editor.view.dispatch(tr);
 }
-function addMedication(sectionId,kind){const section=findSection(sectionId);if(!section)return;const row=medicationRow(kind,newId(),language),point=locations('insertionPoint').find(p=>p.node.attrs.id==='medicine:'+sectionId),position=point?.pos??section.pos+section.node.nodeSize-1;editor.view.dispatch(closeHistory(editor.state.tr).insert(position,nodeFromJson(row)));focusField(editor,fieldsInOrder(editor).find(f=>f.pos>=position));}
+function addMedication(sectionId,kind){const section=findSection(sectionId);if(!section)return;const row=medicationRow(kind,newId(),language),point=locations('insertionPoint').find(p=>p.node.attrs.id==='medicine:'+sectionId),position=insertionPosition(point)??section.pos+section.node.nodeSize-1;editor.view.dispatch(closeHistory(editor.state.tr).insert(position,nodeFromJson(row)));focusField(editor,fieldsInOrder(editor).find(f=>f.pos>=position));}
 function removeRow(entry){const s=structuredClone(sessionOf(editor.state.doc));s.archives[`row:${entry.node.attrs.kind}:${entry.node.attrs.id}`]=entry.node.toJSON();editor.view.dispatch(patchSession(closeHistory(editor.state.tr).setMeta('sessionUpdate',true),s).delete(entry.pos,entry.pos+entry.node.nodeSize));}
-function restoreRows(sectionId,kind){const section=findSection(sectionId),s=sessionOf(editor.state.doc);const archived=Object.entries(s.archives).filter(([key])=>key.startsWith(`row:${kind}:`));const existing=new Set(locations('medicationRow').map(x=>x.node.attrs.id));const rows=archived.map(([,row])=>row).filter(row=>!existing.has(row.attrs.id)),point=locations('insertionPoint').find(p=>p.node.attrs.id==='medicine:'+sectionId);if(section&&rows.length)editor.view.dispatch(closeHistory(editor.state.tr).insert(point?.pos??section.pos+section.node.nodeSize-1,rows.map(nodeFromJson)));}
+function restoreRows(sectionId,kind){const section=findSection(sectionId),s=sessionOf(editor.state.doc);const archived=Object.entries(s.archives).filter(([key])=>key.startsWith(`row:${kind}:`));const existing=new Set(locations('medicationRow').map(x=>x.node.attrs.id));const rows=archived.map(([,row])=>row).filter(row=>!existing.has(row.attrs.id)),point=locations('insertionPoint').find(p=>p.node.attrs.id==='medicine:'+sectionId);if(section&&rows.length)editor.view.dispatch(closeHistory(editor.state.tr).insert(insertionPosition(point)??section.pos+section.node.nodeSize-1,rows.map(nodeFromJson)));}
 function renderSidebar(){if(!editor||!sidebar)return;lastField='';renderFieldPanel();const s=sessionOf(editor.state.doc);
  sectionPanel.replaceChildren(el('h2',{},tr('หัวข้อในเอกสาร','Document sections')),button('+ Insert Block',blockDialog,{class:'primary'}));
  for(const entry of locations('clinicalSection')) {
@@ -287,6 +288,7 @@ function blockDialog(context={}){
  if(context.automatic&&point)focusStop(editor,point,false);
 }
 function afterCurrentParagraph(){const {$from}=editor.state.selection;for(let d=$from.depth;d>0;d--)if($from.node(d).isTextblock)return $from.after(d);return editor.state.selection.to;}
+function insertParagraph(){commitField(editor);const pos=afterCurrentParagraph(),tr=closeHistory(editor.state.tr).insert(pos,editor.schema.nodes.paragraph.create());tr.setSelection(TextSelection.create(tr.doc,pos+1));editor.view.dispatch(tr.scrollIntoView());editor.view.focus();}
 function choosePicture(){
  let position=afterCurrentParagraph();const current=activeField(editor);if(current&&['document.date','document.title','document.addressee','referral.purposes','referral.customPurpose'].includes(current.node.attrs.id)){const body=locations('bodyText')[0];position=body?body.pos+body.node.nodeSize-1:closingPosition();}
  const target=editor,generation=opening,input=el('input',{type:'file',accept:'image/png,image/jpeg',hidden:true});app.append(input);const track=({transaction})=>{position=transaction.mapping.map(position,1);};target.on('transaction',track);

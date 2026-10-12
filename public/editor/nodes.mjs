@@ -6,6 +6,7 @@ import { patchSession } from './session.mjs';
 import { pictureWidthPercent } from './pictures.mjs';
 import { availableBlocks } from './templates.mjs';
 import { closeHistory } from '@tiptap/pm/history';
+import { canSplit } from '@tiptap/pm/transform';
 export const SessionData=Node.create({name:'sessionData',atom:true,selectable:false,addAttributes(){return {template:{default:'referral'},language:{default:'th'},values:{default:{}},archives:{default:{}},fieldArchives:{default:{}},omitted:{default:[]},activeSections:{default:[]},availableFields:{default:[]},converted:{default:[]}};},renderHTML(){return ['span',{hidden:true,contenteditable:'false','data-session':''}];}});
 export const TemplateText=Mark.create({name:'templateText',inclusive:false,addAttributes(){return {th:{default:''},en:{default:''},summaryTh:{default:null},summaryEn:{default:null},historyTh:{default:null},historyEn:{default:null},examTh:{default:null},doctorId:{default:null},withoutTitleEn:{default:null},dateId:{default:null},partialTh:{default:null},partialEn:{default:null},countId:{default:null},singularEn:{default:null}};},renderHTML(){return ['span',{},0];}});
 export const Field=Node.create({
@@ -68,7 +69,8 @@ export const Picture=Node.create({name:'picture',group:'block',atom:true,draggab
  update(node);return {dom,update:n=>n.type.name==='picture'&&update(n),stopEvent:event=>!!event.target.closest?.('.picture-resize'),ignoreMutation:()=>true,destroy(){alive=false;cleanup();}};
 };}});
 export const LayoutAttributes=Extension.create({name:'layoutAttributes',addGlobalAttributes(){return [{types:['paragraph','heading','listItem'],attributes:{
- guard:{default:[]},condition:{default:null},hidden:{default:false,renderHTML:a=>a.hidden?{hidden:true}:{}},role:{default:null},style:{default:null},
+ guard:{default:[],keepOnSplit:false},condition:{default:null,keepOnSplit:false},hidden:{default:false,keepOnSplit:false,renderHTML:a=>a.hidden?{hidden:true}:{}},role:{default:null,keepOnSplit:false},style:{default:null},
+ prosePlaceholder:{default:false,keepOnSplit:false,renderHTML:a=>a.prosePlaceholder?{'data-paragraph-prompt':''}:{}},
  indent:{default:0,renderHTML:a=>({'style':`margin-left:${a.indent*12}pt`})},spacingBefore:{default:null,renderHTML:a=>a.spacingBefore===null?{}:({'style':`margin-top:${a.spacingBefore}pt`})},spacingAfter:{default:null,renderHTML:a=>a.spacingAfter===null?{}:({'style':`margin-bottom:${a.spacingAfter}pt`})}
  }}];}});
 export function activeField(editor) {
@@ -122,7 +124,20 @@ export const FieldBehaviour=Extension.create({
   'Mod-a':()=>{const entry=activeField(this.editor);if(!entry)return false;focusField(this.editor,entry);return true;},
   'Alt-ArrowDown':()=>{const entry=activeField(this.editor);if(!entry||!definition(entry.node.attrs.id)?.options)return false;document.dispatchEvent(new CustomEvent('fieldchoices',{detail:{occurrence:entry.node.attrs.occurrence}}));return true;},
   Tab:()=>moveField(this.editor,false),'Shift-Tab':()=>moveField(this.editor,true),
-  Enter:()=>{const f=activeField(this.editor);if(!f)return false;if(definition(f.node.attrs.id)?.type==='multiline')return this.editor.commands.setHardBreak();commitField(this.editor,f);return moveField(this.editor,false);},
+  Enter:()=>{
+   const f=activeField(this.editor);
+   if(f){if(definition(f.node.attrs.id)?.type==='multiline')return this.editor.commands.setHardBreak();commitField(this.editor,f);return moveField(this.editor,false);}
+   const {$from}=this.editor.state.selection;
+   if($from.parent.type.name==='paragraph'&&($from.parent.attrs.prosePlaceholder||$from.node(-1).type.name!=='listItem'))return this.editor.chain().updateAttributes('paragraph',{prosePlaceholder:false}).splitBlock().run();
+   if($from.parent.type.name!=='phrase')return false;
+   // Split inline phrase wrappers together with their surrounding paragraph.
+   const tr=this.editor.state.tr.deleteSelection(),$pos=tr.selection.$from;let depth=$pos.depth;
+   while(depth>0&&!$pos.node(depth).isTextblock)depth--;
+   if(!depth)return false;
+   const types=Array.from({length:$pos.depth-depth+1},(_,i)=>({type:$pos.node(depth+i).type,attrs:i?$pos.node(depth+i).attrs:{...$pos.node(depth).attrs,guard:[],condition:null,hidden:false,role:null,prosePlaceholder:false}}));
+   if(!canSplit(tr.doc,$pos.pos,types.length,types))return false;
+   this.editor.view.dispatch(tr.split($pos.pos,types.length,types).scrollIntoView());return true;
+  },
  };},
  addProseMirrorPlugins(){
   const editor=this.editor;let previousField=null;
@@ -148,7 +163,7 @@ export const FieldBehaviour=Extension.create({
      return true;
     },
     handleDOMEvents:{mousedown(view,event){
-     const paragraph=event.target.closest?.('.letter-body > p');
+     const paragraph=event.target.closest?.('.tiptap p');
      if(event.button!==0||event.shiftKey||!paragraph||paragraph.childNodes.length!==1||!paragraph.firstChild.matches?.('br.ProseMirror-trailingBreak'))return false;
      event.preventDefault();view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc,view.posAtDOM(paragraph,0))));view.focus();return true;
     },beforeinput(view,event){const f=activeField(editor);if(!f||event.isComposing||view.composing)return false;const {from,to}=view.state.selection;if(event.inputType==='insertText'&&event.data!==null){
@@ -187,7 +202,8 @@ export const FieldBehaviour=Extension.create({
      }
      if(['phrase','paragraph','heading','listItem'].includes(node.type.name)) {
       const hidden=!conditionActive(node.attrs.condition,session)||(node.attrs.guard||[]).some(id=>session.omitted.includes(id));
-      if(hidden!==node.attrs.hidden)edits.push({pos,node,attrs:{...node.attrs,hidden}});
+      const prosePlaceholder=node.attrs.prosePlaceholder&&!node.content.size;
+      if(hidden!==node.attrs.hidden||prosePlaceholder!==node.attrs.prosePlaceholder)edits.push({pos,node,attrs:{...node.attrs,hidden,prosePlaceholder}});
      }
      if(node.type.name==='insertionPoint'){
       const hidden=node.attrs.kind!=='medicine'&&!availableBlocks(session,node.attrs).length;

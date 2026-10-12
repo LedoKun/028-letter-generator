@@ -108,6 +108,57 @@ test('formatting and manual prose survive conversion; editing decorations are ex
  const doc=make();doc.content.splice(3,0,{type:'paragraph',attrs:{textAlign:'center',indent:2,spacingAfter:12},content:[{type:'text',text:'Manual 2569 prose.',marks:[{type:'bold'},{type:'italic'},{type:'underline'},{type:'textStyle',attrs:{fontSize:'14pt'}}]}]});const content=toPdf(doc),p=content.find(n=>n.text?.some?.(t=>t.text==='Manual 2569 prose.'));
  assert.equal(p.alignment,'center');assert.deepEqual(p.margin,[24,0,0,12]);assert.equal(p.text[0].bold,true);assert.equal(p.text[0].italics,true);assert.equal(p.text[0].decoration,'underline');assert.equal(p.text[0].fontSize,14);assert.doesNotMatch(JSON.stringify(content),/background|data-field|shortcut|clinical-field|N\/A|is-focused/);
 });
+for(const template of Object.keys(TEMPLATE_NAMES))for(const language of ['th','en'])test(`manual wording in an empty optional phrase exports: ${template}/${language}`,()=>{
+ const doc=make(template,language,{'doctor.license':''});let phrase;
+ walk(doc,node=>{if(node.type==='phrase'&&node.attrs.guard?.includes('doctor.license'))phrase=node;});
+ assert.ok(phrase);assert.doesNotMatch(output(doc),/MANUAL WORDING/);
+ phrase.content.unshift({type:'text',text:'MANUAL WORDING',marks:[{type:'bold'}]});
+ assert.match(output(doc),/MANUAL WORDING/);
+ const before=JSON.stringify(doc);toPdf(doc);assert.equal(JSON.stringify(doc),before);
+});
+test('edited template labels survive empty fields and their enclosing guarded bullets',()=>{
+ const doc=make('referral','en',{},['hiv']);let phrase;
+ walk(doc,node=>{if(node.type==='phrase'&&node.attrs.guard?.includes('hiv.napId'))phrase=node;});
+ phrase.content[0].text='Clinician-edited HIV identifier wording';
+ assert.match(output(doc),/Clinician-edited HIV identifier wording/);
+ assert.doesNotMatch(output(doc),/CD4 at first visit|The latest HIV VL/);
+});
+test('formatting an untouched optional label does not make its empty phrase printable',()=>{
+ const doc=make('referral','en');let phrase;
+ walk(doc,node=>{if(node.type==='phrase'&&node.attrs.guard?.includes('patient.passport'))phrase=node;});
+ const prefix=phrase.content[0];phrase.content.splice(0,1,{...prefix,text:prefix.text.slice(0,4)},{...prefix,text:prefix.text.slice(4),marks:[...prefix.marks,{type:'italic'}]});
+ assert.doesNotMatch(output(doc),/Passport/);
+});
+test('manual edits to empty medication headings and unnamed rows survive preview validation',()=>{
+ const doc=make('referral','en',{},['hiv','otherMedications']),art=section(doc,'art'),other=section(doc,'otherMedications');
+ art.content[0].content[0].content[0].content[0].text='Edited ART wording';
+ other.content[0].content[0].text='Edited other medication heading';
+ assert.match(output(doc),/Edited other medication heading/);
+ const row=medicationRow('otherMed','manual','en');row.content[0].content.push({type:'text',text:'Manual medication note'});other.content.push(row);
+ const text=output(doc);assert.match(text,/Edited ART wording/);assert.match(text,/Edited other medication heading/);assert.match(text,/Manual medication note/);
+ assert.ok(validateDocument(doc).some(error=>error.id==='otherMed.manual.name'));
+});
+test('deliberate blank paragraphs and standalone hard breaks survive nested export',()=>{
+ const doc=make(),point=doc.content.find(node=>node.type==='clinicalGroup'&&node.attrs.id==='closing');
+ point.content.unshift({type:'paragraph',content:[]},{type:'paragraph',content:[{type:'phrase',content:[{type:'phrase',attrs:{guard:['patient.passport']},content:[]}]}]},{type:'paragraph',content:[{type:'hardBreak'}]},{type:'paragraph',content:[{type:'text',text:'Manual closing text'}]});
+ const pdf=toPdf(doc),index=pdf.findIndex(block=>pdfText(block)==='Manual closing text');
+ assert.equal(pdf[index-3].text,'\u00A0');assert.equal(pdf[index-2].text,'\u00A0');assert.equal(pdfText(pdf[index-1]),'\n');
+});
+test('manual wording still respects explicit omission and inactive conditional branches',()=>{
+ const doc=make('referral','en',{},['hiv']);let phrase;
+ walk(doc,node=>{if(node.type==='phrase'&&node.attrs.guard?.includes('hiv.napId'))phrase=node;});
+ phrase.content.unshift({type:'text',text:'MANUAL IDENTIFIER WORDING'});sessionOf(doc).omitted.push('hiv.napId');
+ assert.doesNotMatch(output(doc),/MANUAL IDENTIFIER WORDING/);
+ sessionOf(doc).omitted=[];phrase.attrs.condition=['equals','patient.name','ANOTHER PATIENT'];assert.doesNotMatch(output(doc),/MANUAL IDENTIFIER WORDING/);
+});
+for(const template of Object.keys(TEMPLATE_NAMES))test(`paragraph prompts surround insertion buttons without exporting empty space: ${template}`,()=>{
+ const doc=make(template,'en');let prompts=0;
+ walk(doc,parent=>{for(const [index,node]of (parent.content||[]).entries()){
+  if(node.attrs?.prosePlaceholder)prompts++;
+  if(node.type==='insertionPoint'){assert.equal(parent.content[index-1].attrs.prosePlaceholder,true);assert.equal(parent.content[index+1].attrs.prosePlaceholder,true);}
+ }});
+ assert.ok(prompts);assert.doesNotMatch(output(doc),/\u00A0|Click to add a paragraph/);
+});
 test('manual page breaks, bulleted and numbered lists export as selectable PDF text',()=>{
  const doc=make();doc.content.splice(3,0,{type:'pageBreak'},...['bulletList','orderedList'].map(type=>({type,content:[{type:'listItem',content:[{type:'paragraph',content:[{type:'text',text:'List item'}]}]}]})));const pdf=toPdf(doc);assert.ok(pdf.some(n=>n.pageBreak==='before'));assert.ok(pdf.some(n=>n.ul));assert.ok(pdf.some(n=>n.ol));assert.match(pdfText(pdf),/List item/);
 });

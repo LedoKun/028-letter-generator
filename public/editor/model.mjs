@@ -162,9 +162,26 @@ export function hydrate(doc) {
  return clean(out);
 }
 
+function unchangedTemplateText(text,attrs) {
+ return text==='\u200B'||[attrs.th,attrs.en,attrs.summaryTh,attrs.summaryEn,attrs.historyTh,attrs.historyEn,attrs.examTh,attrs.withoutTitleEn,attrs.partialTh,attrs.partialEn,attrs.singularEn].includes(text);
+}
+export const emptyProse=node=>['paragraph','phrase'].includes(node.type)&&(node.content||[]).every(emptyProse);
+export function hasManualContent(node) {
+ if(node.type==='field')return false;
+ if(emptyProse(node))return !node.attrs?.prosePlaceholder&&!node.attrs?.role;
+ if(node.type==='hardBreak'||node.type==='pageBreak'||node.type==='picture'&&node.attrs.src)return true;
+ const children=node.type==='text'?[node]:node.content||[];
+ for(let i=0;i<children.length;i++){
+  const child=children[i];if(child.type!=='text'){if(hasManualContent(child))return true;continue;}
+  const mark=child.marks?.find(mark=>mark.type==='templateText');let text=child.text;
+  // Formatting can split unchanged template wording into several adjacent runs.
+  while(mark&&children[i+1]?.type==='text'&&JSON.stringify(children[i+1].marks?.find(mark=>mark.type==='templateText')?.attrs)===JSON.stringify(mark.attrs))text+=children[++i].text;
+  if(text.replace(/\u200B/g,'').trim()&&(!mark||!unchangedTemplateText(text,mark.attrs)))return true;
+ }
+ return false;
+}
 export function templateProse(text,attrs,session) {
- const options=[attrs.th,attrs.en,attrs.summaryTh,attrs.summaryEn,attrs.historyTh,attrs.historyEn,attrs.examTh,attrs.withoutTitleEn,attrs.partialTh,attrs.partialEn,attrs.singularEn];
- if(!options.includes(text)&&text!=='\u200B')return text;
+ if(!unchangedTemplateText(text,attrs))return text;
  if(attrs.doctorId&&session.language==='en'&&/^(dr\.?|doctor|prof\.?|professor)\s/i.test(valueOf(session,attrs.doctorId)))return attrs.withoutTitleEn;
  if(attrs.examTh&&session.language==='th'&&conditionActive(['documentedExamination'],session))return attrs.examTh;
  if(attrs.historyEn&&conditionActive(['treatmentHistory'],session))return attrs[session.language==='th'?'historyTh':'historyEn'];
