@@ -7,10 +7,45 @@ const percentage=page=>page.locator('.format-tools .zoom-controls output');
 const snapshot=page=>page.evaluate(()=>JSON.stringify(clinical.editor.getJSON()));
 async function zoom(page,value){await slider(page).evaluate((input,value)=>{input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},value);await page.waitForFunction(()=>clinical.layout.stable);await expect(percentage(page)).toHaveText(value+'%');}
 for(const language of ['th','en']){
+ test(`Ctrl/Cmd plus and minus zoom the document without changing the browser or letter: ${language}`,async({page})=>{
+  await open(page,language);const before=await snapshot(page),browser=await page.evaluate(()=>({width:innerWidth,ratio:devicePixelRatio}));
+  for(const [key,value]of [['Control+Equal',110],['Control+Shift+Equal',120],['Control+Minus',110],['Meta+Equal',120],['Meta+Minus',110]]){
+   await page.keyboard.press(key);await expect(percentage(page)).toHaveText(value+'%');
+  }
+  await zoom(page,200);await page.keyboard.press('Control+Equal');await expect(percentage(page)).toHaveText('200%');await zoom(page,50);await page.keyboard.press('Control+Minus');await expect(percentage(page)).toHaveText('50%');
+  expect(await snapshot(page)).toBe(before);expect(await page.evaluate(()=>({width:innerWidth,ratio:devicePixelRatio}))).toEqual(browser);
+ });
+ test(`trackpad pinch keeps its document point in place and leaves ordinary scrolling alone: ${language}`,async({page})=>{
+  await open(page,language);await page.evaluate(()=>{clinical.addSections(['otherHistory']);clinical.setValue('history.other',('ภาษาไทย Mixed English text.\n').repeat(100));});await page.waitForFunction(()=>clinical.layout.stable&&clinical.layout.pages>1);await zoom(page,150);await page.evaluate(()=>scrollTo(0,800));
+  const before=await snapshot(page),pdf=await page.evaluate(()=>JSON.stringify(clinical.payload().payload));
+  const point=await page.evaluate(()=>{const surface=document.querySelector('.document-surface'),r=surface.getBoundingClientRect(),scale=Number(surface.dataset.zoom);return {x:450,y:500,documentX:(450-r.left)/scale,documentY:(500-r.top)/scale};});
+  const wheel=delta=>page.evaluate(({delta,point})=>{const event=new WheelEvent('wheel',{ctrlKey:true,deltaY:delta,clientX:point.x,clientY:point.y,bubbles:true,cancelable:true});document.querySelector('.tiptap').dispatchEvent(event);return event.defaultPrevented;},{delta,point});
+  expect(await wheel(-Math.log(1.1)*100)).toBe(true);await expect(percentage(page)).toHaveText('165%');
+  const position=await page.evaluate(point=>{const surface=document.querySelector('.document-surface'),r=surface.getBoundingClientRect(),scale=Number(surface.dataset.zoom);return {x:r.left+point.documentX*scale,y:r.top+point.documentY*scale};},point);expect(Math.abs(position.x-point.x)).toBeLessThanOrEqual(1);expect(Math.abs(position.y-point.y)).toBeLessThanOrEqual(1);
+  expect(await wheel(Math.log(1.1)*100)).toBe(true);await expect(percentage(page)).toHaveText('150%');
+  for(let i=0;i<30;i++)await wheel(-0.1);await expect(percentage(page)).toHaveText('155%');
+  expect(await page.evaluate(()=>{const event=new WheelEvent('wheel',{deltaY:20,bubbles:true,cancelable:true});document.querySelector('.tiptap').dispatchEvent(event);return event.defaultPrevented;})).toBe(false);
+  expect(await snapshot(page)).toBe(before);expect(await page.evaluate(()=>JSON.stringify(clinical.payload().payload))).toBe(pdf);
+ });
+ test(`zoom keeps field choices usable and leaves PDF-preview zoom to the viewer: ${language}`,async({page})=>{
+  await open(page,language);await page.locator('.tiptap [data-field-id="patient.sex"]').click();const menu=page.locator('.editor-dropdown[data-occurrence]');await expect(menu).toBeVisible();
+  const before=await snapshot(page);await page.keyboard.press('Control+Equal');await expect(percentage(page)).toHaveText('110%');await expect(menu).toBeVisible();expect(await snapshot(page)).toBe(before);
+  await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');await expect(menu).toHaveCount(0);expect(await page.evaluate(()=>clinical.editor.state.doc.firstChild.attrs.values['patient.sex'].value)).toBeTruthy();
+  await page.getByRole('button',{name:'PDF Preview',exact:true}).click();await expect(page.locator('.preview-frame')).toBeVisible();
+  const captured=await page.getByRole('dialog').evaluate(dialog=>{const event=new KeyboardEvent('keydown',{key:'+',code:'Equal',ctrlKey:true,bubbles:true,cancelable:true});dialog.dispatchEvent(event);return event.defaultPrevented;});expect(captured).toBe(false);await expect(percentage(page)).toHaveText('110%');await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click();
+ });
+ test(`the sidebar floats above the enlarged page and scrolling reveals the covered edge: ${language}`,async({page})=>{
+  await open(page,language);await zoom(page,200);
+  const geometry=await page.evaluate(()=>{const canvas=document.querySelector('.canvas-scroll').getBoundingClientRect(),workspace=document.querySelector('.editor-workspace').getBoundingClientRect(),sidebar=document.querySelector('.editor-sidebar').getBoundingClientRect(),paper=document.querySelector('.paper').getBoundingClientRect(),x=Math.min(sidebar.right-8,paper.right-8),y=sidebar.top+10;return {canvasWidth:canvas.width,workspaceWidth:workspace.width,overlap:paper.right-sidebar.left,sidebarOnTop:!!document.elementFromPoint(x,y)?.closest('.editor-sidebar')};});
+  expect(geometry.canvasWidth).toBeCloseTo(geometry.workspaceWidth,0);expect(geometry.overlap).toBeGreaterThan(0);expect(geometry.sidebarOnTop).toBe(true);
+  const edge=await page.locator('.canvas-scroll').evaluate(canvas=>{canvas.scrollLeft=canvas.scrollWidth;const paper=canvas.querySelector('.paper').getBoundingClientRect(),sidebar=document.querySelector('.editor-sidebar').getBoundingClientRect();return {paperRight:paper.right,sidebarLeft:sidebar.left};});expect(edge.paperRight).toBeLessThan(edge.sidebarLeft);
+  await expect(page.locator('.editor-sidebar').getByRole('button',{name:'+ Insert Block',exact:true})).toBeVisible();await page.locator('.editor-sidebar').getByRole('button',{name:'+ Insert Block',exact:true}).click();await expect(page.getByRole('region',{name:'Insert Block',exact:true})).toBeVisible();await page.keyboard.press('Escape');
+  await page.setViewportSize({width:900,height:800});await expect(page.locator('.editor-sidebar')).toHaveCSS('position','static');const boxes=await Promise.all([page.locator('.canvas-scroll').boundingBox(),page.locator('.editor-sidebar').boundingBox()]);expect(boxes[1].y).toBeGreaterThanOrEqual(boxes[0].y+boxes[0].height-1);
+ });
  test(`zoom controls support buttons, keyboard slider and limits without changing the letter: ${language}`,async({page})=>{
   await open(page,language);const before=await snapshot(page),selection=await page.evaluate(()=>JSON.stringify(clinical.editor.state.selection.toJSON())),width=(await page.locator('.paper').first().boundingBox()).width;
   await expect(slider(page)).toHaveValue('100');await expect(percentage(page)).toHaveText('100%');await page.getByRole('button',{name:'Zoom in',exact:true}).click();await page.waitForFunction(()=>clinical.layout.stable);await expect(percentage(page)).toHaveText('110%');expect((await page.locator('.paper').first().boundingBox()).width/width).toBeCloseTo(1.1,2);expect(await page.evaluate(()=>JSON.stringify(clinical.editor.state.selection.toJSON()))).toBe(selection);
-  await page.getByRole('button',{name:'Zoom out',exact:true}).click();await slider(page).focus();await page.keyboard.press('ArrowRight');await page.waitForFunction(()=>clinical.layout.stable);await expect(slider(page)).toHaveAttribute('aria-valuetext','110%');
+  await page.getByRole('button',{name:'Zoom out',exact:true}).click();await slider(page).focus();await page.keyboard.press('ArrowRight');await page.waitForFunction(()=>clinical.layout.stable);await expect(slider(page)).toHaveAttribute('aria-valuetext','101%');
   await page.keyboard.press('End');await page.waitForFunction(()=>clinical.layout.stable);await expect(percentage(page)).toHaveText('200%');await expect(page.getByRole('button',{name:'Zoom in',exact:true})).toBeDisabled();
   await page.keyboard.press('Home');await page.waitForFunction(()=>clinical.layout.stable);await expect(percentage(page)).toHaveText('50%');await expect(page.getByRole('button',{name:'Zoom out',exact:true})).toBeDisabled();expect(await snapshot(page)).toBe(before);
  });
@@ -28,6 +63,25 @@ for(const language of ['th','en']){
   await page.getByLabel('Letter language',{exact:true}).selectOption(language==='th'?'en':'th');await expect(percentage(page)).toHaveText('150%');await page.getByLabel('Document template',{exact:true}).selectOption('medical');await expect(percentage(page)).toHaveText('150%');await expect(page.locator('.tiptap [data-field-id="patient.name"]').first()).toContainText('FICTIONAL PATIENT');
  });
 }
+test('a two-finger touchscreen pinch zooms the document while retaining browser scale',async({page,browserName})=>{
+ test.skip(browserName!=='chromium','Native multi-touch injection uses Chromium CDP');await open(page);const before=await snapshot(page),cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:true});
+ const point=await page.evaluate(()=>{const r=document.querySelector('.document-surface').getBoundingClientRect();return {x:500-r.left,y:500-r.top};});
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:450,y:500},{x:550,y:500}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:425,y:500},{x:575,y:500}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:430,y:505},{x:580,y:505}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ const position=await page.evaluate(point=>{const surface=document.querySelector('.document-surface'),r=surface.getBoundingClientRect(),scale=Number(surface.dataset.zoom);return {x:r.left+point.x*scale,y:r.top+point.y*scale};},point);expect(Math.abs(position.x-505)).toBeLessThanOrEqual(1);expect(Math.abs(position.y-505)).toBeLessThanOrEqual(1);
+ await expect(percentage(page)).toHaveText('150%');expect(await page.evaluate(()=>visualViewport.scale)).toBe(1);expect(await snapshot(page)).toBe(before);
+});
+test('native trackpad pinch retains its reading point while the page grows past the canvas',async({page,browserName})=>{
+ test.skip(browserName!=='chromium','Native gesture injection uses Chromium CDP');await open(page);await page.evaluate(()=>{clinical.addSections(['otherHistory']);clinical.setValue('history.other',('ภาษาไทย Mixed English line.\n').repeat(180));});await page.waitForFunction(()=>clinical.layout.stable&&clinical.layout.pages>1);await page.evaluate(()=>scrollTo(0,800));
+ const before=await snapshot(page),point=await page.evaluate(()=>{const r=document.querySelector('.document-surface').getBoundingClientRect();return {x:450-r.left,y:500-r.top};}),cdp=await page.context().newCDPSession(page);
+ await cdp.send('Input.synthesizePinchGesture',{x:450,y:500,scaleFactor:1.5,relativeSpeed:200,gestureSourceType:'mouse'});await expect(percentage(page)).toHaveText('150%');
+ const position=await page.evaluate(point=>{const surface=document.querySelector('.document-surface'),r=surface.getBoundingClientRect(),scale=Number(surface.dataset.zoom);return {x:r.left+point.x*scale,y:r.top+point.y*scale};},point);expect(Math.abs(position.x-450)).toBeLessThanOrEqual(1);expect(Math.abs(position.y-500)).toBeLessThanOrEqual(1);expect(await snapshot(page)).toBe(before);expect(await page.evaluate(()=>visualViewport.scale)).toBe(1);
+});
+test('touchscreen pinch on a picture resize handle leaves its dimensions unchanged',async({page,browserName})=>{
+ test.skip(browserName!=='chromium','Native gesture injection uses Chromium CDP');await open(page);await page.getByLabel('Document template',{exact:true}).selectOption('freeform');const picker=page.waitForEvent('filechooser');await page.getByRole('button',{name:'Insert Picture',exact:true}).click();await(await picker).setFiles('public/media/favicon/android-chrome-192x192.png');await page.locator('.picture-node img').evaluate(image=>image.decode());await page.getByLabel('Picture width',{exact:true}).selectOption('50');
+ const handle=page.getByRole('button',{name:'Resize picture proportionally (bottom right)',exact:true});await handle.scrollIntoViewIfNeeded();const box=await handle.boundingBox(),x=box.x+box.width/2,y=box.y+box.height/2,before=await snapshot(page),cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:true});
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y},{x:x-40,y:y-40}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+20,y:y+20},{x:x-40,y:y-40}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await expect(percentage(page)).toHaveText('150%');expect(await snapshot(page)).toBe(before);
+});
 test('proportional picture dragging compensates for zoom and remains one Undo step',async({page})=>{
  await open(page);await page.getByLabel('Document template',{exact:true}).selectOption('freeform');const picker=page.waitForEvent('filechooser');await page.getByRole('button',{name:'Insert Picture',exact:true}).click();await(await picker).setFiles('public/media/favicon/android-chrome-192x192.png');await page.locator('.picture-node img').evaluate(image=>image.decode());await page.getByLabel('Picture width',{exact:true}).selectOption('50');
  const result=[];for(const value of [100,200]){await zoom(page,value);await page.locator('.picture-node img').click();const handle=page.getByRole('button',{name:'Resize picture proportionally (bottom right)',exact:true});await handle.scrollIntoViewIfNeeded();const box=await handle.boundingBox();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2-40*value/100,box.y+box.height/2,{steps:4});await page.mouse.up();result.push(await page.evaluate(()=>{let width;clinical.editor.state.doc.descendants(node=>{if(node.type.name==='picture')width=node.attrs.width;});return width;}));await page.getByRole('button',{name:'Undo',exact:true}).click();expect(await page.evaluate(()=>{let width;clinical.editor.state.doc.descendants(node=>{if(node.type.name==='picture')width=node.attrs.width;});return width;})).toBe(50);}

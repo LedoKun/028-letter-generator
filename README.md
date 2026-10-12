@@ -26,7 +26,7 @@ Referral wording uses the original GitHub templates and the user's saved legacy 
 
 Adding the medical-certificate examination block defaults its examination date to today, with CE/BE display and editable replacement selection. Entered or deliberately cleared dates survive removal/restoration; starting that block afresh explicitly restores the today default. An examination is not added automatically.
 
-The formatting toolbar includes **− / +**, a horizontal zoom slider and a percentage readout from **50% to 200%**. Zoom changes only the view: A4 layout, field values, formatting, Undo and PDF output stay unchanged. The full enlarged page remains reachable by scrolling; picture dragging compensates for zoom. Zoom is held in page memory and follows template/language changes.
+The formatting toolbar includes **− / +**, a horizontal zoom slider and a percentage readout from **50% to 200%**. **Ctrl/Cmd + / −** zoom the document in 10% steps; the slider allows 1% steps. Trackpad pinch and two-finger touchscreen pinch zoom around the gesture point, with scrolling preserved. On wide screens, the sidebar floats above the enlarged page; horizontal scrolling reveals the page edge beneath it. On narrow screens, the sidebar follows the canvas. Zoom changes only the view: A4 layout, field values, formatting, Undo and PDF output stay unchanged. Picture dragging compensates for zoom. Zoom is held in page memory and follows template/language changes.
 
 The **?** help control contains keyboard shortcuts, the current page count/A4/session-memory information and the PDF printed-layout note. The separate shortcut-hint and status bars are removed.
 
