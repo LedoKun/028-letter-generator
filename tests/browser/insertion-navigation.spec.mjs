@@ -8,7 +8,7 @@ const point=(page,id)=>page.locator(`.tiptap [data-insertion-point="${id}"] > bu
 const active=page=>page.evaluate(()=>clinical.editor.state.selection.$from.parent.attrs.id);
 const state=page=>page.evaluate(()=>JSON.stringify(clinical.editor.getJSON()));
 const blockMenu=page=>page.getByRole('region',{name:'Insert Block',exact:true});
-async function reachClinical(page){await field(page,'patient.sex').click();await page.keyboard.press('Tab');await expect(point(page,'clinical')).toBeFocused();await expect(blockMenu(page)).toBeVisible();}
+async function reachClinical(page){await field(page,'patient.passport').click();await page.keyboard.press('Tab');await expect(point(page,'clinical')).toBeFocused();await expect(blockMenu(page)).toBeVisible();}
 
 for(const language of ['th','en']){
  test(`Tab reaches the diagnosis button and adds a block into its first field: ${language}`,async({page})=>{
@@ -18,7 +18,7 @@ for(const language of ['th','en']){
  test(`Enter closes an empty block menu; Tab skips to closing requests and the next field: ${language}`,async({page})=>{
   await open(page,language);await reachClinical(page);const before=await state(page);await page.keyboard.press('Enter');await expect(blockMenu(page)).toHaveCount(0);await expect(point(page,'clinical')).toBeFocused();expect(await state(page)).toBe(before);
   await page.keyboard.press('Tab');await expect(point(page,'closing')).toBeFocused();await expect(blockMenu(page)).toBeVisible();await page.keyboard.press('Tab');expect(await active(page)).toBe('attachments.lab');
-  await page.keyboard.press('Shift+Tab');await expect(point(page,'closing')).toBeFocused();await page.keyboard.press('Shift+Tab');await expect(point(page,'clinical')).toBeFocused();await page.keyboard.press('Shift+Tab');expect(await active(page)).toBe('patient.sex');
+  await page.keyboard.press('Shift+Tab');await expect(point(page,'closing')).toBeFocused();await page.keyboard.press('Shift+Tab');await expect(point(page,'clinical')).toBeFocused();await page.keyboard.press('Shift+Tab');expect(await active(page)).toBe('patient.passport');
   expect(await state(page)).toBe(before);
  });
  test(`multiple keyboard block selections add together and focus the first added placeholder: ${language}`,async({page})=>{
@@ -32,13 +32,13 @@ for(const language of ['th','en']){
   await page.keyboard.press('ArrowDown');await page.keyboard.press('Tab');await expect(page.locator('[data-section-id="attachments"]')).toHaveCount(1);expect(await active(page)).toBe('attachments.other');
  });
  test(`keyboard restoration retains existing values and excludes disallowed blocks: ${language}`,async({page})=>{
-  await open(page,language);await page.evaluate(()=>{clinical.addSections(['otherHistory']);clinical.setValue('history.other','Preserved clinical history');});await page.locator('[data-section-control="otherHistory"]').getByRole('button',{name:/^Remove:/}).click();await point(page,'clinical').focus();
-  await expect(blockMenu(page).locator('[data-section-choice="physician"]')).toHaveCount(0);await page.keyboard.press('Alt+ArrowDown');await blockMenu(page).getByLabel('Search blocks').fill('Other Medical History');await page.keyboard.press('ArrowDown');await page.keyboard.press('Tab');
-  expect(await active(page)).toBe('history.other');await expect(field(page,'history.other').locator('.field-content')).toHaveText('Preserved clinical history');
+  await open(page,language);await page.evaluate(()=>{clinical.addSections(['hcvHistory']);clinical.setValue('hcv.regimen','Preserved regimen');});await page.locator('[data-section-control="hcvHistory"]').getByRole('button',{name:/^Remove:/}).click();await point(page,'clinical').focus();
+  await expect(blockMenu(page).locator('[data-section-choice="physician"]')).toHaveCount(0);await page.keyboard.press('Alt+ArrowDown');await blockMenu(page).getByLabel('Search blocks').fill('Treated HCV');await page.keyboard.press('ArrowDown');await page.keyboard.press('Tab');
+  expect(await active(page)).toBe('hcv.regimen');await expect(field(page,'hcv.regimen').locator('.field-content')).toHaveText('Preserved regimen');
  });
 }
 test('medical-certificate insertion is reachable by Tab and opens the inserted examination date',async({page})=>{
- await open(page,'en','medical');await field(page,'patient.sex').click();await page.keyboard.press('Tab');await expect(point(page,'clinical')).toBeFocused();await page.keyboard.press('ArrowDown');await page.keyboard.press('Tab');expect(await active(page)).toBe('examination.date');
+ await open(page,'en','medical');await field(page,'patient.passport').click();await page.keyboard.press('Tab');await expect(point(page,'clinical')).toBeFocused();await page.keyboard.press('ArrowDown');await page.keyboard.press('Tab');expect(await active(page)).toBe('examination.date');
  await page.keyboard.type('10102026');await page.keyboard.press('Tab');expect(await active(page)).toBe('examination.findings');
 });
 test('Tab visits medicine commands without adding rows; Enter adds and focuses a medicine',async({page})=>{

@@ -84,7 +84,7 @@ export function buildSection(id,language){
   const prefix=id==='tptCompleted'?'completed':'ongoing';
   content.push(line(`tpt.${prefix}.regimen`,'ผู้ป่วยได้รับ TPT สูตร ','The tuberculosis preventive treatment regimen is ','','.',null,['notEquals',`tpt.${prefix}.regimen`,'Other']),line(`tpt.${prefix}.other`,'ผู้ป่วยได้รับ TPT สูตร ','The tuberculosis preventive treatment regimen is ','','.', ['equals',`tpt.${prefix}.regimen`,'Other']),line(`tpt.${prefix}.start`,'เริ่ม TPT เมื่อเดือน ','Tuberculosis preventive treatment was started in ','','.'));
  }else if(id==='otherHistory'){content.push(P([G('history.other',[B(...SECTIONS[id].labels),T(' ',' '),F('history.other')])]));}
- else if(id==='oi'){content.push(P([G('oi.tablets',[T('ผู้ป่วยได้รับ TMX/SMP 80/400 mg ','The patient receives TMX/SMP 80/400 mg, '),F('oi.tablets'),Q('oi.tablets',' เม็ด วันละ 1 ครั้ง เพื่อป้องกันการติดเชื้อฉวยโอกาส',' tablet once daily for OI prophylaxis.',' tablets once daily for OI prophylaxis.')])]),line('oi.details','การป้องกันอื่น ','Other prophylaxis: '));}
+ else if(id==='oi'){content.push(P([G('oi.tablets',[T('ผู้ป่วยได้รับ TMX/SMP 80/400 mg ','The patient receives TMX/SMP 80/400 mg, '),F('oi.tablets'),Q('oi.tablets',' เม็ด วันละ 1 ครั้ง เพื่อป้องกันการติดเชื้อฉวยโอกาส',' tablet once daily for OI prophylaxis.',' tablets once daily for OI prophylaxis.')])]),P([G('oi.details',[F('oi.details')])]));}
  else if(id==='pickup'){
   content.push(P([G('pickup.date',[T('ผู้ป่วยรับยาครั้งล่าสุดเมื่อวันที่ ','The patient last collected medication on '),F('pickup.date'),G('pickup.days',[T(' โดยมียาเพียงพอสำหรับ ',', with a '),F('pickup.days'),T(' วัน','-day supply')]),T('','.')])]),P([G('pickup.days',[T('ผู้ป่วยได้รับยาเพียงพอสำหรับ ','A '),F('pickup.days'),T(' วัน','-day medication supply was provided.')],['fieldEmpty','pickup.date'])]));
  }else if(['art','otherMedications','travelMedications'].includes(id)){
@@ -174,15 +174,15 @@ export const INSERT_BLOCKS={...SECTIONS,
  viralLoad:{id:'viralLoad',labels:['ผล HIV viral load ล่าสุด','Latest HIV viral load'],documents:['referral','freeform'],closing:false}
 };
 export function availableBlocks(session,context={}){
- return Object.values(INSERT_BLOCKS).filter(section=>section.documents.includes(session.template)&&!session.activeSections?.includes(section.id)&&(!context.allowed||context.allowed.includes(section.id))&&(context.kind!=='closing'||section.closing));
+ return Object.values(INSERT_BLOCKS).filter(section=>section.id!=='otherHistory'&&section.documents.includes(session.template)&&!session.activeSections?.includes(section.id)&&(!context.allowed||context.allowed.includes(section.id))&&(context.kind!=='closing'||section.closing));
 }
 export function buildBlock(id,language,template='referral'){
  if(SECTIONS[id])return buildSection(id,language);
  const {T,B,F,P,G,line}=writer(language),content=[];
  if(id==='identification'){
-  content.push(P([G('patient.name',[B('ชื่อ-นามสกุล ','Full name: '),G('patient.salutation',[F('patient.salutation'),T(' ',' ')],null,['notEquals','patient.salutation','OTHER']),G('patient.salutationOther',[F('patient.salutationOther'),T(' ',' ')],['equals','patient.salutation','OTHER']),F('patient.name')])]),...buildBlock('dobAge',language,template).content,line('patient.nationalId','เลขประจำตัวประชาชน ','National ID: '),line('patient.passport','หนังสือเดินทางเลขที่ ','Passport no.: '));
-  if(['medical','referral'].includes(template))content.push(line('patient.sex','เพศ ','Sex: '));
-  if(template==='medication')content.push(line('patient.nationality','สัญชาติ ','Nationality: ','','',null,['notEquals','patient.nationality','OTHER']),line('patient.nationalityOther','สัญชาติอื่น ','Other nationality: ','','',['equals','patient.nationality','OTHER']));
+  content.push(P([G('patient.name',[B('ชื่อ-นามสกุล ','Full name: '),G('patient.salutation',[F('patient.salutation'),T(' ',' ')],null,['notEquals','patient.salutation','OTHER']),G('patient.salutationOther',[F('patient.salutationOther'),T(' ',' ')],['equals','patient.salutation','OTHER']),F('patient.name')])]),...buildBlock('dobAge',language,template).content,P([G('patient.nationalId',[B('เลขประจำตัวประชาชน ','National ID: '),F('patient.nationalId'),T('  ','  ')]),G('patient.passport',[B('หนังสือเดินทางเลขที่ ','Passport no.: '),F('patient.passport')])]));
+  if(['medical','referral'].includes(template))content[1].content.push(G('patient.sex',[T('  ','  '),B('เพศ ','Sex: '),F('patient.sex')]));
+  if(template==='medication')content[1].content.push(G('patient.nationality',[T('  ','  '),B('สัญชาติ ','Nationality: '),F('patient.nationality')],null,['notEquals','patient.nationality','OTHER']),G('patient.nationalityOther',[T('  ','  '),B('สัญชาติอื่น ','Other nationality: '),F('patient.nationalityOther')],['equals','patient.nationality','OTHER']));
  }else if(id==='dobAge')content.push(P([G('patient.dob',[B('วัน/เดือน/ปีเกิด ','Date of birth: '),F('patient.dob'),T('  ','  ')]),G('patient.age',[B('อายุ ','Age: '),F('patient.age'),T(' ปี',' years')])]));
  else if(id==='physician')content.push(P([{...F(language==='th'?'doctor.th':'doctor.en'),attrs:{id:language==='th'?'doctor.th':'doctor.en',languageBound:true}}]),line('doctor.license','เลขที่ใบอนุญาตประกอบวิชาชีพเวชกรรม ','Medical licence number: '));
  else if(id==='documentDate')content.push(line('document.date','วันที่ ','Date: '));
@@ -194,6 +194,6 @@ export function buildBlock(id,language,template='referral'){
   const visit=node=>{if(node.type==='paragraph'){let match=false;const find=n=>{if(n.type==='field'&&n.attrs.id.startsWith(prefix))match=true;(n.content||[]).forEach(find);};find(node);if(match)content.push(node);}else (node.content||[]).forEach(visit);};visit(buildSection('hiv',language));
  }
  if(!content.length)throw new Error('Unsupported block');
- if(id==='identification')content[0].attrs={...content[0].attrs,spacingBefore:8};
+ if(id==='identification'){for(const paragraph of content)paragraph.attrs={...paragraph.attrs,spacingAfter:2};content[0].attrs.spacingBefore=8;}
  return {type:'clinicalSection',attrs:{id},content:['cd4','viralLoad'].includes(id)?bullets(content):content};
 }

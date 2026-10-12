@@ -89,11 +89,11 @@ test('legacy BPG label remains editable and completes to its original canonical 
  await expect(page.locator('[data-field-id="syphilis.dose2"] .field-content')).toHaveText('13/06/2026');
 });
 for(const language of ['th','en']){
- test(`summary dropdown is restricted to the eleven diagnoses, each with an outer bullet: ${language}`,async({page})=>{
+ test(`summary dropdown offers ten diagnoses and histories, each with an outer bullet: ${language}`,async({page})=>{
   await open(page,'referral',language);await expect(page.locator('.tiptap [data-section-id="lab"]')).toHaveCount(1);
   await page.getByRole('button',{name:'Add a diagnosis or treatment history',exact:true}).click();
   const ids=await page.locator('[data-section-choice]').evaluateAll(nodes=>nodes.map(n=>n.dataset.sectionChoice));
-  expect(ids).toEqual(['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tptCompleted','tptOngoing','otherHistory']);
+  expect(ids).toEqual(['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tptCompleted','tptOngoing']);
   for(const id of ids)await page.locator(`[data-section-choice="${id}"]`).check();
   await page.getByRole('region',{name:'Insert Block'}).getByRole('button',{name:'Add',exact:true}).click();
   const group=page.locator('.tiptap [data-clinical-group="clinical"]');

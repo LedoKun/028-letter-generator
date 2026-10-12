@@ -16,6 +16,22 @@ async function choose(page,id,values){
 async function pdfText(page){return page.evaluate(()=>{const flatten=value=>Array.isArray(value)?value.map(flatten).join(''):!value||typeof value!=='object'?'':(typeof value.text==='string'?value.text:flatten(value.text))+flatten(value.stack)+flatten(value.ul)+flatten(value.ol);return flatten(clinical.payload().payload.content);});}
 
 for(const language of ['th','en']){
+ for(const template of ['referral','medical','medication','freeform'])test(`patient details fit three rows with demographics before IDs: ${template}/${language}`,async({page})=>{
+  await open(page,template,language);if(template==='freeform')await page.evaluate(()=>clinical.addSections(['identification']));
+  await set(page,{'patient.salutation':'MR.','patient.name':'FICTIONAL PATIENT','patient.dob':'10/10/2000','patient.sex':'MALE','patient.nationalId':'1234567890123','patient.passport':'AB123456','patient.nationality':'THAI'});await page.waitForFunction(()=>clinical.layout.stable);
+  const layout=await page.evaluate(()=>{
+   const paragraphs=[...new Set(['patient.name','patient.dob','patient.nationalId','patient.passport'].map(id=>document.querySelector(`.tiptap [data-field-id="${id}"]`).closest('p')))];
+   const tops=[];for(const paragraph of paragraphs){const walker=document.createTreeWalker(paragraph,NodeFilter.SHOW_TEXT),range=document.createRange();let node;while(node=walker.nextNode()){if(node.parentElement.closest('[hidden],.inline-choice,.field-remove,.page-spacer'))continue;range.selectNodeContents(node);for(const rect of range.getClientRects())if(rect.width&&rect.height&&!tops.some(top=>Math.abs(top-rect.top)<4))tops.push(rect.top);}}
+   return {rows:tops.length,fields:paragraphs.map(paragraph=>[...paragraph.querySelectorAll('[data-field-id]')].filter(node=>!node.closest('[hidden]')).map(node=>node.dataset.fieldId))};
+  });
+  expect(layout.rows).toBe(3);expect(layout.fields).toHaveLength(3);expect(layout.fields[1]).toEqual(['patient.dob','patient.age',...(['referral','medical'].includes(template)?['patient.sex']:template==='medication'?['patient.nationality']:[])]);expect(layout.fields[2]).toEqual(['patient.nationalId','patient.passport']);
+  const exported=await page.evaluate(()=>{const flatten=node=>Array.isArray(node)?node.map(flatten).join(''):!node||typeof node!=='object'?'':(typeof node.text==='string'?node.text:flatten(node.text))+flatten(node.stack);return clinical.payload().payload.content.filter(node=>/FICTIONAL PATIENT|10\/10\/(2000|2543)|AB123456/.test(flatten(node))).map(flatten);});
+  expect(exported).toHaveLength(3);expect(exported[2]).toContain('1-2345-67890-12-3');expect(exported[2]).toContain('AB123456');
+  if(['referral','medical'].includes(template))expect(exported[1]).toMatch(language==='th'?/อายุ.*เพศ/:/Age:.*Sex:/);
+  if(template==='medication')await expect(field(page,'patient.name').locator('xpath=ancestor::p/preceding-sibling::*[1]').locator('[data-field-id="document.addressee"]')).toHaveCount(1);
+  await page.keyboard.press('Escape');await expect(page.locator('.editor-dropdown')).toHaveCount(0);await field(page,'patient.age').click();await page.keyboard.press('Tab');expect(await page.evaluate(()=>clinical.editor.state.selection.$from.parent.attrs.id)).toBe(['referral','medical'].includes(template)?'patient.sex':template==='medication'?'patient.nationality':'patient.nationalId');
+  await set(page,{'patient.nationalId':''});const text=await pdfText(page);expect(text).not.toMatch(/National ID:|เลขประจำตัวประชาชน/);expect(text).toContain('AB123456');
+ });
  test(`ART adherence uses the requested wording and keeps its value when switching language: ${language}`,async({page})=>{
   await open(page,'referral',language);await page.evaluate(()=>clinical.addSections(['hiv']));await set(page,{'hiv.adherence':'>95%'});
   const paragraph=field(page,'hiv.adherence').locator('xpath=ancestor::p');
@@ -55,8 +71,9 @@ for(const language of ['th','en']){
  test(`referral buttons are simplified while other medicines remain insertable through the toolbar: ${language}`,async({page})=>{
   await open(page,'referral',language);await expect(page.getByRole('button',{name:'Add a patient or administrative block',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'Add other medications',exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:'Add a closing request',exact:true}).click();await expect(page.locator('[data-section-choice="physician"]')).toHaveCount(0);await expect(page.locator('[data-section-choice="admission"]')).toHaveCount(1);await expect(page.locator('[data-section-choice="financial"]')).toHaveCount(1);await page.getByRole('region',{name:'Insert Block'}).getByRole('button',{name:'Close',exact:true}).click();
-  await page.locator('.format-tools').getByRole('button',{name:'Insert Block',exact:true}).click();await page.locator('[data-section-choice="otherMedications"]').check();await page.getByRole('region',{name:'Insert Block'}).getByRole('button',{name:'Add',exact:true}).click();await expect(page.locator('[data-clinical-group="medications"] [data-section-id="otherMedications"]')).toHaveCount(1);
+  await page.locator('.format-tools').getByRole('button',{name:'Insert Block',exact:true}).click();await expect(page.locator('[data-section-choice="otherHistory"]')).toHaveCount(0);await page.locator('[data-section-choice="otherMedications"]').check();await page.getByRole('region',{name:'Insert Block'}).getByRole('button',{name:'Add',exact:true}).click();await expect(page.locator('[data-clinical-group="medications"] [data-section-id="otherMedications"]')).toHaveCount(1);
   await page.evaluate(()=>clinical.addSections(['hiv']));await page.getByRole('button',{name:'Add TMX/SMP 80/400 mg',exact:true}).click();await expect(page.locator('[data-section-id="hiv"] [data-section-id="oi"]')).toHaveCount(1);await expect(page.getByRole('region',{name:'Insert Block',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'Add TMX/SMP 80/400 mg',exact:true})).toHaveCount(0);
+  await set(page,{'oi.tablets':'2','oi.details':'Clinician-entered prophylaxis details'});await expect(page.locator('.tiptap [data-section-id="oi"]')).toContainText('Clinician-entered prophylaxis details');await expect(page.locator('.tiptap [data-section-id="oi"]')).not.toContainText(language==='th'?'การป้องกันอื่น':'Other prophylaxis:');expect(await pdfText(page)).toContain('Clinician-entered prophylaxis details');
  });
  test(`medical certificate insertion menu offers only examination, leave and treatment blocks: ${language}`,async({page})=>{
   await open(page,'medical',language);await page.getByRole('button',{name:'Add examination, treatment or medical leave',exact:true}).click();

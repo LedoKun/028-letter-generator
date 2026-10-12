@@ -29,7 +29,7 @@ for(const template of Object.keys(TEMPLATE_NAMES))for(const language of ['th','e
  const pdf=toPdf(doc),titleIndex=pdf.findIndex(block=>block.fontSize===16);assert.ok(titleIndex>=0);assert.deepEqual(pdf[titleIndex+1],{text:'',margin:[0,0,0,8]});
 });
 test('block availability returns only unused choices and restores removed sections',()=>{
- const session=sessionOf(make()),context={allowed:REFERRAL_POINTS.clinical};assert.deepEqual(availableBlocks(session,context).map(block=>block.id),REFERRAL_POINTS.clinical);
+ const session=sessionOf(make()),context={allowed:REFERRAL_POINTS.clinical};assert.deepEqual(availableBlocks(session,context).map(block=>block.id),REFERRAL_POINTS.clinical.filter(id=>id!=='otherHistory'));assert.ok(!availableBlocks(session).some(block=>block.id==='otherHistory'));
  session.activeSections.push(...REFERRAL_POINTS.clinical);assert.deepEqual(availableBlocks(session,context),[]);session.activeSections=session.activeSections.filter(id=>id!=='hbv');assert.deepEqual(availableBlocks(session,context).map(block=>block.id),['hbv']);
  session.activeSections.push('oi');assert.deepEqual(availableBlocks(session,{allowed:['oi']}),[]);session.activeSections=session.activeSections.filter(id=>id!=='oi');assert.deepEqual(availableBlocks(session,{allowed:['oi']}).map(block=>block.id),['oi']);
  const point=[];walk(buildSection('hiv','en'),node=>{if(node.type==='insertionPoint'&&node.attrs.id==='hiv.optional')point.push(node);});assert.equal(point[0].attrs.kind,'section');assert.deepEqual(point[0].attrs.allowed,['oi']);
@@ -205,6 +205,21 @@ test('template group spacing survives PDF export without changing compact bullet
 test('new blocks include complete related field groups',()=>{
  const expected={identification:['patient.name','patient.dob','patient.age','patient.passport','patient.nationalId'],cd4:['hiv.initialCD4','hiv.initialCD4Percent','hiv.initialCD4Date'],viralLoad:['hiv.latestVL','hiv.latestVLDate'],physician:['doctor.en','doctor.license'],referralPurpose:['referral.purposes','referral.customPurpose']};
  for(const[id,fields]of Object.entries(expected)){const actual=[];walk(buildBlock(id,'en','referral'),n=>{if(n.type==='field')actual.push(n.attrs.id);});for(const field of fields)assert.ok(actual.includes(field),`${id} missing ${field}`);assert.ok(INSERT_BLOCKS[id]);}
+});
+test('patient identification groups demographics and IDs in three compact paragraphs',()=>{
+ for(const template of Object.keys(TEMPLATE_NAMES))for(const language of ['th','en']){
+  const block=buildBlock('identification',language,template),rows=block.content.map(paragraph=>{const ids=[];walk(paragraph,n=>{if(n.type==='field')ids.push(n.attrs.id);});assert.equal(paragraph.attrs.spacingAfter,2);return ids;});
+  assert.equal(rows.length,3);assert.ok(rows[0].includes('patient.name'));
+  assert.deepEqual(rows[1],['patient.dob','patient.age',...(['medical','referral'].includes(template)?['patient.sex']:template==='medication'?['patient.nationality','patient.nationalityOther']:[])]);
+  assert.deepEqual(rows[2],['patient.nationalId','patient.passport']);
+ }
+});
+test('TMX/SMP additional text exports without the Other prophylaxis label',()=>{
+ for(const language of ['th','en']){
+  const doc=make('referral',language,{'oi.tablets':'2','oi.details':'Clinician-entered prophylaxis details'},['oi']);
+  assert.match(output(doc),/TMX\/SMP 80\/400 mg/);assert.match(output(doc),/Clinician-entered prophylaxis details/);assert.doesNotMatch(output(doc),/Other prophylaxis:|การป้องกันอื่น/);
+  sessionOf(doc).omitted.push('oi.details');assert.doesNotMatch(output(doc),/Clinician-entered prophylaxis details/);
+ }
 });
 test('the field registry covers every template offering a whole block',()=>{
  for(const block of Object.values(INSERT_BLOCKS))for(const template of block.documents)walk(buildBlock(block.id,'en',template),node=>{
