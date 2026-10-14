@@ -22,7 +22,7 @@ export function conditionActive(condition,session) {
  if(op==='empty')return !v||Array.isArray(v)&&!v.length;
  if(op==='notEmpty')return !!(Array.isArray(v)?v.length:v);
  if(op==='percentOnly')return !session.converted?.includes('hiv.initialCD4')&&(!valueOf(session,'hiv.initialCD4')||session.omitted.includes('hiv.initialCD4')||session.availableFields&&!session.availableFields.includes('hiv.initialCD4'))&&!!valueOf(session,'hiv.initialCD4Percent');
- if(op==='hasClinical')return session.activeSections?.some(section=>['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tptCompleted','tptOngoing'].includes(section)||section==='otherHistory'&&!!valueOf(session,'history.other')&&!session.omitted.includes('history.other')&&(!session.availableFields||session.availableFields.includes('history.other')||session.converted?.includes('history.other')))||false;
+ if(op==='hasClinical')return session.activeSections?.some(section=>['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tptCompleted','tptOngoing','tbActive','crag','cmvr'].includes(section)||section==='otherHistory'&&!!valueOf(session,'history.other')&&!session.omitted.includes('history.other')&&(!session.availableFields||session.availableFields.includes('history.other')||session.converted?.includes('history.other')))||false;
  if(op==='treatmentHistory')return session.template==='medical'&&session.activeSections?.some(id=>['syphilisTreatment','tbTreatment'].includes(id))&&!session.activeSections.some(id=>['examination','attendance','leave'].includes(id));
  if(op==='documentedExamination')return session.activeSections?.includes('examination')&&!session.omitted.includes('examination.date')&&!!exactDate(valueOf(session,'examination.date'));
  if(op==='oneOfSections')return session.activeSections?.some(section=>id.includes(section))||false;
@@ -36,7 +36,7 @@ export function normalise(id,value,language) {
  if(def.type==='nationalId') {const digits=raw.replace(/[-\s]/g,'');return /^\d{13}$/.test(digits)?`${digits[0]}-${digits.slice(1,5)}-${digits.slice(5,10)}-${digits.slice(10,12)}-${digits[12]}`:raw;}
  if(def.type==='napId'){const digits=raw.replace(/^D4[-\s]*/i,'').replace(/[-\s]/g,'');return /^\d{5,20}$/.test(digits)?`${digits.slice(0,4)}-${digits.slice(4)}`:raw;}
  if(def.options) {
-  const values=(Array.isArray(value)?value:raw.split(/\s*;\s*/)).map(part=>{part=String(part).trim();return def.options.find(o=>o.value.toLowerCase()===part.toLowerCase()||o.labels.some(l=>l.toLowerCase()===(id==='syphilis.regimen'?part.replace(/\s*\(BPG\)/i,''):part).toLowerCase()))?.value||part;});
+  const values=(Array.isArray(value)?value:def.allowCustom?[raw]:raw.split(/\s*;\s*/)).map(part=>{part=String(part).trim();return def.options.find(o=>o.value.toLowerCase()===part.toLowerCase()||o.labels.some(l=>l.toLowerCase()===(id==='syphilis.regimen'?part.replace(/\s*\(BPG\)/i,''):part).toLowerCase()))?.value||part;});
   return def.type==='multi'?[...new Set(values.filter(Boolean))]:values[0];
  }
  return def.uppercase?raw.toUpperCase():raw;
@@ -49,6 +49,7 @@ export function displayValue(session,id) {
 }
 export function recalculate(session,force='') {
  const values={...session.values},set=(id,value)=>{if(force===id||force==='bpg'&&(id.startsWith('syphilis.dose')||id==='syphilis.duration')||values[id]?.status!=='override')values[id]={value:value===null?'':String(value),status:'calculated'};};
+ if(session.template==='referral'&&values['document.title']?.status==='default')values['document.title']={value:conditionActive(['fieldEmpty','referral.purposes'],session)&&conditionActive(['fieldEmpty','referral.customPurpose'],session)?'medicalSummary':'referralLetter',status:'default'};
  const age=calculateAge(valueOf(session,'patient.dob'),(session.activeSections?.some(id=>['examination','attendance'].includes(id))?valueOf(session,'examination.date'):'')||valueOf(session,'document.date'));
  if(age!==null || values['patient.age']?.status==='calculated' || force==='patient.age')set('patient.age',age);
  if(valueOf(session,'syphilis.regimen')==='Benzathine')for(const n of [1,2,3])set(`syphilis.dose${n}`,addCalendarDays(valueOf(session,'syphilis.start'),(n-1)*7));
@@ -76,7 +77,7 @@ export function fieldError(id,value,session) {
  if(id==='patient.age'&&Number(raw)>150)return 'Review this age';
  if(def.type==='nationalId'&&!/^\d{13}$/.test(raw.replace(/[-\s]/g,'')))return 'National ID must contain 13 digits';
  if(def.type==='napId'&&!/^\d{5,20}$/.test(raw.replace(/-/g,'')))return 'NAP-ID must contain 5–20 digits';
- if(def.options) {
+ if(def.options&&!def.allowCustom) {
   const choices=Array.isArray(value)?value:[value];if(choices.some(v=>!def.options.some(o=>o.value===v||o.labels.includes(v))))return 'Choose a supported option';
  }
  return '';
@@ -117,7 +118,7 @@ export function fieldRequirements(doc,session=sessionOf(doc)) {
  if(valueOf(session,'patient.salutation')==='OTHER'&&active.has('patient.salutationOther'))need('patient.salutationOther');
  if(valueOf(session,'patient.nationality')==='OTHER'&&active.has('patient.nationalityOther'))need('patient.nationalityOther');
  if(valueOf(session,'referral.purposes').includes('custom')&&active.has('referral.purposes'))need('referral.customPurpose');
- if(active.has('tb.siteOther'))need('tb.siteOther');
+ for(const id of ['tb.siteOther','tbActive.siteOther','tbActive.phaseOther'])if(active.has(id))need(id);
  if(session.template==='medication'){
   need('patient.dob');
  }

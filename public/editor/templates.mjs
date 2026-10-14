@@ -1,10 +1,10 @@
-import { TEMPLATE_NAMES, label } from './fields.mjs';
+import { label } from './fields.mjs';
 import { today, parseClinicalDate } from './dates.mjs';
 export const FINANCIAL = [
  'ทั้งนี้ หากเห็นสมควร ขอความอนุเคราะห์ทีมของท่านพิจารณาแนวทางให้ความช่วยเหลือด้านค่าใช้จ่ายในการรักษาหรือด้านสังคมสงเคราะห์ที่เหมาะสมสำหรับผู้ป่วยเพิ่มเติมด้วย',
  'Where appropriate, we also kindly request that your team consider any available financial assistance or social welfare support for this patient.'
 ];
-export const REFERRAL_POINTS={clinical:['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tptCompleted','tptOngoing','otherHistory'],medications:['otherMedications'],closing:['admission','financial','physician'],enclosures:['lab','attachments']};
+export const REFERRAL_POINTS={clinical:['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tptCompleted','tptOngoing','otherHistory','tbActive','crag','cmvr'],medications:['otherMedications'],closing:['admission','financial','physician'],enclosures:['lab','attachments']};
 export const referralPoint=id=>Object.entries(REFERRAL_POINTS).find(([,ids])=>ids.includes(id))?.[0]||'details';
 export function sectionDefaults(id,language='th'){
  const date=parseClinicalDate(today()).iso;
@@ -27,6 +27,7 @@ export function writer(language) {
 }
 export const insertionPoint=(id,hint,kind='blocks',section=null,allowed=null)=>({type:'insertionPoint',attrs:{id,hint,kind,section,allowed}});
 const proseParagraph=()=>({type:'paragraph',attrs:{prosePlaceholder:true},content:[]});
+const writingSpace=()=>Array.from({length:3},()=>({type:'paragraph',attrs:{prosePlaceholder:true,writingSpace:true,spacingAfter:0},content:[]}));
 function bullets(content,type='bulletList'){
  const output=[];let list;
  for(const node of content){
@@ -48,13 +49,16 @@ const names={
  financial:['ข้อความขอคำแนะนำด้านความช่วยเหลือค่าใช้จ่าย','Include Financial Assistance Request'],
  examination:['การตรวจวินิจฉัย','Clinical Examination and Diagnosis'],leave:['ความเห็นแพทย์และการหยุดพักรักษาตัว','Fitness for Work / Leave Advised'],
  syphilisTreatment:['ประวัติการรักษาโรคซิฟิลิส','Syphilis Treatment History'],tbTreatment:['ประวัติการรักษาโรควัณโรค','Tuberculosis (TB) Treatment History'],comments:['ความเห็นเพิ่มเติมของแพทย์','Other Comments'],
- travelMedications:['รายการยาสำหรับการเดินทาง','Travel Medications'],attendance:['รับรองการมารับการตรวจรักษา','Attendance Confirmation']
+ travelMedications:['รายการยาสำหรับการเดินทาง','Travel Medications'],attendance:['รับรองการมารับการตรวจรักษา','Attendance Confirmation'],
+ tbActive:['วัณโรคระหว่างการรักษา','Tuberculosis (TB) — on treatment'],
+ crag:['ผลตรวจแอนติเจนเชื้อ Cryptococcus ในเลือดเป็นบวก','Positive serum cryptococcal antigen (CrAg)'],
+ cmvr:['สงสัยจอประสาทตาอักเสบจากเชื้อ CMV (CMVR)','Suspected cytomegalovirus retinitis (CMVR)']
 };
 const legacy=['includeRetroviral','includeSyphilisActive','includeSuspectedMpox','includeHBV','includeHCVActive','includeTreatedSyphilis','includeTreatedHCV','includeTreatedTB','includeCompletedTPT','includeOngoingTPT','includeOtherHistory'];
 export const SECTIONS=Object.fromEntries(Object.entries(names).map(([id,labels],i)=>[id,{
  id,labels,originalIds:i<11?[legacy[i]]:({oi:['includeTmxSmp'],pickup:['includeLastMedicinePickup'],admission:['includeReferralForAdmission'],lab:['attachmentLabResults'],attachments:['attachmentOther'],examination:['includeConsultationDiagnosis'],leave:['includeAdvisedRest'],syphilisTreatment:['includeSyphilisTreatment'],tbTreatment:['includeTBTreatment'],comments:['includeDoctorComment'],travelMedications:['includeMedications']}[id]||[]),
- documents:['examination','leave','syphilisTreatment','tbTreatment','comments','attendance'].includes(id)?['medical']:id==='travelMedications'?['medication']:['financial','admission','attachments','lab'].includes(id)?['referral','freeform']:['referral'],
- disease:i<11,closing:['admission','financial','attachments','lab'].includes(id)
+ documents:['examination','leave','syphilisTreatment','tbTreatment','comments','attendance'].includes(id)?['medical']:id==='travelMedications'?['medication']:['financial','admission','attachments','lab','tbActive','crag','cmvr'].includes(id)?['referral','freeform']:['referral'],
+ disease:i<11||['tbActive','crag','cmvr'].includes(id),closing:['admission','financial','attachments','lab'].includes(id)
 }]));
 export function buildSection(id,language){
  const {T,D,Q,B,F,P,G,line,dateLine,H}=writer(language),content=[];
@@ -69,11 +73,27 @@ export function buildSection(id,language){
   content.push(buildSection('art',language),proseParagraph(),insertionPoint('hiv.optional','Add TMX/SMP 80/400 mg','section','hiv',['oi']),proseParagraph(),buildSection('pickup',language));
  }else if(id==='syphilis'){
   content.push(dateLine('syphilis.start','เริ่มการรักษาโรคซิฟิลิสเมื่อวันที่ ','Treatment for syphilis commenced on ','เริ่มการรักษาเมื่อ ','Treatment commenced in '),line('syphilis.regimen','ได้รับการรักษาด้วย ','The prescribed treatment regimen is ','','.'));
-  const schedule=[1,2,3].map(n=>line(`syphilis.dose${n}`,`กำหนดฉีด Benzathine penicillin G เข็มที่ ${n} `,`Scheduled Benzathine penicillin G dose ${n} on `));
+  const schedule=[1,2,3].map(n=>line(`syphilis.dose${n}`,`กำหนดฉีด Benzathine penicillin G เข็มที่ ${n} `,`Benzathine penicillin G dose ${n} on `));
   content.push({type:'bulletList',content:[{type:'listItem',attrs:{condition:['equals','syphilis.regimen','Benzathine']},content:[P([B('กำหนดการฉีดยา','Injection schedule:')]),...bullets(schedule)]}]});
  }else if(id==='mpox'){
   content.push(P([G('mpox.days',[T('ผู้ป่วยเริ่มมีอาการมาแล้ว ','Symptoms began '),F('mpox.days'),Q('mpox.days',' วัน',' day ago.',' days ago.')])]),line('mpox.symptoms','อาการสำคัญ ได้แก่ ','Presenting symptoms include ','','.'),line('mpox.symptomOther','อาการอื่น ๆ ','Other symptoms: ','','',['contains','mpox.symptoms','other']));
   content.push(P([G('mpox.risks',[{type:'phrase',attrs:{condition:['notContains','mpox.risks','noneKnown']},content:[T('ผู้ป่วยให้ประวัติว่า ','The patient reported ')]},F('mpox.risks'),T('','.')])]),line('mpox.riskOther','ประวัติความเสี่ยงอื่น ๆ ','Other risk factors: ','','',['contains','mpox.risks','other']));
+ }else if(id==='tbActive'){
+  content.push(line('tbActive.sites','ตำแหน่งของวัณโรค ','Disease site(s): '),line('tbActive.siteOther','ตำแหน่งวัณโรคอื่น ','Other disease site(s): ','','',['contains','tbActive.sites','Other']));
+  for(const [name,th,en]of[
+   ['diagnosisDate','วันที่วินิจฉัยวัณโรค ','TB diagnosis date: '],['specimen','ชนิดสิ่งส่งตรวจและตำแหน่งที่เก็บ ','Specimen and collection site: '],
+   ['afb','ผลตรวจเสมหะ AFB และวันที่ตรวจ ','Sputum AFB smear (date and result): '],['xpert','ผลตรวจ Xpert MTB/RIF หรือ Ultra (GeneXpert) และวันที่ตรวจ ','Xpert MTB/RIF or Ultra (GeneXpert; date and result): '],
+   ['culture','ผลเพาะเชื้อวัณโรคและวันที่ตรวจ ','Mycobacterial culture (date and result): '],['dst','ผลทดสอบความไวต่อยา (C/S, DST) และวันที่ตรวจ ','Drug susceptibility (C/S, DST; date and result): '],['lpa','ผลตรวจ Line probe assay (LPA) และวันที่ตรวจ ','Line probe assay (LPA; date and result): '],
+   ['resistance','ข้อมูลการดื้อยาวัณโรค ','Drug-resistance profile: '],['treatmentStart','วันที่เริ่มรักษาวัณโรค ','TB treatment started: '],['regimen','สูตรยาวัณโรคปัจจุบัน ขนาดยา และความถี่ ','Current TB regimen, doses and frequency: '],['regimenStart','วันที่เริ่มสูตรยาปัจจุบัน ','Current regimen started: '],['phase','ระยะการรักษาปัจจุบัน ','Current treatment phase: ']
+  ])content.push(line('tbActive.'+name,th,en));
+  content.push(line('tbActive.phaseOther','ระยะการรักษาอื่น ','Other treatment phase or stage: ','','',['equals','tbActive.phase','other']));
+  for(const [name,th,en]of[
+   ['weight','น้ำหนักปัจจุบัน (กิโลกรัม) ','Current weight (kg): '],['imaging','ภาพถ่ายรังสีทรวงอกและผลตรวจเพิ่มเติม ','Chest imaging and other investigations: '],['response','การตอบสนองต่อการรักษาและผลตรวจเสมหะหรือเพาะเชื้อติดตาม ','Clinical response and follow-up smear / culture: '],['adherence','ความสม่ำเสมอในการรับยาและช่วงที่ขาดยา ','Adherence and treatment interruptions: '],['adverseEffects','อาการไม่พึงประสงค์และการปรับเปลี่ยนการรักษา ','Adverse effects and treatment changes: '],['followUp','แผนการติดตามและส่งต่อการดูแลรักษา ','Follow-up and transfer-of-care plan: '],['nextReview','วันที่นัดติดตามครั้งถัดไป ','Next review date: ']
+  ])content.push(line('tbActive.'+name,th,en));
+ }else if(id==='crag'){
+  content.push(line('crag.date','วันที่ผลตรวจ serum CrAg เป็นบวก ','Positive serum CrAg test date: '));
+ }else if(id==='cmvr'){
+  content.push(line('cmvr.date','วันที่ตรวจด้วยกล้องถ่ายภาพจอประสาทตา ','Fundus camera examination date: '),line('cmvr.fundus','ผลตรวจจากภาพถ่ายจอประสาทตา ','Fundus camera examination findings: '));
  }else if(['hbv','hcvActive','syphilisHistory'].includes(id)){
   // Diagnosis-only entries already have their single outer bullet.
  }else if(id==='hcvHistory'){
@@ -124,8 +144,8 @@ export function createDocument(template,language='th',doctor={}){
  const values={'document.date':{value:parseClinicalDate(today()).iso,status:'default'}};
  for(const[id,value]of Object.entries(doctor))if(id.startsWith('doctor.'))values[id]={value,status:'preference'};
  const body=[P([T('วันที่ ','Date: '),F('document.date')],{textAlign:'right'})];
- if(template==='freeform'){values['document.title']={value:language==='th'?'บันทึกข้อความ':'Medical Notes',status:'default'};body.push({type:'heading',attrs:{level:1,textAlign:'center'},content:[F('document.title')]});}
- else body.push(template==='referral'?{type:'heading',attrs:{level:1,textAlign:'center'},content:[R('หนังสือส่งตัวผู้ป่วย','Medical Referral Letter','หนังสือสรุปประวัติการรักษา','Medical Summary')]}:template==='medical'?{type:'heading',attrs:{level:1,textAlign:'center'},content:[T('ใบรับรองแพทย์','Medical Certificate')]}:{...H(...TEMPLATE_NAMES[template]),attrs:{level:1,textAlign:'center'}});
+ values['document.title']={value:{referral:'referralLetter',medical:'medicalCertificate',medication:'medicationCertificate',freeform:'medicalNotes'}[template],status:'default'};
+ body.push({type:'heading',attrs:{level:1,textAlign:'center'},content:[F('document.title')]});
  body.push(P([],{spacingAfter:8,role:'titleSpace'}));
  values['document.addressee']={value:language==='th'?'เจ้าหน้าที่ผู้เกี่ยวข้อง':template==='referral'?'To Whom It May Concern':'Whom It May Concern',status:'default'};
  if(template!=='medical')body.push(P([G('document.addressee',[B('เรียน ',template==='referral'?'To: ':'To '),F('document.addressee'),T('',template==='referral'?'':':')])]));
@@ -135,7 +155,7 @@ export function createDocument(template,language='th',doctor={}){
   body.push(P([subject],{spacingAfter:8}),P([introduction(),physician(),G('doctor.license',[T(' ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ',' (Medical Licence Number: '),F('doctor.license'),T('',')')]),R(' ขอส่งตัวผู้ป่วยรายนี้เพื่อ ',', am writing to refer the patient detailed below for ',' ขอส่งสรุปประวัติการรักษาของผู้ป่วยรายนี้เพื่อประกอบการดูแลรักษาต่อ',', provide the following medical summary to support continuity of care'),...referralPurpose(language),R(' โดยมีรายละเอียดดังต่อไปนี้','. Details are provided below.',' โดยมีรายละเอียดดังต่อไปนี้','.') ]));
  }
  if(template==='medical')body.push(P([introduction(),physician(),G('doctor.license',[T(' ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ',', medical licence number '),F('doctor.license')]),M(' ขอรับรองข้อมูลทางการแพทย์ของผู้ป่วยดังต่อไปนี้',', hereby certify the medical information for the patient detailed below.',' ขอรับรองประวัติการรักษาของผู้ป่วยดังต่อไปนี้',', hereby certify the medical information for the patient detailed below.',' ได้ตรวจร่างกาย')]));
- if(template==='freeform')body.push({type:'bodyText',content:[proseParagraph()]});
+ if(template==='freeform')body.push({type:'bodyText',content:writingSpace()});
  else{
   const identity=buildBlock('identification',language,template).content;
   if(template==='referral')body.push(group('details',identity));else body.push(...identity);
@@ -143,7 +163,7 @@ export function createDocument(template,language='th',doctor={}){
    Object.assign(values,Object.fromEntries(Object.entries(sectionDefaults('lab',language)).map(([id,value])=>[id,{value,status:'default'}])));
    body.push(group('summary',[
     {...H('สรุปประวัติการเจ็บป่วยและการรักษา','Clinical Summary and Treatment History'),attrs:{level:2,spacingBefore:8,condition:['hasClinical']}},
-    group('clinical',[proseParagraph(),insertionPoint('clinical','Add a diagnosis or treatment history','blocks',null,REFERRAL_POINTS.clinical),proseParagraph()])
+    group('clinical',[proseParagraph(),insertionPoint('clinical','Add a diagnosis or treatment history','blocks',null,REFERRAL_POINTS.clinical),proseParagraph(),...writingSpace()])
    ]),group('medications',[]));
   }
   if(template==='medication'){

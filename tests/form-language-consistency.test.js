@@ -17,7 +17,7 @@ test('one Clear Form action and on-demand blob preview replace the old form acti
  const source=read('public/editor/main.mjs');assert.equal((source.match(/button\(ui\('clear'\)/g)||[]).length,1);assert.match(source,/PdfGenerator\.generateBlob/);assert.match(source,/snapshot\.errors/);assert.doesNotMatch(source,/setupPdfPreview|Save Draft|generateDataUrl|Reset Template/);
 });
 test('all eleven original disease choices, independent medications and pick-up are available',async()=>{
- const {SECTIONS,buildSection}=await import('../public/editor/templates.mjs');assert.equal(Object.values(SECTIONS).filter(s=>s.disease).length,11);
+ const {SECTIONS,buildSection}=await import('../public/editor/templates.mjs');assert.equal(Object.values(SECTIONS).filter(s=>s.disease&&s.originalIds.length).length,11);
  for(const id of ['art','oi','pickup','otherMedications','admission','lab','attachments'])assert.ok(SECTIONS[id]);const {walk}=await import('../public/editor/model.mjs');let pickup=false;walk(buildSection('hiv','en'),n=>{if(n.type==='clinicalSection'&&n.attrs.id==='pickup')pickup=true;});assert.ok(pickup);assert.equal(SECTIONS.notes,undefined);
 });
 test('Tailwind source owns the document canvas and persistent placeholder styles',()=>{

@@ -1,20 +1,21 @@
+import {openInsert} from './insert-helpers.mjs';
 import {test,expect} from '@playwright/test';
 async function open(page,language,template='medical'){
  await page.clock.install({time:new Date('2026-10-10T03:00:00Z')});await page.addInitScript(language=>localStorage.setItem('documentLanguage',language),language);
- const routes={medical:'medical-certificate',referral:'referral',medication:'certificate-medication-letter',freeform:'free-form-letter'};await page.goto('/'+routes[template]+'/');await expect(page.locator('.tiptap')).toBeFocused();
+ const routes={medical:'medical-certificate',referral:'referral',medication:'certificate-medication-letter',freeform:'free-form-letter'};await page.goto('/'+routes[template]+'/');await expect(page.locator('.tiptap')).toBeFocused();await page.locator('.section-panel > details').evaluate(details=>details.open=true);
 }
 const field=(page,id)=>page.locator(`.tiptap [data-field-id="${id}"]`).filter({visible:true}).first();
 async function removeExamination(page){await page.locator('[data-section-control="examination"]').getByRole('button',{name:/^Remove:/}).click();}
 for(const language of ['th','en']){
  test(`help contains shortcuts and live document status without either bar: ${language}`,async({page})=>{
   await open(page,language,'referral');await expect(page.locator('.shortcut-hint,.status-bar')).toHaveCount(0);const before=await page.evaluate(()=>JSON.stringify(clinical.editor.getJSON()));
-  const help=page.getByRole('button',{name:'Keyboard Shortcuts',exact:true});await help.click();const panel=page.getByRole('region',{name:'Keyboard Shortcuts',exact:true});await expect(panel).toContainText('Tab → Next field / Add… / Preview');await expect(panel.locator('[data-document-status]')).toHaveText('1 page · A4 · Session memory only');await expect(panel).toContainText('PDF is the authoritative printed layout');await expect(panel.locator('.shortcuts-table')).toBeVisible();
+  const help=page.getByRole('button',{name:'Keyboard Shortcuts',exact:true});await help.click();const panel=page.getByRole('region',{name:'Keyboard Shortcuts',exact:true});await expect(panel).toContainText('/ to browse insert options');await expect(panel.locator('[data-document-status]')).toHaveText('1 page · A4 · Session memory only');await expect(panel.locator('.shortcuts-table')).toBeVisible();
   const [buttonBox,panelBox]=await Promise.all([help.boundingBox(),panel.boundingBox()]);expect(panelBox.y).toBeGreaterThanOrEqual(buttonBox.y+buttonBox.height);await page.keyboard.press('Escape');await expect(panel).toHaveCount(0);expect(await page.evaluate(()=>JSON.stringify(clinical.editor.getJSON()))).toBe(before);
   await help.click();await page.evaluate(()=>{const editor=clinical.editor;editor.commands.insertContentAt(editor.state.doc.content.size,{type:'pageBreak'});});await expect(panel.locator('[data-document-status]')).toHaveText('2 pages · A4 · Session memory only');await expect(page.locator('.shortcut-hint,.status-bar')).toHaveCount(0);
  });
  test(`examination date defaults to today, stays selected/editable and preserves changes: ${language}`,async({page})=>{
   await open(page,language);await page.evaluate(()=>{clinical.setValue('document.date','09/10/2026');clinical.setValue('patient.dob','10/10/2000');});await expect(field(page,'patient.age').locator('.field-content')).toHaveText('25');
-  await page.getByRole('button',{name:'Add examination, treatment or medical leave',exact:true}).click();await page.locator('[data-section-choice="examination"]').check();await page.getByRole('region',{name:'Insert Block',exact:true}).getByRole('button',{name:'Add',exact:true}).click();
+  await openInsert(page,'clinical');await page.locator('[data-section-choice="examination"]').check();await page.getByRole('dialog',{name:'Insert',exact:true}).getByRole('button',{name:'Insert selected blocks',exact:true}).click();
   const expected=language==='th'?'10/10/2569':'10/10/2026';await expect(field(page,'examination.date').locator('.field-content')).toHaveText(expected);await expect(field(page,'patient.age').locator('.field-content')).toHaveText('26');
   expect(await page.evaluate(()=>{const e=clinical.editor;return e.state.doc.textBetween(e.state.selection.from,e.state.selection.to);})).toBe(expected);
   await page.keyboard.type('09102026');await page.keyboard.press('Tab');await expect(field(page,'examination.date').locator('.field-content')).toHaveText(language==='th'?'09/10/2569':'09/10/2026');await expect(field(page,'patient.age').locator('.field-content')).toHaveText('25');

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {FIELDS,definition,legacyFieldMap,TEMPLATE_NAMES} from '../public/editor/fields.mjs';
+import {FIELDS,definition,legacyFieldMap,TEMPLATE_NAMES,DOCUMENT_TITLES} from '../public/editor/fields.mjs';
 import {createDocument,buildSection,medicationRow,SECTIONS,INSERT_BLOCKS,buildBlock,FINANCIAL,referralPoint,sectionDefaults,REFERRAL_POINTS,availableBlocks} from '../public/editor/templates.mjs';
 import {parseClinicalDate,displayDate,calculateAge,addCalendarDays,inclusiveDays,today} from '../public/editor/dates.mjs';
 import {hydrate,sessionOf,walk,valueOf,displayValue,normalise,recalculate,validateDocument,fieldRequirements,visibleFields,formatFieldInput,templateProse,fieldError,inputFitsField} from '../public/editor/model.mjs';
@@ -16,11 +16,31 @@ function make(template='referral',language='en',values={},sections=[]) {
 }
 function pdfText(content){if(Array.isArray(content))return content.map(pdfText).join('');if(!content||typeof content!=='object')return '';return (typeof content.text==='string'?content.text:pdfText(content.text))+(content.stack?pdfText(content.stack):'')+(content.ul?pdfText(content.ul):'')+(content.ol?pdfText(content.ol):'');}
 const output=doc=>pdfText(toPdf(doc));
+for(const language of ['th','en'])test(`new clinical diagnoses keep editable details and correct dates: ${language}`,()=>{
+ const values={'tbActive.sites':['Pulmonary'],'tbActive.treatmentStart':'01/09/2569','tbActive.regimenStart':'10/2569','tbActive.regimen':'Clinician-entered regimen and dose','tbActive.phase':'continuation','tbActive.afb':'01/09/2026: 2+','tbActive.xpert':'MTB detected; rifampicin resistance not detected','tbActive.culture':'Culture pending','tbActive.dst':'DST pending','tbActive.lpa':'LPA pending','tbActive.response':'Follow-up culture pending','crag.date':'09/10/2569','cmvr.date':'10/10/2569','cmvr.fundus':'Fictional retinal findings'};
+ const doc=make('referral',language,values,['tbActive','crag','cmvr']),text=output(doc),s=sessionOf(doc);
+ assert.equal(valueOf(s,'tbActive.treatmentStart'),'2026-09-01');assert.equal(valueOf(s,'tbActive.regimenStart'),'2026-10');
+ assert.ok(text.includes(language==='th'?'วันที่ผลตรวจ serum CrAg เป็นบวก 09/10/2569':'Positive serum CrAg test date: 09/10/2026'));
+ assert.ok(text.includes(language==='th'?'วันที่ตรวจด้วยกล้องถ่ายภาพจอประสาทตา 10/10/2569':'Fundus camera examination date: 10/10/2026'));
+ for(const value of ['2+','MTB detected','Culture pending','DST pending','LPA pending','Clinician-entered regimen and dose','Fictional retinal findings'])assert.ok(text.includes(value),value);
+ assert.ok(text.includes(language==='th'?'สรุปประวัติการเจ็บป่วยและการรักษา':'Clinical Summary and Treatment History'));
+ assert.deepEqual(validateDocument(doc),[]);
+ for(const id of ['tbActive','crag','cmvr']){assert.equal(referralPoint(id),'clinical');assert.ok(SECTIONS[id].documents.includes('freeform'));const item=section(doc,id);assert.equal(item.content[0].type,'bulletList');assert.equal(item.content[0].content.length,1);}
+});
+test('current TB fields remain separate from completed treatment and have no assumed results',()=>{
+ const block=buildBlock('tbActive','en'),ids=[];walk(block,node=>{if(node.type==='field')ids.push(node.attrs.id);});
+ assert.equal(ids.length,22);for(const id of ids){assert.ok(definition(id));assert.ok(id.startsWith('tbActive.'));}
+ const doc=make('referral','en',{},['tbActive']);assert.doesNotMatch(output(doc),/smear.*negative|MTB detected|successfully completed|Intensive phase|Continuation phase/);
+ assert.doesNotMatch(output(doc),/AFB|GeneXpert|culture|LPA|regimen|phase/);
+ sessionOf(doc).values['tbActive.phase']={value:'other',status:'manual'};assert.ok(validateDocument(doc).some(error=>error.id==='tbActive.phaseOther'));
+ const crag=[],cmvr=[];walk(buildBlock('crag','en'),node=>{if(node.type==='field')crag.push(node.attrs.id);});walk(buildBlock('cmvr','en'),node=>{if(node.type==='field')cmvr.push(node.attrs.id);});
+ assert.deepEqual(crag,['crag.date']);assert.deepEqual(cmvr,['cmvr.date','cmvr.fundus']);
+});
 function appendMedicine(doc,sectionId,row){walk(section(doc,sectionId),parent=>{const index=parent.content?.findIndex(n=>n.type==='insertionPoint'&&n.attrs.id==='medicine:'+sectionId);if(index>=0)parent.content.splice(index,0,row);});}
 function section(doc,id){let found;walk(doc,node=>{if(node.type==='clinicalSection'&&node.attrs.id===id)found=node;});return found;}
 test('referral purpose retains acronym casing and the clinic uses its official name',()=>{
  const option=FIELDS['referral.purposes'].options.find(option=>option.value==='hivCareTreatment');assert.equal(option.labels[1],'HIV care and treatment');
- const doc=make('referral','en',{'referral.purposes':['hivCareTreatment']});const text=output(doc);assert.match(text,/Medical Referral Letter/);assert.match(text,/for HIV care and treatment/);assert.match(text,/Please contact Public Health Center 28 Krung Thon Buri, should you require any further information\./);
+ const doc=make('referral','en',{'referral.purposes':['hivCareTreatment']});const text=output(doc);assert.match(text,/Referral Letter/);assert.match(text,/for HIV care and treatment/);assert.match(text,/Please contact Public Health Center 28 Krung Thon Buri, should you require any further information\./);
  for(const template of Object.keys(TEMPLATE_NAMES))assert.doesNotMatch(output(make(template,'en',{},template==='medical'?['examination','attendance']:[])),/Public Health Centre|Public Health Center 28,/);
 });
 for(const template of Object.keys(TEMPLATE_NAMES))for(const language of ['th','en'])test(`one blank line follows the title in the editor and PDF: ${template}/${language}`,()=>{
@@ -47,14 +67,14 @@ test('age uses an included examination date and preserves manual correction',()=
 });
 for(const [start,dose2,dose3]of [['06/06/2026','2026-06-13','2026-06-20'],['28/12/2026','2027-01-04','2027-01-11'],['25/02/2024','2024-03-03','2024-03-10'],['25/02/2567','2024-03-03','2024-03-10']])test(`weekly BPG calendar schedule from ${start}`,()=>{
  const doc=make('referral','en',{'syphilis.start':start,'syphilis.regimen':'Benzathine'},['syphilis']),s=sessionOf(doc);
- assert.equal(valueOf(s,'syphilis.dose1'),parseClinicalDate(start).iso);assert.equal(valueOf(s,'syphilis.dose2'),dose2);assert.equal(valueOf(s,'syphilis.dose3'),dose3);assert.match(output(doc),/Scheduled Benzathine penicillin G dose 1/);assert.doesNotMatch(output(doc),/was administered|received.*injection/i);
+ assert.equal(valueOf(s,'syphilis.dose1'),parseClinicalDate(start).iso);assert.equal(valueOf(s,'syphilis.dose2'),dose2);assert.equal(valueOf(s,'syphilis.dose3'),dose3);assert.match(output(doc),/Benzathine penicillin G dose 1/);assert.doesNotMatch(output(doc),/was administered|received.*injection/i);
  for(const n of [1,2,3])assert.ok(visibleFields(doc).includes(`syphilis.dose${n}`));
 });
 test('BPG overrides survive source changes until explicit recalculation',()=>{
  let s=sessionOf(make('referral','th',{'syphilis.start':'06/06/2569','syphilis.regimen':'Benzathine'},['syphilis']));s.values['syphilis.dose2']={value:'2026-06-15',status:'override'};s.values['syphilis.start']={value:'2026-07-01'};s=recalculate(s);assert.equal(valueOf(s,'syphilis.dose2'),'2026-06-15');s=recalculate(s,'bpg');assert.equal(valueOf(s,'syphilis.dose2'),'2026-07-08');assert.equal(displayDate(valueOf(s,'syphilis.dose2'),'th'),'08/07/2569');
 });
 for(const [regimen,days]of [['Doxycycline2Weeks','14'],['Doxycycline28Days','28']])test(`${regimen} has duration without a BPG schedule`,()=>{
- const doc=make('referral','en',{'syphilis.start':'06/06/2026','syphilis.regimen':regimen},['syphilis']);assert.equal(valueOf(sessionOf(doc),'syphilis.duration'),days);assert.doesNotMatch(output(doc),/Scheduled Benzathine penicillin G|scheduled injection dates/);assert.ok(!visibleFields(doc).includes('syphilis.dose2'));
+ const doc=make('referral','en',{'syphilis.start':'06/06/2026','syphilis.regimen':regimen},['syphilis']);assert.equal(valueOf(sessionOf(doc),'syphilis.duration'),days);assert.doesNotMatch(output(doc),/Benzathine penicillin G|scheduled injection dates/);assert.ok(!visibleFields(doc).includes('syphilis.dose2'));
 });
 test('inclusive leave days reject reversed ranges',()=>{assert.equal(inclusiveDays('10/10/2026','12/10/2569'),3);assert.equal(inclusiveDays('10/10/2026','09/10/2026'),null);assert.equal(inclusiveDays('10/2026','12/10/2026'),null);const doc=make('medical','en',{'leave.start':'10/10/2026','leave.end':'09/10/2026'},['leave']);assert.ok(validateDocument(doc).some(e=>e.id==='leave.end'));assert.doesNotMatch(output(doc),/N\/A/);});
 test('referral defaults contain latest laboratory results and no disease, admission or financial request',()=>{const doc=make();let ids=[];walk(doc,n=>{if(n.type==='clinicalSection')ids.push(n.attrs.id);});assert.deepEqual(ids,['lab']);assert.match(output(doc),/Latest laboratory results/);assert.doesNotMatch(output(doc),/HIV|Syphilis|HBV|HCV|Mpox|TB|attached|summaris|financial assistance|No history/i);});
@@ -66,7 +86,7 @@ test('CD4 at first visit count, percentage and date omit cleanly',()=>{
  doc=make('referral','en',{'hiv.initialCD4Percent':'18'},['hiv']);assert.match(output(doc),/CD4 percentage at first visit: 18%/);
 });
 for(const [values,expected,absent]of [[{'pickup.date':'09/10/2026','pickup.days':'60'},/last collected medication on 09\/10\/2026, with a 60-day supply/,/N\/A/],[{'pickup.date':'09/10/2026','pickup.days':''},/last collected medication on 09\/10\/2026\./,/-day supply/],[{'pickup.date':'','pickup.days':'60'},/A 60-day medication supply was provided/,/last collected medication/],[{'pickup.date':'','pickup.days':''},/Full name/,/last collected medication|medication supply was provided/]])test(`independent pick-up and supply: ${JSON.stringify(values)}`,()=>{const text=output(make('referral','en',values,['pickup']));assert.match(text,expected);assert.doesNotMatch(text,absent);assert.doesNotMatch(text,/adherence|never collected/);});
-test('all eleven original disease/history modules have real content and preserved field bindings',()=>{const disease=Object.values(SECTIONS).filter(s=>s.disease);assert.equal(disease.length,11);for(const section of disease){const node=buildSection(section.id,'en');const fields=[];walk(node,n=>{if(n.type==='field'){assert.ok(definition(n.attrs.id),n.attrs.id);fields.push(n.attrs.id);}});if(!['hbv','hcvActive','syphilisHistory'].includes(section.id))assert.ok(fields.length,section.id);assert.ok(section.originalIds[0]);}});
+test('all eleven original disease/history modules have real content and preserved field bindings',()=>{const disease=Object.values(SECTIONS).filter(s=>s.disease&&s.originalIds.length);assert.equal(disease.length,11);for(const section of disease){const node=buildSection(section.id,'en');const fields=[];walk(node,n=>{if(n.type==='field'){assert.ok(definition(n.attrs.id),n.attrs.id);fields.push(n.attrs.id);}});if(!['hbv','hcvActive','syphilisHistory'].includes(section.id))assert.ok(fields.length,section.id);assert.ok(section.originalIds[0]);}});
 test('ART, OI and independent other medication rows preserve all dosing fields',()=>{
  const doc=make('referral','en',{'art.one.name':'TDF/3TC/DTG','art.one.tablets':'1','art.one.time':'930','oi.tablets':'2','otherMed.one.name':'Fluconazole','otherMed.one.strength':'200 mg','otherMed.one.frequency':'OD','otherMed.one.quantity':'28'},['art','oi','otherMedications']);
  for(const [sectionId,kind]of [['art','art'],['otherMedications','otherMed']])appendMedicine(doc,sectionId,medicationRow(kind,'one','en'));
@@ -158,13 +178,13 @@ test('manual wording still respects explicit omission and inactive conditional b
  assert.doesNotMatch(output(doc),/MANUAL IDENTIFIER WORDING/);
  sessionOf(doc).omitted=[];phrase.attrs.condition=['equals','patient.name','ANOTHER PATIENT'];assert.doesNotMatch(output(doc),/MANUAL IDENTIFIER WORDING/);
 });
-for(const template of Object.keys(TEMPLATE_NAMES))test(`paragraph prompts surround insertion buttons without exporting empty space: ${template}`,()=>{
+for(const template of Object.keys(TEMPLATE_NAMES))test(`insertion prompts omit empty space while the writing area keeps three blank lines: ${template}`,()=>{
  const doc=make(template,'en');let prompts=0;
  walk(doc,parent=>{for(const [index,node]of (parent.content||[]).entries()){
   if(node.attrs?.prosePlaceholder)prompts++;
   if(node.type==='insertionPoint'){assert.equal(parent.content[index-1].attrs.prosePlaceholder,true);assert.equal(parent.content[index+1].attrs.prosePlaceholder,true);}
  }});
- assert.ok(prompts);assert.doesNotMatch(output(doc),/\u00A0|Click to add a paragraph/);
+ assert.ok(prompts);assert.doesNotMatch(output(doc),/Click to add a paragraph/);assert.equal((output(doc).match(/\u00A0/g)||[]).length,['referral','freeform'].includes(template)?3:0);
 });
 test('manual page breaks, bulleted and numbered lists export as selectable PDF text',()=>{
  const doc=make();doc.content.splice(3,0,{type:'pageBreak'},...['bulletList','orderedList'].map(type=>({type,content:[{type:'listItem',content:[{type:'paragraph',content:[{type:'text',text:'List item'}]}]}]})));const pdf=toPdf(doc);assert.ok(pdf.some(n=>n.pageBreak==='before'));assert.ok(pdf.some(n=>n.ul));assert.ok(pdf.some(n=>n.ol));assert.match(pdfText(pdf),/List item/);
@@ -250,7 +270,7 @@ test('required fields follow the current template and included clinical statemen
  assert.equal(fieldRequirements(make('referral','en',{'syphilis.regimen':'Benzathine'},['syphilis'])).required.has('syphilis.dose3'),true);
 });
 test('safe defaults and referral header ordering match the reviewed letter structure',()=>{
- const en=createDocument('freeform','en'),th=createDocument('freeform','th');assert.equal(valueOf(sessionOf(en),'document.title'),'Medical Notes');assert.equal(valueOf(sessionOf(th),'document.title'),'บันทึกข้อความ');
+ const en=createDocument('freeform','en'),th=createDocument('freeform','th');assert.equal(displayValue(sessionOf(en),'document.title'),'Medical Notes');assert.equal(displayValue(sessionOf(th),'document.title'),'บันทึกข้อความ');
  const doc=createDocument('referral','th');const ordered=[];walk(doc,n=>{if(n.type==='field')ordered.push(n.attrs.id);});assert.ok(ordered.indexOf('document.addressee')<ordered.indexOf('patient.name'));assert.ok(ordered.indexOf('referral.purposes')<ordered.indexOf('patient.name'));assert.ok(ordered.includes('patient.salutation'));assert.ok(ordered.includes('patient.sex'));
  const s=sessionOf(doc);for(const id of ['pickup.days','pickup.date','art.1.tablets','syphilis.regimen','examination.date'])assert.equal(valueOf(s,id),'');
 });
@@ -302,15 +322,25 @@ for(const language of ['th','en'])test(`treatment-only certificate does not asse
  const doc=make('medical',language,{'treatment.syphilisDate':'06/06/2026','treatment.syphilisNotes':'Documented administered treatment','treatment.tbDate':'01/06/2025','treatment.tbNotes':'Documented completion record','syphilis.regimen':'Benzathine','syphilis.start':'10/10/2026'},['syphilisTreatment','tbTreatment']);
  const text=output(doc);
  for(const phrase of language==='th'?['ใบรับรองแพทย์','ผู้ป่วยได้รับการรักษาโรคซิฟิลิส','จนครบกำหนดการรักษาเป็นที่เรียบร้อยแล้ว เมื่อวันที่ 01/06/2568']:['Medical Certificate','hereby certify the medical information','was administered treatment for syphilis','successfully completed a course of treatment for tuberculosis on 01/06/2025'])assert.ok(text.includes(phrase),phrase);
- assert.doesNotMatch(text,/clinically examined|unfit for work|Scheduled Benzathine penicillin G|disease-free|clearance|cured|ได้ทำการตรวจร่างกาย|สมควรหยุดพักรักษาตัว/);
+ assert.doesNotMatch(text,/clinically examined|unfit for work|Benzathine penicillin G|disease-free|clearance|cured|ได้ทำการตรวจร่างกาย|สมควรหยุดพักรักษาตัว/);
  assert.deepEqual(validateDocument(doc),[]);
 });
 test('certificate title stays simple across included blocks while preserving manual edits',()=>{
  const doc=make('medical','en',{'treatment.tbDate':'09/10/2026'},['tbTreatment']),s=sessionOf(doc);
  assert.match(output(doc),/Medical Certificate/);
  s.activeSections.push('examination');assert.match(output(doc),/Medical Certificate/);assert.doesNotMatch(output(doc),/reviewed the medical records/);
- const title=doc.content.find(n=>n.type==='heading'&&n.attrs.level===1);title.content[0].text='A clinician-edited certificate title';
+ s.values['document.title']={value:'A clinician-edited certificate title',status:'manual'};
  s.activeSections=['tbTreatment'];assert.match(output(doc),/A clinician-edited certificate title/);assert.doesNotMatch(output(doc),/CERTIFICATE OF TREATMENT HISTORY/);
+});
+test('title presets translate and custom titles remain valid, printable text',()=>{
+ for(const language of ['th','en'])for(const template of Object.keys(TEMPLATE_NAMES)){
+  for(const title of [...DOCUMENT_TITLES,{value:'A custom clinical title',labels:['A custom clinical title','A custom clinical title']}]){
+   const doc=make(template,language,{'document.title':title.value}),text=title.labels[language==='en'?1:0];
+   assert.equal(displayValue(sessionOf(doc),'document.title'),text);assert.ok(output(doc).includes(text));assert.ok(!validateDocument(doc).some(error=>error.id==='document.title'));
+  }
+ }
+ assert.equal(fieldError('art.name','UNSUPPORTED MEDICINE',sessionOf(make('referral'))),'Choose a supported option');
+ assert.equal(normalise('document.title','Clinical notes; assessment / follow-up','en'),'Clinical notes; assessment / follow-up');
 });
 test('Thai template prose avoids English sentence and label punctuation',()=>{
  for(const doc of [...Object.keys(TEMPLATE_NAMES).map(type=>createDocument(type,'th')),...Object.keys(INSERT_BLOCKS).map(id=>buildBlock(id,'th'))])walk(doc,node=>{

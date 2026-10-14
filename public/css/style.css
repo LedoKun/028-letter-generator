@@ -1272,57 +1272,11 @@
 .official-footer {
   font-size: 6.5pt;
 }
-.editor-dropdown {
-  margin-top: 12px;
-  padding: 12px 16px;
-  background: #fff;
-  border: 1px solid #ccdce2;
-  border-radius: 8px;
-  max-height: 42vh;
-  overflow: auto;
-  box-shadow: 0 3px 12px #183e4c14;
-}
-.editor-dropdown h2 {
-  font-size: 14px;
-  font-weight: 700;
-  margin: 0 0 8px;
-}
-.editor-dropdown .catalogue-list {
-  max-height: 24vh;
-}
 .editor-dropdown .dialog-actions {
   margin-top: 8px;
 }
 .editor-dropdown .catalogue-search {
   padding: 6px 10px;
-}
-.inline-choice {
-  display: inline-block !important;
-  width: 20px;
-  max-width: 20px;
-  height: 17px;
-  border: 0 !important;
-  background: transparent !important;
-  padding: 0 !important;
-  margin: 0 1px !important;
-  vertical-align: baseline;
-  border-radius: 2px !important;
-  cursor: pointer;
-  overflow: hidden;
-  font-size: 0 !important;
-  color: transparent !important;
-}
-.inline-choice option {
-  font-size: 13px;
-  color: #172d37;
-}
-.inline-choice.multi-choice {
-  font-size: 11px !important;
-  color: #326b80 !important;
-  height: 15px;
-}
-.inline-choice:hover {
-  background: #c6e2ec !important;
 }
 .editor-app dialog {
   margin: auto;
@@ -1496,48 +1450,6 @@
 .clinical-field .inline-choice:hover,.clinical-field .field-remove:hover {
   background: #c8e5ed !important;
 }
-.editor-dropdown {
-  display: block;
-  position: relative;
-  width: 100%;
-  min-width: 260px;
-  max-width: 100%;
-  margin: 8pt 0;
-  padding: 10px 12px;
-  background: #fff;
-  color: #18323f;
-  border: 1px solid #aac7d2;
-  border-radius: 6px;
-  font: 13px/1.4 Sarabun;
-  text-align: left;
-  white-space: normal;
-  letter-spacing: normal;
-  box-shadow: 0 2px 8px #173c4c18;
-}
-.editor-dropdown button {
-  font-size: 12px;
-}
-.editor-dropdown h2 {
-  font-size: 14px;
-  text-align: left;
-}
-.block-insertion {
-  margin: 6pt 0;
-}
-.block-insertion>button {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px dashed #99b9c7;
-  border-radius: 4px;
-  background: #f5fafc;
-  color: #466b7e;
-  font: 12px Sarabun;
-  text-align: left;
-}
-.block-insertion>button:hover {
-  background: #e4f2f6;
-  border-color: #3888a2;
-}
 .picture-frame {
   position: relative;
   margin: 0 auto;
@@ -1603,20 +1515,6 @@
 .tiptap ul,.tiptap ol {
   margin-bottom: 2pt;
 }
-.editor-dropdown {
-  position: fixed;
-  z-index: 30;
-  margin: 0;
-  min-width: 0;
-  max-width: calc(100vw - 24px);
-  max-height: min(480px,calc(100vh - 24px));
-  overflow: auto;
-  box-shadow: 0 8px 28px #173c4c30;
-}
-.editor-dropdown .catalogue-list {
-  max-height: min(260px,40vh);
-  overflow: auto;
-}
 .choice-hint {
   font-size: 11px;
   color: #57727e;
@@ -1626,41 +1524,6 @@
   background: #dfedf2;
   outline: 1px solid #4e94ab;
   outline-offset: -1px;
-}
-.block-insertion>button:focus-visible {
-  outline: 2px solid #28869b;
-  outline-offset: 2px;
-}
-.tiptap p[data-paragraph-prompt] {
-  position: relative;
-  min-height: 16px;
-  margin: 0;
-  border-radius: 3px;
-  outline: 1px dashed #c6d5dc;
-  background: #f9fcfd;
-  cursor: text;
-  font: 11px/16px 'Sarabun',sans-serif;
-}
-.tiptap p[data-paragraph-prompt]::before {
-  content: 'Click to add a paragraph…';
-  position: absolute;
-  left: 5px;
-  color: #637f8c;
-  font: inherit;
-  pointer-events: none;
-}
-.tiptap:lang(th) p[data-paragraph-prompt]::before {
-  content: 'คลิกเพื่อเพิ่มย่อหน้า…';
-}
-.letter-body>p[data-paragraph-prompt]::before {
-  content: 'Start writing your letter here...';
-}
-.tiptap p[data-paragraph-prompt]:hover {
-  outline-color: #28869b;
-  background: #f0f8fb;
-}
-.tiptap p[data-paragraph-prompt]+.block-insertion,.block-insertion:has(+p[data-paragraph-prompt]) {
-  margin: 0;
 }
 .official-footer {
   padding-right: 188pt;
@@ -1674,6 +1537,7 @@
 }
 .document-zoom {
   margin: auto;
+  overflow: clip;
 }
 .document-zoom>.document-surface {
   margin: 0;
@@ -1694,6 +1558,13 @@
   min-width: 42px;
   font-size: 12px;
   text-align: center;
+}
+.editor-app .tiptap:focus-visible {
+  outline: none;
+}
+.document-surface:has(.tiptap:focus-visible) .paper {
+  outline: 2px solid #15899a;
+  outline-offset: -2px;
 }
 .canvas-scroll {
   touch-action: pan-x pan-y;
@@ -1717,6 +1588,163 @@
     border-radius: 6px;
     box-shadow: 0 6px 20px #183e4c22;
   }
+}
+.block-insertion {
+  position: relative;
+  height: 0;
+  margin: 0;
+  line-height: 0;
+}
+.block-insertion>button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  background: #fff;
+  box-shadow: 0 2px 8px #173c4c20;
+  opacity: 0;
+  pointer-events: none;
+  font: 20px/26px Sarabun;
+}
+.block-insertion>button:focus {
+  opacity: 1;
+  pointer-events: auto;
+}
+.context-insert {
+  position: fixed;
+  z-index: 20;
+  width: 30px;
+  height: 28px;
+  padding: 0 !important;
+  background: #fff !important;
+  box-shadow: 0 2px 8px #173c4c20;
+  font-size: 20px !important;
+  line-height: 26px;
+}
+.tiptap p[data-paragraph-prompt] {
+  position: relative;
+  cursor: text;
+}
+.tiptap p[data-paragraph-prompt]:not([data-writing-space]) {
+  height: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+.tiptap p[data-paragraph-prompt]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 5px;
+}
+.tiptap p[data-paragraph-prompt].is-active-prose::before {
+  content: 'Type text or / to insert';
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #637f8c;
+  font: 11px/16px Sarabun;
+  pointer-events: none;
+}
+.letter-body>p[data-paragraph-prompt] {
+  min-height: 1.4em;
+}
+.editor-dropdown {
+  display: block;
+  position: fixed;
+  z-index: 30;
+  width: 420px;
+  max-width: calc(100vw - 24px);
+  margin: 0;
+  padding: 12px;
+  background: #fff;
+  color: #18323f;
+  border: 1px solid #aac7d2;
+  border-radius: 8px;
+  font: 13px/1.4 Sarabun;
+  text-align: left;
+  white-space: normal;
+  overflow: auto;
+  box-shadow: 0 8px 28px #173c4c30;
+}
+.editor-dropdown h2 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  text-align: left;
+}
+.editor-dropdown button {
+  font-size: 12px;
+}
+.editor-dropdown .catalogue-list {
+  max-height: min(280px,40vh);
+  overflow: auto;
+}
+.insert-group {
+  font-size: 11px;
+  font-weight: 700;
+  color: #57727e;
+  margin: 10px 0 4px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.catalogue-list button.field-choice {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #edf1f3;
+  border-radius: 0;
+  text-align: left;
+  background: transparent;
+}
+.field-choice strong {
+  display: block;
+  font-weight: 600;
+}
+.choice-hint {
+  margin: 8px 0 0;
+}
+.insert-restore-options {
+  margin-top: 8px;
+  font-size: 11px;
+}
+.editor-sidebar summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+.field-actions {
+  margin-top: 12px;
+}
+.field-actions .panel-actions {
+  margin-top: 8px;
+}
+.field-panel>strong {
+  display: block;
+  margin-bottom: 8px;
+}
+.format-tools svg {
+  display: block;
+}
+.format-tools [data-command=toggleBold] {
+  font-weight: 700;
+}
+.format-tools [data-command=toggleItalic] {
+  font-style: italic;
+}
+.format-tools [data-command=toggleUnderline] {
+  text-decoration: underline;
+}
+.format-tools button[aria-pressed=true] {
+  background: #cee9ee;
+  border-color: #176879;
+}
+.clinical-field[data-field-id="document.title"] .field-remove {
+  display: none !important;
 }
 @property --tw-rotate-x {
   syntax: "*";

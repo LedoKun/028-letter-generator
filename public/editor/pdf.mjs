@@ -37,7 +37,7 @@ export function toPdf(doc) {
    const text=inline(node),combined=text.map(n=>n.text).join('');
    const title=node.type==='heading',margin=[(node.attrs?.indent||0)*12,node.attrs?.spacingBefore??(title?4:0),0,node.attrs?.spacingAfter??(inList?2:5)];
    if(!combined.trim()&&!combined.includes('\n')){
-    if(node.attrs?.prosePlaceholder&&emptyProse(node))return [];
+    if(node.attrs?.prosePlaceholder&&!node.attrs?.writingSpace&&emptyProse(node))return [];
     if(!title&&emptyProse(node)&&!node.attrs?.role)return [{text:'\u00A0',fontSize:10,lineHeight:1.05,margin}];
     return node.attrs?.spacingAfter>5?[{text:'',margin:[0,0,0,node.attrs.spacingAfter]}]:[];
    }

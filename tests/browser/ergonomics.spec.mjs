@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 
 async function open(page,language='en'){
  await page.clock.install({time:new Date('2026-10-10T03:00:00Z')});await page.addInitScript(language=>localStorage.setItem('documentLanguage',language),language);
- await page.goto('/referral/');await expect(page.locator('.tiptap')).toBeFocused();
+ await page.goto('/referral/');await expect(page.locator('.tiptap')).toBeFocused();await page.locator('.section-panel > details').evaluate(details=>details.open=true);
 }
 const field=(page,id)=>page.locator(`.tiptap [data-field-id="${id}"]`).filter({visible:true}).first();
 const menu=page=>page.locator('.editor-dropdown[data-occurrence]');
@@ -73,7 +73,7 @@ test('National ID has a format hint and typing/pasting cannot exceed its limit',
 test('last field tabs to Preview, then to the date without opening a PDF',async({page})=>{
  await open(page);await field(page,'doctor.license').click();await page.locator('.tiptap [data-field-id="doctor.license"]').last().click();const before=await values(page);
  await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'PDF Preview',exact:true})).toBeFocused();await expect(page.locator('dialog[open]')).toHaveCount(0);await page.keyboard.press('Tab');expect(await active(page)).toBe('document.date');
- expect(await values(page)).toEqual(before);await page.keyboard.insertText('09102026');await page.keyboard.press('Tab');expect((await values(page))['document.date'].value).toBe('2026-10-09');expect(await active(page)).toBe('document.addressee');
+ expect(await values(page)).toEqual(before);await page.keyboard.insertText('09102026');await page.keyboard.press('Tab');expect((await values(page))['document.date'].value).toBe('2026-10-09');expect(await active(page)).toBe('document.title');await page.keyboard.press('Tab');expect(await active(page)).toBe('document.addressee');
 });
 test('Preview returns to the document date even after its paragraph is moved',async({page})=>{
  await open(page);await page.evaluate(()=>{const e=clinical.editor,date=e.state.doc.child(1),start=e.state.doc.firstChild.nodeSize;e.view.dispatch(e.state.tr.delete(start,start+date.nodeSize).insert(e.state.doc.content.size-date.nodeSize,date));});

@@ -6,6 +6,14 @@ export const TEMPLATE_NAMES = {
  freeform: ['หนังสือแบบกำหนดเอง', 'Free-form / Custom Letter'],
 };
 export const label = (pair, language) => pair[language === 'en' ? 1 : 0];
+export const DOCUMENT_TITLES = [
+ {value:'medicalCertificate',labels:['ใบรับรองแพทย์','Medical Certificate']},
+ {value:'referralLetter',labels:['หนังสือส่งตัวผู้ป่วย','Referral Letter']},
+ {value:'medicalNotes',labels:['บันทึกข้อความ','Medical Notes']},
+ {value:'medicalSummary',labels:['หนังสือสรุปประวัติการรักษา','Medical Summary']},
+ {value:'medicalConsultation',labels:['หนังสือขอปรึกษาทางการแพทย์','Medical Consultation Letter']},
+ {value:'medicationCertificate',labels:['หนังสือรับรองการพกยา','Medication Certificate for Travel']},
+];
 const options = id => (legacyOptions[id] || []).filter(o => o.value && !['NONE', 'None'].includes(o.value)).map(o => ({
  value: o.value, labels: [o['data-thai'] || o.text.split(' / ')[0].trim(), o['data-english'] || o.text.split(' / ').at(-1).trim()]
 }));
@@ -24,7 +32,7 @@ const definitions = [
  ['doctor.th','doctorNameThai','Doctor’s name (Thai)','ชื่อแพทย์ภาษาไทย','text',{required:true}],
  ['doctor.en','doctorNameEnglish','Doctor’s name (English)','ชื่อแพทย์ภาษาอังกฤษ','text',{required:true}],
  ['doctor.license','medicalLicense','Medical licence number','เลขที่ใบประกอบวิชาชีพ','text',{required:true}],
- ['document.title','documentTitle','Document title','ชื่อเอกสาร','text'],
+ ['document.title','documentTitle','Document title','ชื่อเอกสาร','choice',{options:DOCUMENT_TITLES,allowCustom:true}],
  ['document.addressee','addressee','Addressee','ผู้รับหนังสือ','text'],
  ['document.body','letterBody','Letter body','เนื้อหาหนังสือ','multiline'],
  ['referral.purposes','referralIntent','Referral purpose','วัตถุประสงค์ในการส่งตัว','multi',{options:[...options('referralIntent').map(o=>({...o,labels:[o.value==='continuedCare'?'รับการรักษาต่อ':o.labels[0],o.labels[1].replace('Specialized','Specialised').replace(/^TB treatment$/,'Tuberculosis treatment').replace('Referral for Continued Care','continued care').replace(/^[A-Z](?=[a-z])/,letter=>letter.toLowerCase())]})),{value:'custom',labels:['วัตถุประสงค์อื่น ๆ','Other purpose (specify)']}]}],
@@ -46,7 +54,7 @@ const definitions = [
  ['attachments.lab','','Laboratory results enclosure','ผลตรวจทางห้องปฏิบัติการล่าสุด','text'],
  ['syphilis.start','syphilisStartDate','Treatment start date','วันที่เริ่มการรักษา','date'],
  ['syphilis.regimen','syphilisMedication','Treatment regimen','สูตรการรักษา','choice',{options:options('syphilisMedication')}],
- ...[1,2,3].map(n=>[`syphilis.dose${n}`,`syphilisDose${n}Date`,`Scheduled Benzathine penicillin G dose ${n}`,`กำหนดฉีด Benzathine penicillin G เข็มที่ ${n}`,'date',{calculated:true,dependencies:['syphilis.start','syphilis.regimen']}]),
+ ...[1,2,3].map(n=>[`syphilis.dose${n}`,`syphilisDose${n}Date`,`Benzathine penicillin G dose ${n}`,`กำหนดฉีด Benzathine penicillin G เข็มที่ ${n}`,'date',{calculated:true,dependencies:['syphilis.start','syphilis.regimen']}]),
  ['syphilis.duration','syphilisDuration','Treatment duration (days)','ระยะเวลาการรักษา (วัน)','integer',{calculated:true,dependencies:['syphilis.regimen']}],
  ['syphilis.notes','syphilisNotes','Syphilis treatment notes','หมายเหตุการรักษาซิฟิลิส','multiline'],
  ['mpox.days','mpoxSymptomDurationDays','Duration of symptoms (days)','ระยะเวลาที่มีอาการ (วัน)','integer'],
@@ -60,6 +68,31 @@ const definitions = [
  ['tb.siteOther','treatedTBSitesOther','Other TB sites','ตำแหน่งวัณโรคอื่น','text'],
  ['tb.regimen','treatedTBMedication','Previous TB regimen','สูตรยาที่เคยรักษาวัณโรค','text'],
  ['tb.completed','treatedTBCompletionDate','TB treatment completion date','วันที่รักษาวัณโรคครบ','partialDate'],
+ ['tbActive.sites','','TB disease sites','ตำแหน่งของวัณโรค','multi',{options:options('treatedTBSitesSelect')}],
+ ['tbActive.siteOther','','Other TB disease sites','ตำแหน่งวัณโรคอื่น','text'],
+ ['tbActive.diagnosisDate','','TB diagnosis date','วันที่วินิจฉัยวัณโรค','partialDate'],
+ ['tbActive.specimen','','Specimen and collection site','ชนิดสิ่งส่งตรวจและตำแหน่งที่เก็บ','text'],
+ ['tbActive.afb','','Sputum AFB smear: date and result','ผลตรวจเสมหะ AFB และวันที่ตรวจ','multiline'],
+ ['tbActive.xpert','','Xpert MTB/RIF or Ultra (GeneXpert): date and result','ผลตรวจ Xpert MTB/RIF หรือ Ultra (GeneXpert) และวันที่ตรวจ','multiline'],
+ ['tbActive.culture','','Mycobacterial culture: date and result','ผลเพาะเชื้อวัณโรคและวันที่ตรวจ','multiline'],
+ ['tbActive.dst','','Drug susceptibility (C/S, DST): date and result','ผลทดสอบความไวต่อยา (C/S, DST) และวันที่ตรวจ','multiline'],
+ ['tbActive.lpa','','Line probe assay (LPA): date and result','ผลตรวจ Line probe assay (LPA) และวันที่ตรวจ','multiline'],
+ ['tbActive.resistance','','Drug-resistance profile','ข้อมูลการดื้อยาวัณโรค','text'],
+ ['tbActive.treatmentStart','','TB treatment start date','วันที่เริ่มรักษาวัณโรค','partialDate'],
+ ['tbActive.regimen','','Current TB regimen, doses and frequency','สูตรยาวัณโรคปัจจุบัน ขนาดยา และความถี่','multiline'],
+ ['tbActive.regimenStart','','Current regimen start date','วันที่เริ่มสูตรยาปัจจุบัน','partialDate'],
+ ['tbActive.phase','','Current treatment phase','ระยะการรักษาปัจจุบัน','choice',{options:[{value:'intensive',labels:['ระยะเข้มข้น','Intensive phase']},{value:'continuation',labels:['ระยะต่อเนื่อง','Continuation phase']},{value:'other',labels:['ระยะอื่น (ระบุ)','Other (specify)']}]}],
+ ['tbActive.phaseOther','','Other treatment phase or stage','ระยะการรักษาอื่น','text'],
+ ['tbActive.weight','','Current weight (kg)','น้ำหนักปัจจุบัน (กิโลกรัม)','number'],
+ ['tbActive.imaging','','Chest imaging and other investigations','ภาพถ่ายรังสีทรวงอกและผลตรวจเพิ่มเติม','multiline'],
+ ['tbActive.response','','Clinical response and follow-up smear / culture','การตอบสนองต่อการรักษาและผลตรวจเสมหะหรือเพาะเชื้อติดตาม','multiline'],
+ ['tbActive.adherence','','Adherence and treatment interruptions','ความสม่ำเสมอในการรับยาและช่วงที่ขาดยา','multiline'],
+ ['tbActive.adverseEffects','','Adverse effects and treatment changes','อาการไม่พึงประสงค์และการปรับเปลี่ยนการรักษา','multiline'],
+ ['tbActive.followUp','','Follow-up and transfer-of-care plan','แผนการติดตามและส่งต่อการดูแลรักษา','multiline'],
+ ['tbActive.nextReview','','Next review date','วันที่นัดติดตามครั้งถัดไป','partialDate'],
+ ['crag.date','','Positive serum CrAg test date','วันที่ผลตรวจ serum CrAg เป็นบวก','partialDate'],
+ ['cmvr.date','','Fundus camera examination date','วันที่ตรวจด้วยกล้องถ่ายภาพจอประสาทตา','partialDate'],
+ ['cmvr.fundus','','Fundus camera examination findings','ผลตรวจจากภาพถ่ายจอประสาทตา','multiline'],
  ...['completed','ongoing'].flatMap(prefix=>[
   [`tpt.${prefix}.regimen`,`${prefix}TPTMedication`,'TPT regimen','สูตรยา TPT','choice',{options:options(`${prefix}TPTMedication`)}],
   [`tpt.${prefix}.other`,`${prefix}TPTMedicationOther`,'Other TPT regimen','สูตร TPT อื่น','text'],
@@ -99,9 +132,9 @@ export function definition(id) {
 }
 export const legacyFieldMap = Object.fromEntries(Object.values(FIELDS).flatMap(f=>f.originalIds.map(id=>[id,f.id])));
 const templateScope = {
- patient:['referral','medical','medication','freeform'],doctor:['referral','medical','medication','freeform'],document:['referral','medical','medication','freeform'],referral:['referral'],hiv:['referral'],oi:['referral'],pickup:['referral'],syphilis:['referral'],mpox:['referral'],hcv:['referral'],tb:['referral'],tpt:['referral'],history:['referral'],attachments:['referral','freeform'],examination:['medical'],leave:['medical'],treatment:['medical'],art:['referral'],otherMed:['referral'],travel:['medication']
+ patient:['referral','medical','medication','freeform'],doctor:['referral','medical','medication','freeform'],document:['referral','medical','medication','freeform'],referral:['referral'],hiv:['referral'],oi:['referral'],pickup:['referral'],syphilis:['referral'],mpox:['referral'],hcv:['referral'],tb:['referral'],tbActive:['referral','freeform'],crag:['referral','freeform'],cmvr:['referral','freeform'],tpt:['referral'],history:['referral'],attachments:['referral','freeform'],examination:['medical'],leave:['medical'],treatment:['medical'],art:['referral'],otherMed:['referral'],travel:['medication']
 };
-const sectionScope={referral:['referralPurpose'],hiv:['hiv'],oi:['hiv','oi'],pickup:['hiv','pickup'],syphilis:['syphilis'],mpox:['mpox'],hcv:['hcvHistory'],tb:['tbHistory'],history:['otherHistory'],attachments:['attachments'],examination:['examination'],leave:['leave'],art:['hiv','art'],otherMed:['otherMedications'],travel:['travelMedications']};
+const sectionScope={referral:['referralPurpose'],hiv:['hiv'],oi:['hiv','oi'],pickup:['hiv','pickup'],syphilis:['syphilis'],mpox:['mpox'],hcv:['hcvHistory'],tb:['tbHistory'],tbActive:['tbActive'],crag:['crag'],cmvr:['cmvr'],history:['otherHistory'],attachments:['attachments'],examination:['examination'],leave:['leave'],art:['hiv','art'],otherMed:['otherMedications'],travel:['travelMedications']};
 for(const field of Object.values(FIELDS)) {
  const prefix=field.id.split('.')[0];field.documents=templateScope[prefix]||[];field.sections=sectionScope[prefix]||[];
  if(prefix==='tpt')field.sections=[field.id.includes('.completed.')?'tptCompleted':'tptOngoing'];

@@ -8,9 +8,10 @@ function lines(view) {
  const origin=view.dom.getBoundingClientRect().top,scale=Number(view.dom.closest('.document-surface')?.dataset.zoom)||1,records=[];
  view.state.doc.descendants((node,pos)=>{
   if(node.attrs.hidden)return false;
+  if(node.type.name==='insertionPoint'||node.attrs.prosePlaceholder&&!node.attrs.writingSpace&&!node.content.size)return false;
   if(node.type.name==='pageBreak'){records.push({pos,top:(view.nodeDOM(pos).getBoundingClientRect().top-origin)/scale,manual:true});return false;}
   if(node.type.name==='clinicalGroup'&&node.attrs.id==='signature'){const r=view.nodeDOM(pos).getBoundingClientRect();let manual=false;node.descendants(child=>{if(child.type.name==='pageBreak')manual=true;});if(!manual&&r.height/scale<=PAGE.height-PAGE.top-PAGE.bottom){records.push({pos,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});return false;}}
-  if(['picture','insertionPoint'].includes(node.type.name)){const r=view.nodeDOM(pos).getBoundingClientRect();records.push({pos,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});return false;}
+  if(node.type.name==='picture'){const r=view.nodeDOM(pos).getBoundingClientRect();records.push({pos,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});return false;}
   if(!node.isTextblock)return;
   const dom=view.nodeDOM(pos);if(!dom?.getClientRects().length)return false;
   let lastTop=-Infinity;const $pos=view.state.doc.resolve(pos),listStart=['listItem','medicationRow'].includes($pos.parent.type.name)&&$pos.index()===0?$pos.before($pos.depth):null;
@@ -24,8 +25,7 @@ function lines(view) {
    if(n.nodeType===1){add(view.posAtDOM(n,0)-1,n.getBoundingClientRect());continue;}
    for(const part of graphemes.segment(n.data)) {range.setStart(n,part.index);range.setEnd(n,part.index+part.segment.length);add(view.posAtDOM(n,part.index),range.getBoundingClientRect());}
   }
-  // Put prompt spacers outside the paragraph so its hint and background move together.
-  if(!Number.isFinite(lastTop)) {const r=(node.attrs.prosePlaceholder?dom:dom.querySelector(':scope > br.ProseMirror-trailingBreak')||dom).getBoundingClientRect();records.push({pos:node.attrs.prosePlaceholder?pos:pos+1,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});}
+  if(!Number.isFinite(lastTop)) {const r=(dom.querySelector(':scope > br.ProseMirror-trailingBreak')||dom).getBoundingClientRect();records.push({pos:pos+1,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});}
   return false;
  });
  return records;

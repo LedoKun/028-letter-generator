@@ -1,10 +1,11 @@
+import {openInsert,insertAction,insertBlocks} from './insert-helpers.mjs';
 import {test,expect} from '@playwright/test';
 
 async function open(page,type='referral',language='th'){
  await page.clock.install({time:new Date('2026-10-10T03:00:00Z')});
  await page.addInitScript(language=>localStorage.setItem('documentLanguage',language),language);
  await page.goto({referral:'/referral/',medical:'/medical-certificate/',medication:'/certificate-medication-letter/',freeform:'/free-form-letter/'}[type]);
- await expect(page.locator('.tiptap')).toBeFocused();
+ await expect(page.locator('.tiptap')).toBeFocused();await page.locator('.section-panel > details').evaluate(details=>details.open=true);
 }
 const field=(page,id)=>page.locator(`.tiptap [data-field-id="${id}"]`).filter({visible:true}).first();
 async function set(page,values){await page.evaluate(values=>{for(const [id,value]of Object.entries(values))clinical.setValue(id,value);},values);}
@@ -16,7 +17,7 @@ async function choose(page,id,values){
 async function pdfText(page){return page.evaluate(()=>{const flatten=value=>Array.isArray(value)?value.map(flatten).join(''):!value||typeof value!=='object'?'':(typeof value.text==='string'?value.text:flatten(value.text))+flatten(value.stack)+flatten(value.ul)+flatten(value.ol);return flatten(clinical.payload().payload.content);});}
 
 for(const language of ['th','en'])test(`ART once-daily wording stays visible when a time is entered or cleared: ${language}`,async({page})=>{
- await open(page,'referral',language);await page.evaluate(()=>clinical.addSections(['hiv']));await page.locator('[data-insertion-point="medicine:art"] > button').click();
+ await open(page,'referral',language);await page.evaluate(()=>clinical.addSections(['hiv']));await insertAction(page,'medicine','medicine:art');
  const row=page.locator('.tiptap [data-kind="art"]'),id=await row.getAttribute('data-medication-row');await set(page,{[`art.${id}.name`]:'TDF/3TC/DTG',[`art.${id}.tablets`]:'1'});
  const frequency=language==='th'?'วันละ 1 ครั้ง':'once daily';await field(page,`art.${id}.time`).click();await page.keyboard.insertText('2000');await expect(row).toContainText(frequency);await page.keyboard.press('Tab');
  const expected=language==='th'?'1 เม็ด วันละ 1 ครั้ง เวลา 20:00 น.':'1 tablet once daily at 20:00';await expect(field(page,`art.${id}.time`).locator('.field-content')).toHaveText('20:00');expect(await pdfText(page)).toContain(expected);
@@ -78,13 +79,13 @@ for(const language of ['th','en']){
  });
  test(`referral buttons are simplified while other medicines remain insertable through the toolbar: ${language}`,async({page})=>{
   await open(page,'referral',language);await expect(page.getByRole('button',{name:'Add a patient or administrative block',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'Add other medications',exact:true})).toHaveCount(0);
-  await page.getByRole('button',{name:'Add a closing request',exact:true}).click();await expect(page.locator('[data-section-choice="physician"]')).toHaveCount(0);await expect(page.locator('[data-section-choice="admission"]')).toHaveCount(1);await expect(page.locator('[data-section-choice="financial"]')).toHaveCount(1);await page.getByRole('region',{name:'Insert Block'}).getByRole('button',{name:'Close',exact:true}).click();
-  await page.locator('.format-tools').getByRole('button',{name:'Insert Block',exact:true}).click();await expect(page.locator('[data-section-choice="otherHistory"]')).toHaveCount(0);await page.locator('[data-section-choice="otherMedications"]').check();await page.getByRole('region',{name:'Insert Block'}).getByRole('button',{name:'Add',exact:true}).click();await expect(page.locator('[data-clinical-group="medications"] [data-section-id="otherMedications"]')).toHaveCount(1);
-  await page.evaluate(()=>clinical.addSections(['hiv']));await page.getByRole('button',{name:'Add TMX/SMP 80/400 mg',exact:true}).click();await expect(page.locator('[data-section-id="hiv"] [data-section-id="oi"]')).toHaveCount(1);await expect(page.getByRole('region',{name:'Insert Block',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'Add TMX/SMP 80/400 mg',exact:true})).toHaveCount(0);
+  await openInsert(page,'closing');await expect(page.locator('[data-section-choice="physician"]')).toHaveCount(0);await expect(page.locator('[data-section-choice="admission"]')).toHaveCount(1);await expect(page.locator('[data-section-choice="financial"]')).toHaveCount(1);await page.getByRole('dialog',{name:'Insert'}).getByRole('button',{name:'Close',exact:true}).click();
+  await page.locator('.format-tools').getByRole('button',{name:'Insert',exact:true}).click();await expect(page.locator('[data-section-choice="otherHistory"]')).toHaveCount(0);await page.locator('[data-section-choice="otherMedications"]').check();await page.getByRole('dialog',{name:'Insert'}).getByRole('button',{name:'Insert selected blocks',exact:true}).click();await expect(page.locator('[data-clinical-group="medications"] [data-section-id="otherMedications"]')).toHaveCount(1);
+  await page.evaluate(()=>clinical.addSections(['hiv']));await insertBlocks(page,['oi'],'hiv.optional');await expect(page.locator('[data-section-id="hiv"] [data-section-id="oi"]')).toHaveCount(1);await expect(page.getByRole('dialog',{name:'Insert',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'Add TMX/SMP 80/400 mg',exact:true})).toHaveCount(0);
   await set(page,{'oi.tablets':'2','oi.details':'Clinician-entered prophylaxis details'});await expect(page.locator('.tiptap [data-section-id="oi"]')).toContainText('Clinician-entered prophylaxis details');await expect(page.locator('.tiptap [data-section-id="oi"]')).not.toContainText(language==='th'?'การป้องกันอื่น':'Other prophylaxis:');expect(await pdfText(page)).toContain('Clinician-entered prophylaxis details');
  });
  test(`medical certificate insertion menu offers only examination, leave and treatment blocks: ${language}`,async({page})=>{
-  await open(page,'medical',language);await page.getByRole('button',{name:'Add examination, treatment or medical leave',exact:true}).click();
+  await open(page,'medical',language);await openInsert(page,'clinical');
   for(const id of ['attendance','identification','dobAge','physician','comments','documentDate','addressee'])await expect(page.locator(`[data-section-choice="${id}"]`)).toHaveCount(0);
   for(const id of ['examination','leave','syphilisTreatment','tbTreatment'])await expect(page.locator(`[data-section-choice="${id}"]`)).toHaveCount(1);
   await expect(page.locator('[data-section-choice]')).toHaveCount(4);
@@ -96,9 +97,9 @@ for(const language of ['th','en']){
 }
 test('free-form body has only its empty-body writing hint and toolbar blocks insert into that body',async({page})=>{
  await open(page,'freeform','en');await expect(page.locator('.tiptap [data-insertion-point]')).toHaveCount(0);const paragraph=page.locator('.letter-body > p').first();
- expect(await paragraph.evaluate(n=>getComputedStyle(n,'::before').content)).toBe('"Start writing your letter here..."');
+ await paragraph.click();expect(await paragraph.evaluate(n=>getComputedStyle(n,'::before').content)).toBe('"Type text or / to insert"');
  await paragraph.click();await page.keyboard.insertText('Fictional letter body.');expect(await paragraph.evaluate(n=>getComputedStyle(n,'::before').content)).toBe('none');expect(await pdfText(page)).toContain('Fictional letter body.');expect(await pdfText(page)).not.toContain('Start writing');
- await page.locator('.format-tools').getByRole('button',{name:'Insert Block',exact:true}).click();await page.locator('[data-section-choice="identification"]').check();await page.getByRole('region',{name:'Insert Block'}).getByRole('button',{name:'Add',exact:true}).click();await expect(page.locator('.letter-body [data-section-id="identification"]')).toHaveCount(1);expect(await page.evaluate(()=>clinical.payload().errors.some(e=>e.id==='document.body'))).toBe(false);
+ await page.locator('.format-tools').getByRole('button',{name:'Insert',exact:true}).click();await page.locator('[data-section-choice="identification"]').check();await page.getByRole('dialog',{name:'Insert'}).getByRole('button',{name:'Insert selected blocks',exact:true}).click();await expect(page.locator('.letter-body [data-section-id="identification"]')).toHaveCount(1);expect(await page.evaluate(()=>clinical.payload().errors.some(e=>e.id==='document.body'))).toBe(false);
 });
 test('travel certificate has no closing-request insertion point and retains medicine insertion',async({page})=>{
  await open(page,'medication','en');await expect(page.getByRole('button',{name:'Add attachments or a closing request',exact:true})).toHaveCount(0);await expect(page.locator('[data-insertion-point="medicine:travelMedications"]')).toHaveCount(1);

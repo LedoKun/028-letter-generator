@@ -1,23 +1,42 @@
 {
-  "date": "2026-10-11",
+  "date": "2026-10-14",
   "projects": [
     "chromium",
     "firefox"
   ],
   "stats": {
-    "startTime": "2026-10-11T14:42:53.986Z",
-    "duration": 235738.724,
-    "expected": 351,
-    "skipped": 1,
+    "startTime": "2026-10-14T16:32:17.672Z",
+    "duration": 427558.859,
+    "expected": 526,
+    "skipped": 4,
     "unexpected": 0,
     "flaky": 0
   },
   "skipped": [
-    "Firefox: Chromium-specific composition protocol test; the Chromium case passed"
+    {
+      "project": "firefox",
+      "title": "Thai composition commits to one inline placeholder without losing characters",
+      "reason": "Native composition protocol is Chromium-specific."
+    },
+    {
+      "project": "firefox",
+      "title": "a two-finger touchscreen pinch zooms the document while retaining browser scale",
+      "reason": "Native multi-touch injection uses Chromium CDP"
+    },
+    {
+      "project": "firefox",
+      "title": "native trackpad pinch retains its reading point while the page grows past the canvas",
+      "reason": "Native gesture injection uses Chromium CDP"
+    },
+    {
+      "project": "firefox",
+      "title": "touchscreen pinch on a picture resize handle leaves its dimensions unchanged",
+      "reason": "Native gesture injection uses Chromium CDP"
+    }
   ],
-  "casesPerProject": 176,
-  "source": "Latest full npm run test:browser",
-  "revision": "Matched footer/logo text height and view-only 50\u2013200% zoom; includes all previous ergonomics and clinical workflows",
+  "casesPerProject": 250,
+  "source": "test-results/browser-results.json",
+  "revision": "Local working tree: contextual insertion, sidebar cleanup, formatting icons and title presets",
   "finalLogoChecks": {
     "command": "npm run test:browser -- tests/browser/completion-controls.spec.mjs tests/browser/editor.spec.mjs --grep 'blank line after the title|cached production application'",
     "stats": {
@@ -64,7 +83,7 @@
       "unexpected": 0,
       "flaky": 0
     },
-    "coverage": "50\u2013200% buttons/keyboard slider and percentage, view-only state/PDF invariance, scaled Thai/English pagination and full-width scroll, field/dropdown/Tab editing, proportional picture drag with Undo, all-template footer logo matching text height without increasing the footer"
+    "coverage": "50–200% buttons/keyboard slider and percentage, view-only state/PDF invariance, scaled Thai/English pagination and full-width scroll, field/dropdown/Tab editing, proportional picture drag with Undo, all-template footer logo matching text height without increasing the footer"
   },
   "httpIdCompatibilityChecks": {
     "command": "npm run test:browser -- tests/browser/http-origin.spec.mjs tests/browser/insertion-navigation.spec.mjs",
@@ -77,5 +96,28 @@
       "flaky": 0
     },
     "coverage": "All four templates in Thai/English without randomUUID; toolbar/page creation, IDs, block menus, medication rows, travel reuse and new placeholder creation; previous keyboard insertion behaviour"
-  }
+  },
+  "latestInsertionTitleChecks": {
+    "passed": 36,
+    "casesPerProject": 18,
+    "includedInFullRun": true,
+    "source": "tests/browser/insert-menu.spec.mjs",
+    "coverage": [
+      "Browse without keywords and search with spaces",
+      "Slash only in empty paragraphs or focused insertion controls; typed and pasted literal slashes preserved",
+      "Escape restores selection and leaves document unchanged",
+      "Controls and menus do not consume page space",
+      "Collapsed sidebar tools and distinct active formatting icons",
+      "Translated title presets and valid custom titles retained across language/template changes"
+    ]
+  },
+  "uiEnhancements": [
+    "Stationary contextual insert trigger with nearby popup; cleanup on document changes",
+    "Three editable lines after patient/clinical blocks and before the contact sentence in referral/free-form letters",
+    "Document title uses the Sex radio-choice catalogue with keyboard selection and custom titles",
+    "Individual paper focus borders and clipped zoom frame",
+    "Native copy/paste into an external text box in both languages and browsers; hidden values and internal placeholders omitted",
+    "Diagnosis/finding-only Clinical information group; HIV details, treatment and administrative groups separate",
+    "Current TB laboratory/treatment details, positive serum CrAg test date, suspected CMVR examination date and fundus findings"
+  ]
 }

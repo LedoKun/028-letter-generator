@@ -1,4 +1,5 @@
 import { chromium } from '@playwright/test';
+import {insertAction} from '../tests/browser/insert-helpers.mjs';
 import {spawn,execFileSync} from 'node:child_process';
 import {readFileSync,writeFileSync,mkdirSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -23,17 +24,18 @@ try{
  referenceSource=referenceSource.replace('window.PdfGenerator =','window.ReferencePdfGenerator =');await referencePage.addScriptTag({content:referenceSource});
  const referenceBytes=await referencePage.evaluate(async()=>[...new Uint8Array(await(await ReferencePdfGenerator.generateBlob({type:'Typography reference',content:[{text:'Reference'}]})).arrayBuffer())]);
  const referenceFile='pdf-results/approved-reference.pdf';writeFileSync(referenceFile,Buffer.from(referenceBytes));const approvedImage=raster(referenceFile,'pdf-results/approved-reference'),referenceWords=words(referenceFile),pageLabel=referenceWords.find(w=>w.text==='Page:'&&w.y>700),footerTop=Math.min(...referenceWords.filter(word=>word.y>700).map(word=>word.y));assert.ok(pageLabel);await referencePage.close();
- for(const [sample,path]of Object.entries({...routes,'medical-history':'medical-certificate','referral-wording':'referral'}))for(const language of ['th','en']){
-  const type=sample==='medical-history'?'medical':sample==='referral-wording'?'referral':sample,historyOnly=sample==='medical-history',compact=sample==='referral-wording';
+ for(const [sample,path]of Object.entries({...routes,'medical-history':'medical-certificate','referral-wording':'referral','referral-infections':'referral'}))for(const language of ['th','en']){
+  const type=sample==='medical-history'?'medical':sample.startsWith('referral-')?'referral':sample,historyOnly=sample==='medical-history',compact=['referral-wording','referral-infections'].includes(sample),infections=sample==='referral-infections';
   const context=await browser.newContext({timezoneId:'Asia/Bangkok'}),page=await context.newPage();
   await page.clock.install({time:new Date('2026-10-10T03:00:00Z')});await page.addInitScript(lang=>localStorage.setItem('documentLanguage',lang),language);
   await page.goto(`http://localhost:4176/${path}/index.html`);await page.waitForFunction(()=>document.activeElement?.classList.contains('tiptap'));
-  await page.evaluate(({type,language,historyOnly,compact})=>{
+  await page.evaluate(({type,language,historyOnly,compact,infections})=>{
    const data={'document.date':'10/10/2026','patient.name':'FICTIONAL PATIENT','patient.dob':'10/10/2000','doctor.en':'TEST DOCTOR','doctor.th':'นพ. ทดสอบ ระบบ','doctor.license':'12345'};
    if(type==='referral'){
     clinical.addSections(['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tptCompleted','tptOngoing','otherHistory','otherMedications','oi','pickup','admission','lab','attachments','financial']);
     Object.assign(data,{'hiv.napId':'1234-567890','hiv.diagnosed':'02/02/2020','hiv.artStart':'03/03/2020','hiv.initialCD4':'325','hiv.initialCD4Percent':'18','hiv.initialCD4Date':'10/01/2026','hiv.adherence':'>95%','hiv.latestVL':'<20','hiv.latestVLDate':'09/10/2026','oi.tablets':'2','pickup.date':compact?'10/10/2026':'09/10/2026','pickup.days':'60','syphilis.regimen':'Benzathine','syphilis.start':compact?'10/10/2026':'06/06/2026','mpox.days':'4','mpox.symptoms':['rashLesions','feverChills','other'],'mpox.symptomOther':'Fictional symptom','mpox.risks':['noneKnown'],'hcv.regimen':'SOF/VEL','hcv.completed':'07/07/2024','tb.sites':['Pulmonary','Lymph nodes'],'tb.regimen':'2HRZE/4HR','tb.completed':'08/08/2023','tpt.completed.regimen':'3HP','tpt.completed.start':'09/2022','tpt.ongoing.regimen':'1HP','tpt.ongoing.start':'09/2025','history.other':('ประวัติสำหรับทดสอบเอกสาร Fictional clinical history.\n').repeat(compact?1:150),'attachments.other':'Fictional treatment record','document.notes':'Fictional additional notes.'});
    }
+   if(infections){clinical.addSections(['tbActive','crag','cmvr']);Object.assign(data,{'tbActive.sites':['Pulmonary'],'tbActive.afb':'01/09/2026: 2+','tbActive.xpert':'MTB detected; rifampicin resistance not detected','tbActive.culture':'Culture pending','tbActive.dst':'DST pending','tbActive.lpa':'LPA pending','tbActive.resistance':'Fictional resistance profile','tbActive.regimen':'Fictional clinician-entered regimen','tbActive.treatmentStart':'01/09/2026','tbActive.regimenStart':'10/2026','tbActive.phase':'continuation','tbActive.response':'Fictional follow-up culture','tbActive.adherence':'Fictional adherence record','tbActive.adverseEffects':'Fictional tolerability record','tbActive.followUp':'Fictional transfer-of-care plan','crag.date':'09/10/2026','cmvr.date':'10/10/2026','cmvr.fundus':'Fictional fundus findings'});}
    if(type==='medical'){
     clinical.addSections(historyOnly?['syphilisTreatment','tbTreatment','comments']:['examination','leave','syphilisTreatment','tbTreatment','comments','attendance']);Object.assign(data,{'treatment.syphilisDate':'09/10/2026','treatment.syphilisNotes':'Documented administration; fictional record','treatment.tbDate':'01/06/2026','treatment.tbNotes':'Fictional completion record','doctor.comments':'Fictional physician comment'});
     if(!historyOnly)Object.assign(data,{'examination.date':'10/10/2026','examination.findings':'Fictional examination findings','examination.diagnosis':'Fictional diagnosis','leave.start':'10/10/2026','leave.end':'12/10/2026','leave.notes':'Fictional leave notes'});
@@ -43,9 +45,9 @@ try{
     Object.assign(data,{'document.title':'TEST LETTER','document.addressee':'Test recipient'});const e=clinical.editor;e.state.doc.descendants((n,p)=>{if(n.type.name==='bodyText')e.commands.insertContentAt(p+1,{type:'paragraph',content:[{type:'text',text:('ข้อความสำหรับทดสอบเท่านั้น Fictional text for regression testing.\n').repeat(150)}]});});
    }
    for(const [id,value]of Object.entries(data))clinical.setValue(id,value);
-  },{type,language,historyOnly,compact});
+  },{type,language,historyOnly,compact,infections});
   if(type==='referral')for(const [section,kind,med]of [['art','art','TDF/3TC/DTG'],['otherMedications','otherMed','Fluconazole']]){
-   await page.locator(`[data-section-control="${section}"]`).getByRole('button',{name:'Add medicine',exact:true}).click();
+   await insertAction(page,'medicine','medicine:'+section);
    const id=await page.locator(`.tiptap [data-kind="${kind}"]`).last().getAttribute('data-medication-row');
    await page.evaluate(({kind,id,med})=>{clinical.setValue(`${kind}.${id}.name`,med);if(kind==='art'){clinical.setValue(`${kind}.${id}.tablets`,'1');clinical.setValue(`${kind}.${id}.time`,'20:00');}else{clinical.setValue(`${kind}.${id}.strength`,'200 mg');clinical.setValue(`${kind}.${id}.frequency`,'OD');clinical.setValue(`${kind}.${id}.quantity`,'28');clinical.setValue(`${kind}.${id}.unit`,'tablet');}},{kind,id,med});
   }
@@ -57,13 +59,14 @@ try{
   const info=execFileSync('pdfinfo',[file],{encoding:'utf8'}),pageCount=Number(info.match(/Pages:\s+(\d+)/)[1]);assert.match(info,/595\.28 x 841\.89 pts/);
   const extracted=execFileSync('pdftotext',['-layout',file,'-'],{encoding:'utf8'});assert.doesNotMatch(extracted,/N\/A|None specified|Next field|Previous field|CD4 percentage at first visit\s*$/m);
   assert.match(extracted,/Public Health Center 28 Krung Thon Buri/);assert.doesNotMatch(extracted,/Public Health Centre|Public Health Center 28 - Krung Thon Buri/);
-  if(type==='referral'&&language==='en')assert.match(extracted,/Medical Referral Letter/);
+  if(type==='referral'&&language==='en')assert.match(extracted,/Referral Letter/);
   if(type==='referral'&&language==='th'){
    const pageWords=Array.from({length:pageCount},(_,i)=>words(file,i+1)),financial=pageWords.find(items=>items.some(word=>word.text==='ทั้งนี้'));
    assert.ok(financial,'Financial request is missing');const opening=financial.find(word=>word.text==='ทั้งนี้'),request=financial.find(word=>word.text.startsWith('ขอความอนุเคราะห์ทีม'));
    assert.ok(request,'Financial request text is not searchable');assert.ok(Math.abs(request.y-opening.y)<0.1,'Thai financial request leaves an unnecessarily short opening line');
    assert.match(extracted,/ART adherence >95%/);assert.doesNotMatch(extracted,/[\u200B\uFFFD]/);
   }
+  if(infections)for(const value of ['AFB','GeneXpert','DST','LPA','MTB detected','Culture pending','Fictional fundus findings','CMVR','CrAg'])assert.ok(extracted.includes(value),`${sample}-${language}: missing ${value}`);
   assert.doesNotMatch(extracted,/Signature:|Name: Dr|ลงชื่อ|_{3,}|\.{4,}|Baseline CD4/);
   assert.doesNotMatch(extracted,/\bBPG\b|Fictional additional notes|Fictional leave notes|Documented administration; fictional record/);
   if(type==='referral'){assert.match(extracted,/Latest laboratory results|ผลตรวจทางห้องปฏิบัติการล่าสุด/);assert.doesNotMatch(extracted,/Purpose of Referral|Additional details|Co-Infections and Past Medical History|Additional Notes and Requests|รายละเอียดเพิ่มเติมในการส่งตัว/);if(compact)assert.match(extracted,language==='th'?/24\/10\/2569/:/24\/10\/2026/);}
@@ -73,7 +76,7 @@ try{
   assert.ok(physician,`${sample}-${language}: plain physician name is missing`);
   const signatureGapPoints=physician.y-closing.bottom;assert.ok(signatureGapPoints>=40,`${sample}-${language}: signature space was lost`);
   assert.match(extracted,type==='freeform'?/TEST LETTER/:/FICTIONAL PATIENT/);assert.match(extracted,/Valid only with an official stamp/);assert.match(extracted,/10\/10\/2026 \(DD\/MM\/YYYY\)/);assert.ok(/\u0E/.test(JSON.stringify(extracted))||/[ก-๙]/.test(extracted));
-  if(historyOnly){assert.match(extracted,language==='th'?/ใบรับรองแพทย์/:/Medical Certificate/);assert.doesNotMatch(extracted,/clinically examined|unfit for work|Scheduled Benzathine penicillin G|ได้ทำการตรวจร่างกาย/);}
+  if(historyOnly){assert.match(extracted,language==='th'?/ใบรับรองแพทย์/:/Medical Certificate/);assert.doesNotMatch(extracted,/clinically examined|unfit for work|Benzathine penicillin G|ได้ทำการตรวจร่างกาย/);}
   const baseline=`docs/samples/legacy/${type}-${language}.pdf`,legacyLogoHeight=logoHeight(baseline);
   for(let index=1;index<=pageCount;index++){
    const actual=raster(file,`pdf-results/current-${type}-${language}-${index}`,index);

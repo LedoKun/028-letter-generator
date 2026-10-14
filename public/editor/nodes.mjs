@@ -1,11 +1,22 @@
 import { Node, Mark, Extension } from '@tiptap/core';
 import { Plugin, TextSelection } from '@tiptap/pm/state';
+import { Fragment, Slice } from '@tiptap/pm/model';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { definition, label } from './fields.mjs';
 import { sessionOf, displayValue, normalise, fieldError, fieldRequirements, conditionActive, recalculate, templateProse, formatFieldInput, inputFitsField, newId } from './model.mjs';
 import { patchSession } from './session.mjs';
 import { pictureWidthPercent } from './pictures.mjs';
 import { availableBlocks } from './templates.mjs';
 import { closeHistory } from '@tiptap/pm/history';
+export function cleanClipboardSlice(slice){
+ const clean=fragment=>{const children=[];fragment.forEach(node=>{
+  if(node.attrs.hidden||['sessionData','insertionPoint'].includes(node.type.name)||node.attrs.prosePlaceholder&&!node.attrs.writingSpace&&!node.content.size)return;
+  if(node.isText){const text=node.text.replace(/[\u200B\uFEFF\uFFFC]/g,'');if(text)children.push(node.withText(text));}
+  else{const content=clean(node.content);if(content.size||node.isLeaf||node.isTextblock)children.push(node.copy(content));}
+ });return Fragment.fromArray(children);};
+ const content=clean(slice.content),limits=Slice.maxOpen(content,false);
+ return new Slice(content,Math.min(slice.openStart,limits.openStart),Math.min(slice.openEnd,limits.openEnd));
+}
 import { canSplit } from '@tiptap/pm/transform';
 export const SessionData=Node.create({name:'sessionData',atom:true,selectable:false,addAttributes(){return {template:{default:'referral'},language:{default:'th'},values:{default:{}},archives:{default:{}},fieldArchives:{default:{}},omitted:{default:[]},activeSections:{default:[]},availableFields:{default:[]},converted:{default:[]}};},renderHTML(){return ['span',{hidden:true,contenteditable:'false','data-session':''}];}});
 export const TemplateText=Mark.create({name:'templateText',inclusive:false,addAttributes(){return {th:{default:''},en:{default:''},summaryTh:{default:null},summaryEn:{default:null},historyTh:{default:null},historyEn:{default:null},examTh:{default:null},doctorId:{default:null},withoutTitleEn:{default:null},dateId:{default:null},partialTh:{default:null},partialEn:{default:null},countId:{default:null},singularEn:{default:null}};},renderHTML(){return ['span',{},0];}});
@@ -43,13 +54,12 @@ export const ClinicalGroup=Node.create({name:'clinicalGroup',group:'block',conte
 export const MedicationRow=Node.create({priority:50,name:'medicationRow',group:'block',content:'paragraph+',defining:true,addAttributes(){return {id:{default:''},kind:{default:'art'}};},renderHTML({node}){return ['ul',{'data-medication-row':node.attrs.id,'data-kind':node.attrs.kind,class:'medication-row'},['li',{},0]];}});
 export const BodyText=Node.create({priority:50,name:'bodyText',group:'block',content:'block+',defining:true,renderHTML(){return ['div',{'data-letter-body':'',class:'letter-body'},0];}});
 export const PageBreak=Node.create({name:'pageBreak',group:'block',atom:true,renderHTML(){return ['div',{'data-page-break':'',class:'manual-page-break',contenteditable:'false','aria-label':'Manual page break'}];}});
-export const InsertionPoint=Node.create({name:'insertionPoint',group:'block',atom:true,selectable:false,addAttributes(){return {id:{default:'clinical'},hint:{default:'Add clinical information'},kind:{default:'blocks'},section:{default:null},allowed:{default:null},hidden:{default:false}};},renderHTML({node}){return ['div',{class:'block-insertion','data-insertion-point':node.attrs.id,contenteditable:'false',...(node.attrs.hidden?{hidden:true}:{})},['button',{type:'button'},'+ '+node.attrs.hint]];},addNodeView(){return ({node,editor,getPos})=>{
+export const InsertionPoint=Node.create({name:'insertionPoint',group:'block',atom:true,selectable:false,addAttributes(){return {id:{default:'clinical'},hint:{default:'Add clinical information'},kind:{default:'blocks'},section:{default:null},allowed:{default:null},hidden:{default:false}};},renderHTML({node}){return ['div',{class:'block-insertion','data-insertion-point':node.attrs.id,contenteditable:'false',...(node.attrs.hidden?{hidden:true}:{})},['button',{type:'button','aria-label':node.attrs.hint},'+']];},addNodeView(){return ({node,editor,getPos})=>{
  const dom=document.createElement('div'),button=document.createElement('button');dom.className='block-insertion';dom.contentEditable='false';button.type='button';dom.append(button);
- const update=current=>{node=current;dom.dataset.insertionPoint=node.attrs.id;dom.hidden=node.attrs.hidden;button.textContent='+ '+node.attrs.hint;button.setAttribute('aria-label',node.attrs.hint);return true;};update(node);
- const open=automatic=>document.dispatchEvent(new CustomEvent('insertblocks',{detail:{...node.attrs,pos:getPos(),automatic}}));
- button.addEventListener('click',()=>open(false));
- button.addEventListener('focus',()=>{if(!button.suppressChoices&&!['medicine','section'].includes(node.attrs.kind))open(true);});
- button.addEventListener('keydown',event=>{if(event.isComposing||editor.view.composing||event.ctrlKey||event.metaKey)return;if(event.key==='Tab'&&!event.altKey&&moveField(editor,event.shiftKey)){event.preventDefault();event.stopPropagation();}else if(event.altKey&&event.key==='ArrowDown'&&!['medicine','section'].includes(node.attrs.kind)){event.preventDefault();open(false);}});
+ const update=current=>{node=current;dom.dataset.insertionPoint=node.attrs.id;dom.hidden=node.attrs.hidden;button.textContent='+';button.title=node.attrs.hint+' (/)';button.setAttribute('aria-label',node.attrs.hint);button.setAttribute('aria-haspopup','dialog');return true;};update(node);
+ const open=()=>document.dispatchEvent(new CustomEvent('insertmenu',{detail:{...node.attrs,pos:getPos()}}));
+ button.addEventListener('click',open);
+ button.addEventListener('keydown',event=>{if(event.isComposing||editor.view.composing||event.ctrlKey||event.metaKey||event.altKey)return;if(event.key==='Tab'&&moveField(editor,event.shiftKey)){event.preventDefault();event.stopPropagation();}else if(event.key==='/'){event.preventDefault();open();}});
  return {dom,stopEvent:()=>true,ignoreMutation:()=>true,update:current=>current.type.name==='insertionPoint'&&update(current)};
 };}});
 export const Picture=Node.create({name:'picture',group:'block',atom:true,draggable:true,addAttributes(){return {src:{default:''},naturalWidth:{default:1},naturalHeight:{default:1},width:{default:100},alt:{default:'Inserted picture'},caption:{default:''}};},renderHTML({node}){
@@ -71,6 +81,7 @@ export const Picture=Node.create({name:'picture',group:'block',atom:true,draggab
 export const LayoutAttributes=Extension.create({name:'layoutAttributes',addGlobalAttributes(){return [{types:['paragraph','heading','listItem'],attributes:{
  guard:{default:[],keepOnSplit:false},condition:{default:null,keepOnSplit:false},hidden:{default:false,keepOnSplit:false,renderHTML:a=>a.hidden?{hidden:true}:{}},role:{default:null,keepOnSplit:false},style:{default:null},
  prosePlaceholder:{default:false,keepOnSplit:false,renderHTML:a=>a.prosePlaceholder?{'data-paragraph-prompt':''}:{}},
+ writingSpace:{default:false,keepOnSplit:false,renderHTML:a=>a.writingSpace?{'data-writing-space':''}:{}},
  indent:{default:0,renderHTML:a=>({'style':`margin-left:${a.indent*12}pt`})},spacingBefore:{default:null,renderHTML:a=>a.spacingBefore===null?{}:({'style':`margin-top:${a.spacingBefore}pt`})},spacingAfter:{default:null,renderHTML:a=>a.spacingAfter===null?{}:({'style':`margin-bottom:${a.spacingAfter}pt`})}
  }}];}});
 export function activeField(editor) {
@@ -89,7 +100,7 @@ export function focusStop(editor,entry,choices=true){
  if(entry?.node.attrs.hidden)return;
  if(entry?.node.type.name!=='insertionPoint'){focusField(editor,entry,choices);return;}
  const button=editor.view.nodeDOM(entry.pos)?.querySelector('button');if(!button)return;
- button.suppressChoices=!choices;button.focus();button.scrollIntoView({block:'nearest',inline:'nearest'});button.suppressChoices=false;
+ button.focus();button.scrollIntoView({block:'nearest',inline:'nearest'});
 }
 export function focusField(editor,entry,choices=true) {
  if(!entry){editor.view.focus();return;}
@@ -97,7 +108,7 @@ export function focusField(editor,entry,choices=true) {
  const dom=editor.view.nodeDOM(entry.pos);dom?.scrollIntoView({block:'nearest',inline:'nearest'});
  if(choices&&definition(entry.node.attrs.id)?.options)document.dispatchEvent(new CustomEvent('fieldchoices',{detail:{occurrence:entry.node.attrs.occurrence,automatic:true}}));
 }
-export function focusInitialField(editor){focusField(editor,fieldsInOrder(editor).find(field=>field.node.attrs.id!=='document.date'));}
+export function focusInitialField(editor){const fields=fieldsInOrder(editor);focusField(editor,fields.find(field=>!['document.date',...(sessionOf(editor.state.doc).template==='freeform'?[]:['document.title'])].includes(field.node.attrs.id)),false);}
 export function updateSession(editor,fn,meta={}) {
  const next=fn(structuredClone(sessionOf(editor.state.doc)));
  if(JSON.stringify(next)===JSON.stringify(sessionOf(editor.state.doc))&&!meta.force)return;
@@ -144,6 +155,10 @@ export const FieldBehaviour=Extension.create({
   return [new Plugin({
    filterTransaction(tr){const next=tr.doc.firstChild,previous=editor.state.doc.firstChild;return next?.type.name==='sessionData'&&(tr.getMeta('reset')||next.attrs.template===previous.attrs.template)&&(JSON.stringify(next.attrs)===JSON.stringify(previous.attrs)||tr.getMeta('sessionUpdate')||tr.getMeta('fieldSync')||tr.getMeta('history$')||tr.getMeta('reset'));},
    props:{
+    transformCopied:cleanClipboardSlice,
+    clipboardTextSerializer:slice=>slice.content.textBetween(0,slice.content.size,'\n\n',node=>node.type.name==='hardBreak'?'\n':node.type.name==='picture'?node.attrs.caption||'':''),
+    decorations(state){const {$from}=state.selection;return $from.parent.type.name==='paragraph'&&$from.parent.attrs.prosePlaceholder?DecorationSet.create(state.doc,[Decoration.node($from.before(),$from.after(),{class:'is-active-prose'})]):DecorationSet.empty;},
+    handleTextInput(view,from,to,text){if(text!=='/'||view.composing||from!==to||view.state.selection.$from.parent.type.name!=='paragraph'||view.state.selection.$from.parent.content.size)return false;document.dispatchEvent(new CustomEvent('insertmenu'));return true;},
     handleClickOn(view,pos,node,nodePos,event,direct){if(direct&&node.type.name==='field'&&!node.attrs.hidden){focusField(editor,{node,pos:nodePos});return true;}return false;},
     handlePaste(view,event){
      const text=event.clipboardData?.getData('text/plain');if(!text){event.preventDefault();return true;}
@@ -242,7 +257,7 @@ export const FieldBehaviour=Extension.create({
     const active=activeField(editor);document.querySelectorAll('.clinical-field.is-focused').forEach(el=>el.classList.remove('is-focused'));
     if(active){editor.view.nodeDOM(active.pos)?.classList.add('is-focused');editor.view.dom.setAttribute('aria-activedescendant',`field-${active.node.attrs.occurrence}`);}else editor.view.dom.removeAttribute('aria-activedescendant');
     const occurrence=active?.node.attrs.occurrence;
-    if(occurrence!==previousField&&active&&definition(active.node.attrs.id)?.options)queueMicrotask(()=>{if(!editor.isDestroyed&&editor.view.hasFocus()&&!editor.view.composing&&activeField(editor)?.node.attrs.occurrence===occurrence)document.dispatchEvent(new CustomEvent('fieldchoices',{detail:{occurrence,automatic:true}}));});
+    if(occurrence!==previousField&&active&&active.node.attrs.id!=='document.title'&&definition(active.node.attrs.id)?.options)queueMicrotask(()=>{if(!editor.isDestroyed&&editor.view.hasFocus()&&!editor.view.composing&&activeField(editor)?.node.attrs.occurrence===occurrence)document.dispatchEvent(new CustomEvent('fieldchoices',{detail:{occurrence,automatic:true}}));});
     if(previousField&&previousField!==occurrence&&!editor.view.composing){const previous=fieldsInOrder(editor).find(f=>f.node.attrs.occurrence===previousField);previousField=occurrence;if(previous)queueMicrotask(()=>{if(!editor.isDestroyed)commitField(editor,previous);});}
     previousField=occurrence;
    }};},

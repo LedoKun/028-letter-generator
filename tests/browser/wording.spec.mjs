@@ -1,10 +1,11 @@
+import {openInsert,insertAction} from './insert-helpers.mjs';
 import {test,expect} from '@playwright/test';
 
 async function open(page,type,language){
  await page.clock.install({time:new Date('2026-10-10T03:00:00Z')});
  await page.addInitScript(language=>localStorage.setItem('documentLanguage',language),language);
  await page.goto({medical:'/medical-certificate/',referral:'/referral/',medication:'/certificate-medication-letter/',freeform:'/free-form-letter/'}[type]);
- await expect(page.locator('.tiptap')).toBeFocused();
+ await expect(page.locator('.tiptap')).toBeFocused();await page.locator('.section-panel > details').evaluate(details=>details.open=true);
 }
 async function set(page,values){await page.evaluate(values=>{for(const [id,value]of Object.entries(values))clinical.setValue(id,value);},values);}
 async function pdfText(page){return page.evaluate(()=>{const text=x=>Array.isArray(x)?x.map(text).join(''):!x||typeof x!=='object'?'':(typeof x.text==='string'?x.text:text(x.text))+text(x.stack)+text(x.ul)+text(x.ol);return text(clinical.payload().payload.content);});}
@@ -14,7 +15,7 @@ for(const language of ['th','en']){
   await open(page,'medical',language);
   await page.evaluate(()=>clinical.addSections(['syphilisTreatment','tbTreatment']));
   await set(page,{'patient.name':'FICTIONAL PATIENT','doctor.th':'นพ. ทดสอบ','doctor.en':'TEST DOCTOR','doctor.license':'12345','treatment.syphilisDate':'06/06/2026','treatment.tbDate':'01/06/2025','treatment.tbNotes':'Clinician-entered treatment notes.'});
-  const title=page.locator('.tiptap h1'),standard=language==='th'?'ใบรับรองแพทย์':'Medical Certificate';
+  const title=page.locator('.tiptap h1 .field-content'),standard=language==='th'?'ใบรับรองแพทย์':'Medical Certificate';
   await expect(title).toHaveText(standard);
   expect(await pdfText(page)).not.toMatch(/clinically examined|unfit for work|Scheduled BPG|disease-free|ได้ทำการตรวจร่างกาย/);
   await page.evaluate(()=>clinical.addSections(['examination']));await expect(title).toHaveText(standard);
@@ -89,13 +90,13 @@ test('legacy BPG label remains editable and completes to its original canonical 
  await expect(page.locator('[data-field-id="syphilis.dose2"] .field-content')).toHaveText('13/06/2026');
 });
 for(const language of ['th','en']){
- test(`summary dropdown offers ten diagnoses and histories, each with an outer bullet: ${language}`,async({page})=>{
+ test(`summary dropdown offers diagnoses, findings and histories with detail subbullets: ${language}`,async({page})=>{
   await open(page,'referral',language);await expect(page.locator('.tiptap [data-section-id="lab"]')).toHaveCount(1);
-  await page.getByRole('button',{name:'Add a diagnosis or treatment history',exact:true}).click();
+  await openInsert(page,'clinical');
   const ids=await page.locator('[data-section-choice]').evaluateAll(nodes=>nodes.map(n=>n.dataset.sectionChoice));
-  expect(ids).toEqual(['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tptCompleted','tptOngoing']);
+  expect(ids).toEqual(['hiv','syphilis','mpox','hbv','hcvActive','syphilisHistory','hcvHistory','tbHistory','tbActive','crag','cmvr','tptCompleted','tptOngoing']);
   for(const id of ids)await page.locator(`[data-section-choice="${id}"]`).check();
-  await page.getByRole('region',{name:'Insert Block'}).getByRole('button',{name:'Add',exact:true}).click();
+  await page.getByRole('dialog',{name:'Insert'}).getByRole('button',{name:'Insert selected blocks',exact:true}).click();
   const group=page.locator('.tiptap [data-clinical-group="clinical"]');
   for(const id of ids){const section=group.locator(`:scope > [data-section-id="${id}"]`);await expect(section.locator(':scope > ul > li > p').first()).toBeVisible();await expect(section.locator('h2')).toHaveCount(0);}
   await page.evaluate(()=>clinical.addSections(['otherMedications'],false,'clinical'));await expect(group.locator('[data-section-id="otherMedications"]')).toHaveCount(0);
@@ -133,7 +134,7 @@ for(const language of ['th','en']){
 }
 test('adding HIV reuses existing ART and supply blocks at the correct bullet depth',async({page})=>{
  await open(page,'referral','en');await page.evaluate(()=>{clinical.addSections(['art','pickup']);clinical.setValue('pickup.date','09/10/2026');clinical.setValue('pickup.days','30');});
- await page.locator('[data-section-control="art"]').getByRole('button',{name:'Add medicine',exact:true}).click();
+ await insertAction(page,'medicine','medicine:art');
  const row=await page.locator('.tiptap [data-kind="art"]').getAttribute('data-medication-row');await set(page,{[`art.${row}.name`]:'TDF/3TC/DTG',[`art.${row}.tablets`]:'1'});
  await page.evaluate(()=>clinical.addSections(['hiv']));await expect(page.locator('[data-section-id="hiv"] [data-section-id="art"]')).toHaveCount(1);await expect(page.locator('[data-section-id="hiv"] [data-section-id="pickup"]')).toHaveCount(1);
  await expect(page.locator('.tiptap [data-section-id="pickup"]')).toHaveCount(1);expect(await pdfText(page)).toContain('TDF/3TC/DTG 1 tablet once daily');expect(await pdfText(page)).toContain('with a 30-day supply');

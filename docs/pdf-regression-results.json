@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-11T14:38:47.536Z",
+  "generatedAt": "2026-10-14T16:30:50.002Z",
   "printedAt": "2026-10-10T03:00:00Z",
   "samples": [
     {
@@ -17,9 +17,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "ee3515d65d48dbd301e5c94cf267ebe495cb1079c446549c4a3f088494a17e97"
+      "sha256": "75580cafb9e8535872a769afa76fa1cf241a1247f8d12fcb8c2a005ad9269761"
     },
     {
       "type": "referral",
@@ -36,9 +36,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "d1298ac48b93e82e5689426979a1fcf6382ff763ac8a64b167231802c858a25e"
+      "sha256": "e87a48b7f31b99bf8ed47e72e280ee62abd590a191f06f4c92311ff61d3c70ca"
     },
     {
       "type": "medical",
@@ -55,9 +55,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "6fe4733d2c4c912a7ca76ad7280f842736c333fc15ce9d0cca3c7a1eb08201d7"
+      "sha256": "87de582a49780cad250a305a4310bf8083d0a40f524f20bb1f0663505ca5211c"
     },
     {
       "type": "medical",
@@ -74,9 +74,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "24d5cabb0067da065c64df755433c93061f84f592e7dc7221d5962512165a8e9"
+      "sha256": "4e96027532d5c0a9d459d21cacb87d420513332737d26c441e9a98ea5a14b8f1"
     },
     {
       "type": "medication",
@@ -93,9 +93,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "b1145a5bf33f1e6b621aaf6bd0c3d72c53431bcf95a6e3f95e77bfac71092b43"
+      "sha256": "f12ee4716c6692817f5f40a0849a3255525baf7503fa566c454ac8a0d5c85fa4"
     },
     {
       "type": "medication",
@@ -112,9 +112,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "af698fb7c6ff184e5954cf61b92dbdf9c821a24d2f4772c49f94c12579e2cf37"
+      "sha256": "ac85d4a52676fe84e26004b31854c2c9b558dd8e23bf56001140eefedcfa6bdb"
     },
     {
       "type": "freeform",
@@ -131,9 +131,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "429d3b8defba7caaedb6189ffb9001336f06354d3ef699254b77a81e464cb914"
+      "sha256": "0841f558722a240d6294ae8b0a8bee41a481f4783e11881cafa48963c9b248c0"
     },
     {
       "type": "freeform",
@@ -150,9 +150,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "97720d481216a05d927654f54ce32b5b8069b444ae8f1ab7d94ef3d8a4243281"
+      "sha256": "3f958e51fc112207d4cfb0602d3484675d182d8a094aaa8491953e12b7654a6d"
     },
     {
       "type": "medical",
@@ -169,9 +169,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "453bfad1f8f93cf06aebc8e1f110842f6d232bb211b56e94393b3c5acfaa1f87"
+      "sha256": "20129be0c45ca6efab7a9af5b2c57fb2d7186a5c2ccfbfd758f6181e42ebaa5e"
     },
     {
       "type": "medical",
@@ -188,9 +188,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "f7f0272940ccb98a0a69df20f1f1bcb8a4105e92eb572f3cc30f313122d375c5"
+      "sha256": "5882c88125b75893e98e9338556c79d73e42b106739fd56a2fb4d4adf676c7d6"
     },
     {
       "type": "referral",
@@ -207,9 +207,9 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "a2cd37b5edf6e1e91c0b200c86360b568fa79fe842d0de7a2d22eb6052c1a48e"
+      "sha256": "7cf770921bde08f0aad159e2d9842847cddefeb64ce6498e5dedf7e9efcf3d1e"
     },
     {
       "type": "referral",
@@ -226,9 +226,47 @@
       "footerLogoMatchesTextHeight": true,
       "footerTextAndHeightUnchanged": true,
       "signatureMatchesRequestedLayout": true,
-      "signatureGapPoints": 64.73,
+      "signatureGapPoints": 63.3,
       "nonDestructive": true,
-      "sha256": "301cef809795f43abec2f540f1ece573f318a6522e137ad909c8cfa744d86723"
+      "sha256": "e0eeb2a7f10c081a46e3cd3eed178670de1d6ffc141de953be16ac63962f0453"
+    },
+    {
+      "type": "referral",
+      "sample": "referral-infections",
+      "language": "th",
+      "pages": 3,
+      "searchable": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
+      "headerMatchesApprovedTypography": true,
+      "footerMatchesApprovedTypography": true,
+      "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
+      "footerTextAndHeightUnchanged": true,
+      "signatureMatchesRequestedLayout": true,
+      "signatureGapPoints": 63.3,
+      "nonDestructive": true,
+      "sha256": "bfbe549337ca5b30d14bc77e87af0779243e0205c3e82c402264471c4fa35f36"
+    },
+    {
+      "type": "referral",
+      "sample": "referral-infections",
+      "language": "en",
+      "pages": 3,
+      "searchable": true,
+      "approvedLogoPixelsIdentical": true,
+      "logoHeightMatchesLegacy": true,
+      "logoHeightPoints": 49.81,
+      "headerMatchesApprovedTypography": true,
+      "footerMatchesApprovedTypography": true,
+      "originalFooterLogoIncluded": true,
+      "footerLogoMatchesTextHeight": true,
+      "footerTextAndHeightUnchanged": true,
+      "signatureMatchesRequestedLayout": true,
+      "signatureGapPoints": 63.3,
+      "nonDestructive": true,
+      "sha256": "b35fbe1334330a2504d8b7d8135601139bb90199dd156e06ffa8ae2a9ebdf515"
     }
   ]
 }
