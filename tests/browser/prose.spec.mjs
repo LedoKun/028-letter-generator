@@ -12,6 +12,20 @@ const content=page=>page.evaluate(()=>clinical.payload().payload.content);
 const text=async page=>flatten(await content(page));
 const paragraphs=page=>page.evaluate(()=>{let count=0;clinical.editor.state.doc.descendants(node=>{if(node.type.name==='paragraph')count++;});return count;});
 
+for(const language of ['th','en'])test(`paragraph prompts move intact onto the next A4 page and remain editable: ${language}`,async({page})=>{
+ await open(page,'referral',language);await page.waitForFunction(()=>clinical.layout.stable);
+ const probe=await page.evaluate(()=>{const editor=clinical.editor;let pos;editor.state.doc.descendants((node,p)=>{if(node.type.name==='clinicalGroup'&&node.attrs.id==='clinical')pos=p+1;});editor.commands.insertContentAt(pos,{type:'paragraph',content:[{type:'text',text:'FICTIONAL PAGINATION CHECK'}]});return pos;});
+ await page.waitForFunction(()=>clinical.layout.stable);
+ await page.evaluate(pos=>{const editor=clinical.editor,paragraph=editor.view.nodeDOM(pos),prompt=paragraph.nextElementSibling,origin=editor.view.dom.getBoundingClientRect().top,end=(297-30)*96/25.4,gap=end-8-(prompt.getBoundingClientRect().top-origin);editor.view.dispatch(editor.state.tr.setNodeMarkup(pos,null,{...editor.state.doc.nodeAt(pos).attrs,spacingAfter:(parseFloat(getComputedStyle(paragraph).marginBottom)+gap)*72/96}));},probe);
+ await page.waitForFunction(()=>clinical.layout.stable&&clinical.layout.pages>1);
+ const prompt=page.locator('[data-insertion-point="clinical"]').locator('xpath=preceding-sibling::*[1]');await expect(prompt).toHaveAttribute('data-paragraph-prompt','');await expect(prompt.locator('.page-spacer')).toHaveCount(0);
+ const bounds=await prompt.evaluate(node=>{const r=node.getBoundingClientRect(),origin=node.closest('.tiptap').getBoundingClientRect().top,page=297*96/25.4+24,index=Math.floor((r.top-origin)/page);return {height:r.height,index,top:r.top-origin-index*page,bottom:r.bottom-origin-index*page};});
+ expect(bounds.height).toBeCloseTo(16,0);expect(bounds.index).toBe(1);expect(bounds.top).toBeGreaterThanOrEqual(34*96/25.4-1);expect(bounds.bottom).toBeLessThanOrEqual((297-30)*96/25.4+1);
+ await prompt.click();await page.keyboard.insertText('EDITED ON THE NEXT PAGE');expect(await text(page)).toContain('EDITED ON THE NEXT PAGE');expect(await text(page)).not.toMatch(/Click to add a paragraph|คลิกเพื่อเพิ่มย่อหน้า/);
+ await page.getByRole('button',{name:'Undo',exact:true}).click();await expect(prompt).toHaveAttribute('data-paragraph-prompt','');await expect(prompt.locator('.page-spacer')).toHaveCount(0);
+ await page.evaluate(pos=>{const editor=clinical.editor;editor.commands.deleteRange({from:pos,to:pos+editor.state.doc.nodeAt(pos).nodeSize});},probe);await page.waitForFunction(()=>clinical.layout.stable&&clinical.layout.pages===1);await expect(prompt).toHaveAttribute('data-paragraph-prompt','');
+});
+
 for(const language of ['th','en'])for(const template of Object.keys(routes)){
  test(`typing around Add buttons preserves paragraphs, blank lines and hard breaks: ${template}/${language}`,async({page})=>{
   await open(page,template,language);

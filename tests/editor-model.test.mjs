@@ -70,7 +70,14 @@ test('all eleven original disease/history modules have real content and preserve
 test('ART, OI and independent other medication rows preserve all dosing fields',()=>{
  const doc=make('referral','en',{'art.one.name':'TDF/3TC/DTG','art.one.tablets':'1','art.one.time':'930','oi.tablets':'2','otherMed.one.name':'Fluconazole','otherMed.one.strength':'200 mg','otherMed.one.frequency':'OD','otherMed.one.quantity':'28'},['art','oi','otherMedications']);
  for(const [sectionId,kind]of [['art','art'],['otherMedications','otherMed']])appendMedicine(doc,sectionId,medicationRow(kind,'one','en'));
- const text=output(doc);for(const part of ['TDF/3TC/DTG','1 tablet at 09:30','TMX/SMP 80/400 mg','2 tablets once daily','Fluconazole','200 mg','OD','28'])assert.ok(text.includes(part),part);assert.doesNotMatch(text,/N\/A|None specified/);
+ const text=output(doc);for(const part of ['TDF/3TC/DTG','1 tablet once daily at 09:30','TMX/SMP 80/400 mg','2 tablets once daily','Fluconazole','200 mg','OD','28'])assert.ok(text.includes(part),part);assert.doesNotMatch(text,/N\/A|None specified/);
+});
+for(const language of ['th','en'])test(`ART frequency survives entering or clearing administration time: ${language}`,()=>{
+ for(const time of ['','2000','']){
+  const doc=make('referral',language,{'art.one.name':'TDF/3TC/DTG','art.one.tablets':'1','art.one.time':time},['art']);appendMedicine(doc,'art',medicationRow('art','one',language));
+  const text=output(doc);assert.ok(text.includes(language==='th'?'1 เม็ด วันละ 1 ครั้ง':'1 tablet once daily'));
+  if(time)assert.ok(text.includes(language==='th'?'วันละ 1 ครั้ง เวลา 20:00 น.':'once daily at 20:00'));else assert.doesNotMatch(text,/เวลา| at /);
+ }
 });
 test('blank medication rows are rejected and empty optional headings omitted',()=>{const doc=make('referral','en',{},['otherMedications']);assert.doesNotMatch(output(doc),/Other Medications/);section(doc,'otherMedications').content.push(medicationRow('otherMed','one','en'));assert.ok(validateDocument(doc).some(e=>e.id==='otherMed.one.name'));});
 test('travel medication OTHER requires a named medicine and no fabricated dose',()=>{

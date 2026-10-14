@@ -108,7 +108,7 @@ export function buildSection(id,language){
 }
 export function medicationRow(kind,id,language){
  const {F,T,Q,P,G}=writer(language),name=`${kind}.${id}.name`,content=[F(name)];
- if(kind==='art')content.push(G(`${kind}.${id}.tablets`,[T(' ',' '),F(`${kind}.${id}.tablets`),Q(`${kind}.${id}.tablets`,' เม็ด',' tablet',' tablets'),{type:'phrase',attrs:{condition:['fieldEmpty',`${kind}.${id}.time`]},content:[T(' วันละ 1 ครั้ง',' once daily')]}]),G(`${kind}.${id}.time`,[T(' เวลา ',' at '),F(`${kind}.${id}.time`),T(' น.','')]));
+ if(kind==='art')content.push(G(`${kind}.${id}.tablets`,[T(' ',' '),F(`${kind}.${id}.tablets`),Q(`${kind}.${id}.tablets`,' เม็ด',' tablet',' tablets'),T(' วันละ 1 ครั้ง',' once daily')]),G(`${kind}.${id}.time`,[T(' เวลา ',' at '),F(`${kind}.${id}.time`),T(' น.','')]));
  if(kind==='otherMed'){
   for(const[field,th,en]of[['strength',' ',' '],['frequency',' รับประทาน ',' ']])content.push(G(`${kind}.${id}.${field}`,[T(th,en),F(`${kind}.${id}.${field}`)]));
   content.push(G(`${kind}.${id}.quantity`,[T(' จำนวน ',' (Quantity: '),F(`${kind}.${id}.quantity`),G(`${kind}.${id}.unit`,[T(' ',' '),F(`${kind}.${id}.unit`)]),T('',')')]));

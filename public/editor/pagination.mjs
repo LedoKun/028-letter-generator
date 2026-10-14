@@ -24,8 +24,8 @@ function lines(view) {
    if(n.nodeType===1){add(view.posAtDOM(n,0)-1,n.getBoundingClientRect());continue;}
    for(const part of graphemes.segment(n.data)) {range.setStart(n,part.index);range.setEnd(n,part.index+part.segment.length);add(view.posAtDOM(n,part.index),range.getBoundingClientRect());}
   }
-  // Measure the empty line itself; its paragraph may contain a page spacer.
-  if(!Number.isFinite(lastTop)) {const r=(dom.querySelector(':scope > br.ProseMirror-trailingBreak')||dom).getBoundingClientRect();records.push({pos:pos+1,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});}
+  // Put prompt spacers outside the paragraph so its hint and background move together.
+  if(!Number.isFinite(lastTop)) {const r=(node.attrs.prosePlaceholder?dom:dom.querySelector(':scope > br.ProseMirror-trailingBreak')||dom).getBoundingClientRect();records.push({pos:node.attrs.prosePlaceholder?pos:pos+1,top:(r.top-origin)/scale,bottom:(r.bottom-origin)/scale});}
   return false;
  });
  return records;

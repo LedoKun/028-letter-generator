@@ -77,6 +77,14 @@ One shared ID helper uses the native UUID method when present, otherwise 128 bit
 
 On 12 October, all 185 unit tests and 46 targeted Chromium/Firefox browser cases passed. A Docker image was rebuilt as `letter-generator:http-id-fix` and 16 genuine non-loopback HTTP scenarios passed: four templates × two languages × two browsers, with initial focus, visible toolbar/pages, applicable insertion/medicine workflows, valid PDF Preview/Download including the footer logo, preserved document state and no page errors or failed static-asset requests. Preview-blob cancellation when its iframe is closed is excluded from static-asset failure checks. [Container results](docker-http-verification.json) and [diagnosis](container-http-troubleshooting.md) record the evidence. The existing published/user container was left untouched; the QA container was removed after checking.
 
+## UI regression fixes — 14 October 2026
+
+ART rows retain **วันละ 1 ครั้ง / once daily** when an administration time is entered or cleared, in both the editor and PDF. Empty paragraph prompts are measured as whole blocks and receive their page spacer before the paragraph; the hint and background no longer stretch across the footer, page gap and next header. Toolbar, slider and keyboard zoom retain the visible left page border, while pointer-anchored trackpad/touchscreen pinch preserves its reading point.
+
+`npm test` passed all 206 tests; `npm run build` and `git diff --check` passed. The targeted Chromium/Firefox checks cover automatic/reverse reflow, prompt clicking/typing/Undo, manual breaks, all-template prose editing, actual Preview/Download text, section restoration, medication time entry/clearing, desktop/narrow-screen zoom, unchanged document/PDF state, pinch anchors and proportional picture resizing.
+
+The main browser run passed 111 cases and skipped three Firefox cases requiring Chromium's native gesture protocol. Four new ART assertions initially compared clean prose with editor text containing the inline × controls; these assertions were corrected to check field contents and PDF prose separately. All four then passed, together with two existing ART-restoration cases: 117 distinct browser cases passed overall, with no unresolved failures. Before/after screenshots were inspected for the stretched prompt and enlarged page border. Docker, Microsoft Edge and the complete PDF pixel-regression suite were not rerun for these UI fixes.
+
 ## Review limits
 
 - A qualified clinician has not approved the wording, retained medication/regimen catalogue or clinical suitability. User-requested today/60-day defaults remain editable and require review for the actual patient.

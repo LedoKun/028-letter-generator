@@ -74,12 +74,12 @@ function applyZoom(){
  surface.dataset.zoom=scale;surface.style.transform=`scale(${scale})`;surface.parentElement.style.width=`${PAGE.width*scale}px`;surface.parentElement.style.height=`${(layout.pages*PAGE.height+(layout.pages-1)*PAGE.gap)*scale}px`;
 }
 function setZoom(value,point,anchor){
- const next=Math.round(Math.max(50,Math.min(200,Number(value))));if(next===zoom&&!anchor)return;
+ const next=Math.round(Math.max(50,Math.min(200,Number(value)))),anchored=!!point;if(next===zoom&&!anchor)return;
  const canvas=document.querySelector('.canvas-scroll'),surface=document.querySelector('.document-surface'),before=surface.getBoundingClientRect(),bounds=canvas.getBoundingClientRect(),style=getComputedStyle(canvas),top=Math.max(bounds.top,document.querySelector('#toolbar').getBoundingClientRect().bottom);
  point||={x:bounds.left+(canvas.clientWidth+parseFloat(style.paddingLeft)-parseFloat(style.paddingRight))/2,y:(top+Math.max(top,Math.min(bounds.bottom,innerHeight)))/2};
  const x=anchor?.x??(point.x-before.left)*100/zoom,y=anchor?.y??(point.y-before.top)*100/zoom;
  // Page breaks stay in A4 coordinates, so view zoom needs no repagination.
- zoom=next;applyZoom();surface.parentElement.style.marginLeft=Math.max(0,point.x-x*zoom/100-bounds.left-parseFloat(style.paddingLeft)+canvas.scrollLeft)+'px';const after=surface.getBoundingClientRect();canvas.scrollLeft+=after.left+x*zoom/100-point.x;window.scrollBy(0,after.top+y*zoom/100-point.y);
+ zoom=next;applyZoom();surface.parentElement.style.marginLeft=anchored?Math.max(0,point.x-x*zoom/100-bounds.left-parseFloat(style.paddingLeft)+canvas.scrollLeft)+'px':'';const after=surface.getBoundingClientRect();canvas.scrollLeft=anchored?canvas.scrollLeft+after.left+x*zoom/100-point.x:0;window.scrollBy(0,after.top+y*zoom/100-point.y);
  const controls=document.querySelector('.zoom-controls'),slider=controls.querySelector('input');slider.value=zoom;slider.setAttribute('aria-valuetext',zoom+'%');controls.querySelector('output').textContent=zoom+'%';controls.querySelector('[data-zoom-out]').disabled=zoom===50;controls.querySelector('[data-zoom-in]').disabled=zoom===200;
  document.querySelector('.editor-dropdown')?.reposition();
 }

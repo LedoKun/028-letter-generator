@@ -15,6 +15,14 @@ async function choose(page,id,values){
 }
 async function pdfText(page){return page.evaluate(()=>{const flatten=value=>Array.isArray(value)?value.map(flatten).join(''):!value||typeof value!=='object'?'':(typeof value.text==='string'?value.text:flatten(value.text))+flatten(value.stack)+flatten(value.ul)+flatten(value.ol);return flatten(clinical.payload().payload.content);});}
 
+for(const language of ['th','en'])test(`ART once-daily wording stays visible when a time is entered or cleared: ${language}`,async({page})=>{
+ await open(page,'referral',language);await page.evaluate(()=>clinical.addSections(['hiv']));await page.locator('[data-insertion-point="medicine:art"] > button').click();
+ const row=page.locator('.tiptap [data-kind="art"]'),id=await row.getAttribute('data-medication-row');await set(page,{[`art.${id}.name`]:'TDF/3TC/DTG',[`art.${id}.tablets`]:'1'});
+ const frequency=language==='th'?'วันละ 1 ครั้ง':'once daily';await field(page,`art.${id}.time`).click();await page.keyboard.insertText('2000');await expect(row).toContainText(frequency);await page.keyboard.press('Tab');
+ const expected=language==='th'?'1 เม็ด วันละ 1 ครั้ง เวลา 20:00 น.':'1 tablet once daily at 20:00';await expect(field(page,`art.${id}.time`).locator('.field-content')).toHaveText('20:00');expect(await pdfText(page)).toContain(expected);
+ await field(page,`art.${id}.time`).click();await page.keyboard.press('Backspace');await page.keyboard.press('Tab');await expect(row).toContainText(frequency);expect(await pdfText(page)).toContain(frequency);expect(await pdfText(page)).not.toContain('20:00');
+});
+
 for(const language of ['th','en']){
  for(const template of ['referral','medical','medication','freeform'])test(`patient details fit three rows with demographics before IDs: ${template}/${language}`,async({page})=>{
   await open(page,template,language);if(template==='freeform')await page.evaluate(()=>clinical.addSections(['identification']));

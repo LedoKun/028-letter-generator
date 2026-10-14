@@ -139,5 +139,5 @@ test('adding HIV reuses existing ART and supply blocks at the correct bullet dep
  await expect(page.locator('.tiptap [data-section-id="pickup"]')).toHaveCount(1);expect(await pdfText(page)).toContain('TDF/3TC/DTG 1 tablet once daily');expect(await pdfText(page)).toContain('with a 30-day supply');
  const nesting=await page.locator(`[data-field-id="art.${row}.name"]`).evaluate(node=>{let depth=0;for(let parent=node.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='LI')depth++;return depth;});expect(nesting).toBe(3);
  await page.locator('[data-section-control="art"]').getByRole('button',{name:'Remove medicine',exact:true}).click();await page.locator('[data-section-control="art"]').getByRole('button',{name:'Restore',exact:true}).click();expect(await pdfText(page)).toContain('TDF/3TC/DTG 1 tablet once daily');
- await set(page,{[`art.${row}.time`]:'20:00'});expect(await page.locator('.tiptap [data-kind="art"]').innerText()).not.toContain('once daily');expect(await pdfText(page)).toContain('TDF/3TC/DTG 1 tablet at 20:00');
+ await set(page,{[`art.${row}.time`]:'20:00'});expect(await page.locator('.tiptap [data-kind="art"]').innerText()).toContain('once daily');expect(await pdfText(page)).toContain('TDF/3TC/DTG 1 tablet once daily at 20:00');
 });

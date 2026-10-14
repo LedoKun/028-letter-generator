@@ -7,6 +7,20 @@ const percentage=page=>page.locator('.format-tools .zoom-controls output');
 const snapshot=page=>page.evaluate(()=>JSON.stringify(clinical.editor.getJSON()));
 async function zoom(page,value){await slider(page).evaluate((input,value)=>{input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},value);await page.waitForFunction(()=>clinical.layout.stable);await expect(percentage(page)).toHaveText(value+'%');}
 for(const language of ['th','en']){
+ test(`toolbar zoom retains the left page border on desktop and narrow screens: ${language}`,async({page})=>{
+  await open(page,language);const before=await snapshot(page);
+  for(const width of [1440,900]){
+   await page.setViewportSize({width,height:1000});await zoom(page,100);
+   for(const value of [150,200]){
+    await zoom(page,value);
+    const bounds=await page.locator('.canvas-scroll').evaluate(canvas=>({left:canvas.querySelector('.paper').getBoundingClientRect().left,start:canvas.getBoundingClientRect().left+parseFloat(getComputedStyle(canvas).paddingLeft),scroll:canvas.scrollLeft}));
+    expect(bounds.left).toBeGreaterThanOrEqual(bounds.start-1);expect(bounds.scroll).toBe(0);
+   }
+   await page.locator('.canvas-scroll').evaluate(canvas=>{canvas.scrollLeft=canvas.scrollWidth;});await page.getByRole('button',{name:'Zoom out',exact:true}).click();await expect(percentage(page)).toHaveText('190%');
+   expect(await page.locator('.canvas-scroll').evaluate(canvas=>canvas.querySelector('.paper').getBoundingClientRect().left-canvas.getBoundingClientRect().left)).toBeGreaterThanOrEqual(0);
+  }
+  expect(await snapshot(page)).toBe(before);
+ });
  test(`Ctrl/Cmd plus and minus zoom the document without changing the browser or letter: ${language}`,async({page})=>{
   await open(page,language);const before=await snapshot(page),browser=await page.evaluate(()=>({width:innerWidth,ratio:devicePixelRatio}));
   for(const [key,value]of [['Control+Equal',110],['Control+Shift+Equal',120],['Control+Minus',110],['Meta+Equal',120],['Meta+Minus',110]]){
